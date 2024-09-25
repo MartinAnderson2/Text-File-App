@@ -10,7 +10,7 @@ The application will enable the user to:
 - open the notes in their default text editor  
 
 It will be used by those who wish to be able to easily find notes about various topics whenever they need them. It will also be handy for those who have a lot of notes but difficulty finding the correct ones when they need them.  
-This project is of interest to me since I will personally find it helpful for keeping track of and finding important and handy information. Additionally, I am interested in learning more about how to handle files via code.  
+This project is of interest to me since I will personally find it helpful for keeping track of and finding important and handy information. Additionally, I am interested in learning more about how to handle files via code and how to create categories of arbitrary depth.  
 
 ## User Stories
 
