@@ -11,3 +11,13 @@ The application will enable the user to:
 
 It will be used by those who wish to be able to easily find notes about various topics whenever they need them. It will also be handy for those who have a lot of notes but difficulty finding the correct ones when they need them.  
 This project is of interest to me since I will personally find it helpful for keeping track of and finding important and handy information. Additionally, I am interested in learning more about how to handle files via code.  
+
+## User Stories
+
+- As a user, I want to be able to add a note and add it to a list of notes of the same category.  
+- As a user, I want to be able to view all of the notes I have added to a given category.  
+- As a user, I want to be able to view all of the categories I have created.  
+- As a user, I want to be able to choose a note from a list of recently-opened notes.  
+- As a user, I want to be able to search through the titles of my notes to find the one I desire.  
+- As a user, I want to be able to change the categorization of a note I have previously added. 
+- As a user, I want to be able to open my note after finding the desired one.  
