@@ -31,7 +31,7 @@ public class File extends NamedObject {
     }
 
     // EFFECTS: returns the number of labels this file is tagged with
-    public int numberLabelsTaggerWith() {
+    public int numberLabelsTaggedWith() {
         return 0;
     }
 
