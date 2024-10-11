@@ -26,7 +26,7 @@ public class File extends NamedObject {
     }
 
     // EFFECTS: returns true if this file is tagged with label otherwise returns false
-    public boolean taggedWithLabel(Label label) {
+    public boolean isTaggedWithLabel(Label label) {
         return false;
     }
 
