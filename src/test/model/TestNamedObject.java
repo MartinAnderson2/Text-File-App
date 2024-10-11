@@ -5,11 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class TestNamedObject {
-    @BeforeEach
-    void runBefore() {
+public abstract class TestNamedObject {
+    NamedObject namedObject;
 
-    }
+    // Subclasses must instantiated namedObject in runBefore
+    @BeforeEach
+    abstract void runBefore();
 
     @Test
     void sampleTest() {
