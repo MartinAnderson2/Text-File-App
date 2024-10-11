@@ -37,4 +37,11 @@ public class Folder extends NamedObject {
     public Folder getSubfolder(String name) {
         return new Folder(name);
     }
+
+    // REQUIRES: !name.isEmpty()
+    // MODIFIES: this
+    // EFFECTS creates a new file named name with path path that is within this foler
+    public void addFile(String name, String Path) {
+
+    }
 }
