@@ -35,6 +35,11 @@ public class File extends NamedObject {
         return false;
     }
 
+    // EFFECTS: returns the number of labels this file is tagged with
+    public int numberLabelsTaggedWith() {
+        return 0;
+    }
+
     public String getFilePath() {
         return "";
     }
