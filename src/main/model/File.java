@@ -25,6 +25,11 @@ public class File extends NamedObject {
         
     }
 
+    // EFFECTS: returns true if this file is tagged with label otherwise returns false
+    public boolean taggedWithLabel(Label label) {
+        return false;
+    }
+
     public String getFilePath() {
         return "";
     }
