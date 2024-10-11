@@ -59,6 +59,7 @@ public abstract class TestNamedObject {
     void testIsBeginningOfNameAllCharactersMatch() {
         namedObject.setName("Apple");
         assertTrue(namedObject.isBeginningOfName("Apple"));
+        assertTrue(namedObject.isBeginningOfName(namedObject.getName()));
     }
 
     @Test
@@ -108,6 +109,7 @@ public abstract class TestNamedObject {
     void testIsNamedRight() {
         namedObject.setName("ASUS");
         assertTrue(namedObject.isNamed("ASUS"));
+        assertTrue(namedObject.isNamed(namedObject.getName()));
     }
 
     @Test
