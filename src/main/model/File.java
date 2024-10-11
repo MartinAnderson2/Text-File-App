@@ -25,11 +25,6 @@ public class File extends NamedObject {
         
     }
 
-    // REQUIRES: !name.isEmpty()
-    public void setName(String name) {
-        
-    }
-
     public String getFilePath() {
         return "";
     }

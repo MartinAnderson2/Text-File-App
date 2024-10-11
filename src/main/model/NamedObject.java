@@ -10,4 +10,9 @@ public abstract class NamedObject {
     public boolean isNamed(String input) {
         return false;
     }
+
+    // REQUIRES: !name.isEmpty()
+    public void setName(String name) {
+
+    }
 }

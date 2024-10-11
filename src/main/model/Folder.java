@@ -30,8 +30,4 @@ public class Folder extends NamedObject {
     public Folder getSubfolder(String name) {
         return new Folder(name);
     }
-
-    public void setName(String name) {
-
-    }
 }

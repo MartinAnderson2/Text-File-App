@@ -20,8 +20,4 @@ public class Label extends NamedObject {
     public List<File> getLabelledFiles() {
         return new ArrayList<File>();
     }
-
-    public void setName(String name) {
-
-    }
 }
