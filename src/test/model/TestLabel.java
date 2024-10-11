@@ -35,7 +35,7 @@ public class TestLabel extends TestNamedObject {
 
     @Test
     void testlabelFileOneFile() {
-        assertFalse(houseFile.taggedWithLabel(nounLabel));
+        assertFalse(houseFile.isTaggedWithLabel(nounLabel));
 
 
         nounLabel.labelFile(houseFile);
@@ -45,13 +45,13 @@ public class TestLabel extends TestNamedObject {
 
         assertEquals(1, filesLabelledNoun.size());
         assertEquals(houseFile, filesLabelledNoun.get(0));
-        assertTrue(houseFile.taggedWithLabel(nounLabel));
+        assertTrue(houseFile.isTaggedWithLabel(nounLabel));
     }
 
     @Test
     void testlabelFileTwoFilesOneLabel() {
-        assertFalse(homeyFile.taggedWithLabel(adjectiveLabel));
-        assertFalse(happyFile.taggedWithLabel(adjectiveLabel));
+        assertFalse(homeyFile.isTaggedWithLabel(adjectiveLabel));
+        assertFalse(happyFile.isTaggedWithLabel(adjectiveLabel));
 
 
         adjectiveLabel.labelFile(homeyFile);
@@ -62,18 +62,18 @@ public class TestLabel extends TestNamedObject {
 
         assertEquals(1, filesLabelledAdjective.size());
         assertEquals(homeyFile, filesLabelledAdjective.get(0));
-        assertTrue(homeyFile.taggedWithLabel(adjectiveLabel));
+        assertTrue(homeyFile.isTaggedWithLabel(adjectiveLabel));
 
         assertEquals(1, filesLabelledAdjective.size());
         assertEquals(happyFile, filesLabelledAdjective.get(1));
-        assertTrue(happyFile.taggedWithLabel(adjectiveLabel));
+        assertTrue(happyFile.isTaggedWithLabel(adjectiveLabel));
     }
 
     @Test
     void testlabelFileMultipleFilesMultipleLabels() {
-        assertFalse(happinessFile.taggedWithLabel(nounLabel));
-        assertFalse(homeyFile.taggedWithLabel(adjectiveLabel));
-        assertFalse(happyFile.taggedWithLabel(adjectiveLabel));
+        assertFalse(happinessFile.isTaggedWithLabel(nounLabel));
+        assertFalse(homeyFile.isTaggedWithLabel(adjectiveLabel));
+        assertFalse(happyFile.isTaggedWithLabel(adjectiveLabel));
 
 
         nounLabel.labelFile(happinessFile);
@@ -86,14 +86,14 @@ public class TestLabel extends TestNamedObject {
 
         assertEquals(1, filesLabelledNoun.size());
         assertEquals(happinessFile, filesLabelledNoun.get(0));
-        assertTrue(happinessFile.taggedWithLabel(nounLabel));
+        assertTrue(happinessFile.isTaggedWithLabel(nounLabel));
 
         assertEquals(1, filesLabelledAdjective.size());
         assertEquals(homeyFile, filesLabelledAdjective.get(0));
-        assertTrue(homeyFile.taggedWithLabel(adjectiveLabel));
+        assertTrue(homeyFile.isTaggedWithLabel(adjectiveLabel));
 
         assertEquals(1, filesLabelledAdjective.size());
         assertEquals(happyFile, filesLabelledAdjective.get(1));
-        assertTrue(happyFile.taggedWithLabel(adjectiveLabel));
+        assertTrue(happyFile.isTaggedWithLabel(adjectiveLabel));
     }
 }
