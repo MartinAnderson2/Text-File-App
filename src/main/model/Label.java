@@ -10,8 +10,9 @@ public class Label extends NamedObject {
 
     }
 
-    // MODIFIES: this
+    // MODIFIES: this, file
     // EFFECTS: adds file to the list of all files labelled with this label
+    //          and adds this label to the File's list of labels
     public void labelFile(File file) {
 
     }
