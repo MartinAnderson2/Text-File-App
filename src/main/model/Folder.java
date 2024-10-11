@@ -26,6 +26,13 @@ public class Folder extends NamedObject {
         return new Folder("");
     }
 
+    // REQUIRES: !name.isEmpty()
+    // MODIFIES: this
+    // EFFECTS: creates a new folder that is a subfolder of this folder, named name
+    public void makeSubfolder(String name) {
+
+    }
+
     // EFFECTS: if this folder contains a folder named name return it, otherwise return null
     public Folder getSubfolder(String name) {
         return new Folder(name);
