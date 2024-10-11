@@ -26,13 +26,13 @@ public class File extends NamedObject {
     }
 
     // EFFECTS: returns true if this file is tagged with label otherwise returns false
-    public boolean isTaggedWithLabel(Label label) {
+    public boolean isLabelled(Label label) {
         return false;
     }
 
-    // EFFECTS: returns the number of labels this file is tagged with
-    public int numberLabelsTaggedWith() {
-        return 0;
+    // EFFECTS: returns true if labelled with one or more lables and false if not labelled
+    public boolean isLabelled() {
+        return false;
     }
 
     public String getFilePath() {
