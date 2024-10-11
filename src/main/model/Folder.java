@@ -44,4 +44,9 @@ public class Folder extends NamedObject {
     public void addFile(String name, String Path) {
 
     }
+
+    // EFFECTS: returns file with given name or null if not found
+    public File getFile(String name) {
+        return new File("name", "C:\\");
+    }
 }
