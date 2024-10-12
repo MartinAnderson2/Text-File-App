@@ -22,6 +22,11 @@ public class TestLabel extends TestNamedObject {
 
         nounLabel = new Label("Noun");
         adjectiveLabel = new Label("Adjective");
+
+        houseFile = new File("House", "C:\\210");
+        happinessFile = new File("Happiness", "C:\\Haha\\Yes");
+        homeyFile = new File("Homey", "C:\\110");
+        happyFile = new File("Happy", "C:\\yeah");
     }
 
     @Test
@@ -60,11 +65,11 @@ public class TestLabel extends TestNamedObject {
 
         List<File> filesLabelledAdjective = adjectiveLabel.getLabelledFiles();
 
-        assertEquals(1, filesLabelledAdjective.size());
+        assertEquals(2, filesLabelledAdjective.size());
         assertEquals(homeyFile, filesLabelledAdjective.get(0));
         assertTrue(homeyFile.isLabelled(adjectiveLabel));
 
-        assertEquals(1, filesLabelledAdjective.size());
+        assertEquals(2, filesLabelledAdjective.size());
         assertEquals(happyFile, filesLabelledAdjective.get(1));
         assertTrue(happyFile.isLabelled(adjectiveLabel));
     }
@@ -88,11 +93,11 @@ public class TestLabel extends TestNamedObject {
         assertEquals(happinessFile, filesLabelledNoun.get(0));
         assertTrue(happinessFile.isLabelled(nounLabel));
 
-        assertEquals(1, filesLabelledAdjective.size());
+        assertEquals(2, filesLabelledAdjective.size());
         assertEquals(homeyFile, filesLabelledAdjective.get(0));
         assertTrue(homeyFile.isLabelled(adjectiveLabel));
 
-        assertEquals(1, filesLabelledAdjective.size());
+        assertEquals(2, filesLabelledAdjective.size());
         assertEquals(happyFile, filesLabelledAdjective.get(1));
         assertTrue(happyFile.isLabelled(adjectiveLabel));
     }
