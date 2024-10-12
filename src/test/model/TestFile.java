@@ -212,7 +212,7 @@ public class TestFile extends TestNamedObject {
         assertTrue(beeSLFile.isLabelled(programmingLanguageLabel));
         assertTrue(beeSLFile.isLabelled(lowerLevelComputerScienceCourseLabel));
         assertTrue(beeSLFile.isLabelled(programmingLanguageLabel));
-        assertFalse(beeSLFile.isLabelled(lowerLevelComputerScienceCourseLabel));
+        assertTrue(beeSLFile.isLabelled(lowerLevelComputerScienceCourseLabel));
     }
 
     @Test
