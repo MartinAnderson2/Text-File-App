@@ -7,7 +7,7 @@ public abstract class NamedObject {
     //                  otherwise false
     public boolean isBeginningOfName(String input) {
         if (input.length() <= name.length()) {
-            return input.isEmpty() || (input == name.substring(0, input.length()));
+            return input.isEmpty() || (input.equals(name.substring(0, input.length())));
         }
         else {
             return false;
@@ -16,7 +16,7 @@ public abstract class NamedObject {
 
     // EFFECTS: returns true if input perfectly matches this file's name
     public boolean isNamed(String input) {
-        return name == input;
+        return name.equals(input);
     }
 
     // REQUIRES: !name.isEmpty()
