@@ -3,7 +3,7 @@ package model;
 import java.util.List;
 import java.util.ArrayList;
 
-// Represents a folder with a name that holds files as well as other folders and has a parent folder unless it is a root folder
+// Represents a folder with a name that holds files as well as other folders and has a parent folder unless it is the root folder
 public class Folder extends NamedObject {
     private List<Folder> subfolders;
     private List<File> containedFiles;
