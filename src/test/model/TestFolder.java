@@ -42,10 +42,10 @@ public class TestFolder extends TestNamedObject {
         
         
         educationFolder.addFile("Goals", "C:\\");
-        educationFolder.addFile("Personal Project Ideas", "C:\\210");
-        educationFolder.addFile("C01 OH Questions", "C:\\210");
-        educationFolder.addFile("My WeBWorK 1 Answers", "C:\\200");
-        educationFolder.addFile("My WeBWorK 2 Answers", "C:\\200");
+        cpscTwoTenFolder.addFile("Personal Project Ideas", "C:\\210");
+        cpscTwoTenFolder.addFile("C01 OH Questions", "C:\\210");
+        mathTwoHundredFolder.addFile("My WeBWorK 1 Answers", "C:\\200");
+        mathTwoHundredFolder.addFile("My WeBWorK 2 Answers", "C:\\200");
         
         goalsFile = educationFolder.getFile("Goals");
         personalProjectIdeasFile = cpscTwoTenFolder.getFile("Personal Project Ideas");
@@ -70,7 +70,7 @@ public class TestFolder extends TestNamedObject {
         assertEquals(educationFolder, cpscTwoTenFolder.getParentFolder());
         assertEquals(cpscTwoTenFiles, cpscTwoTenFolder.containedFiles());
         assertEquals(educationFolder, mathTwoHundredFolder.getParentFolder());
-        assertEquals(cpscTwoTenFiles, mathTwoHundredFolder.containedFiles());
+        assertEquals(mathTwoHundredFiles, mathTwoHundredFolder.containedFiles());
 
         assertEquals(educationSubfolders, educationFolder.containedFolders());
     }
@@ -109,12 +109,12 @@ public class TestFolder extends TestNamedObject {
 
     @Test
     void testContainedFilesContainsFilesAndFolders() {
-        assertEquals(goalsFile, educationFolder.containedFiles());
+        assertEquals(goalsFile, educationFolder.containedFiles().get(0));
     }
 
     @Test
     void testContainedFilesContainsFilesAndFoldersMultiple() {
-        assertEquals(goalsFile, educationFolder.containedFiles());
+        assertEquals(goalsFile, educationFolder.containedFiles().get(0));
 
         assertEquals(cpscTwoTenFiles, cpscTwoTenFolder.containedFiles());
     }
@@ -181,7 +181,7 @@ public class TestFolder extends TestNamedObject {
         assertEquals("lectures", newCompSciFolder.getName());
         assertEquals(cpscTwoTenFolder, newCompSciFolder.getParentFolder());
         assertFalse(foldersInMathTwoHundred.isEmpty());
-        assertEquals("midtemrs", newMathFolder.getName());
+        assertEquals("midterms", newMathFolder.getName());
         assertEquals(mathTwoHundredFolder, newMathFolder.getParentFolder());
     }
 
@@ -238,8 +238,8 @@ public class TestFolder extends TestNamedObject {
         assertEquals(personalProjectIdeasFile, cpscTwoTenFolder.getFile("Personal Project Ideas"));
         assertEquals(ceeZeroOneQuestionsFile, cpscTwoTenFolder.getFile("C01 OH Questions"));
 
-        assertEquals(mywebworkOneAnswersFile, mathTwoHundredFolder.getFile("My WeBWorK One Answers"));
-        assertEquals(myWebworkTwoAnswersFile, mathTwoHundredFolder.getFile("My WeBWorK Two Answers"));
+        assertEquals(mywebworkOneAnswersFile, mathTwoHundredFolder.getFile("My WeBWorK 1 Answers"));
+        assertEquals(myWebworkTwoAnswersFile, mathTwoHundredFolder.getFile("My WeBWorK 2 Answers"));
 
         assertEquals(goalsFile, educationFolder.getFile("Goals"));
     }
