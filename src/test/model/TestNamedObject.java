@@ -119,8 +119,26 @@ public abstract class TestNamedObject {
     }
 
     @Test
-    void testIsNamedWrongCase() {
+    void testIsNamedWrongCaseOneCharacter() {
+        namedObject.setName("H");
+        assertTrue(namedObject.isNamed("h"));
+    }
+
+    @Test
+    void testIsNamedRightLowerCaseDiffers() {
         namedObject.setName("HP");
-        assertFalse(namedObject.isNamed("Hp"));
+        assertTrue(namedObject.isNamed("Hp"));
+    }
+
+    @Test
+    void testIsNamedRightUpperCaseDiffers() {
+        namedObject.setName("Lenovo");
+        assertTrue(namedObject.isNamed("LenoVo"));
+    }
+
+    @Test
+    void testIsNamedRightCasesDiffer() {
+        namedObject.setName("Acer");
+        assertTrue(namedObject.isNamed("aCER"));
     }
 }

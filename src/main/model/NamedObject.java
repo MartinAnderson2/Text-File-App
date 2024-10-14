@@ -14,9 +14,12 @@ public abstract class NamedObject {
         }
     }
 
-    // EFFECTS: returns true if input perfectly matches this file's name
+    // EFFECTS: returns true if input matches this file's name regardless of case
     public boolean isNamed(String input) {
-        return name.equals(input);
+        String nameLowerCase = name.toLowerCase();
+        String inputLowerCase = input.toLowerCase();
+
+        return nameLowerCase.equals(inputLowerCase);
     }
 
     // REQUIRES: !name.isEmpty()
