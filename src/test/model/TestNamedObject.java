@@ -46,13 +46,13 @@ public abstract class TestNamedObject {
     @Test
     void testIsBeginningOfNameOneCharacterAndMatches() {
         namedObject.setName("Apple");
-        assertFalse(namedObject.isBeginningOfName("A"));
+        assertTrue(namedObject.isBeginningOfName("A"));
     }
 
     @Test
     void testIsBeginningOfNameMultipleCharactersButNotFullAndMatches() {
         namedObject.setName("Orange");
-        assertFalse(namedObject.isBeginningOfName("Ora"));
+        assertTrue(namedObject.isBeginningOfName("Ora"));
     }
 
     @Test
@@ -71,7 +71,7 @@ public abstract class TestNamedObject {
     @Test
     void testIsBeginningOfNameWrongCase() {
         namedObject.setName("Orange");
-        assertFalse(namedObject.isBeginningOfName("orange"));
+        assertTrue(namedObject.isBeginningOfName("orange"));
     }
 
 
