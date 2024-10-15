@@ -1,5 +1,6 @@
 package model;
 
+// Represents an arbitrary object that has a name and includes methods for handling that name
 public abstract class NamedObject {
     protected String name;
 
