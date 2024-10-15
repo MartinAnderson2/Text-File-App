@@ -3,7 +3,8 @@ package model;
 import java.util.Set;
 import java.util.HashSet;
 
-// Represents a folder with a name that holds files as well as other folders and has a parent folder unless it is the root folder
+// Represents a folder with a name that holds files as well as other folders
+// and has a parent folder unless it is the root folder
 public class Folder extends NamedObject {
     private Set<Folder> subfolders;
     private Set<File> containedFiles;
