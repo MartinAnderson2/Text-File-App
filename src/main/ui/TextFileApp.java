@@ -59,7 +59,6 @@ public class TextFileApp {
         System.out.println("  \"l\": List the files and folders, just files, or just folders in the current directory");
         System.out.println("  \"n\": Navigate the file system");
         System.out.println("  \"o\": Open a file or folder, open all files with a given label");
-        System.out.println("  \"s\": Search for file or folder");
         System.out.println("  \"q\": Quit the application");
     }
 
@@ -77,7 +76,7 @@ public class TextFileApp {
         } else if (input.equals("o") || input.equals("open")) {
             openMenu();
         } else {
-            System.out.println("Your input was not recognized as any of: a, e, l, n, o, s, or q");
+            System.out.println("Your input was not recognized as any of: a, e, l, n, o, or q");
         }
     }
 
@@ -144,7 +143,7 @@ public class TextFileApp {
         } else if (input.equals("l") || input.equals("label")) {
             addLabelMenu();
         } else {
-            System.out.println("Your input was not recognized as any of: file, folder, label, or b");
+            System.out.println("Your input was not recognized as any of: fi, fo, l, or b");
         }
     }
 
@@ -566,7 +565,7 @@ public class TextFileApp {
         } else if (input.equals("l") || input.equals("label")) {
             editLabelMenu();
         } else {
-            System.out.println("Your input was not recognized as any of: file, folder, label, or b");
+            System.out.println("Your input was not recognized as any of: fi, fo, l, or b");
         }
     }
 
@@ -963,7 +962,60 @@ public class TextFileApp {
     // MODIFIES: this
     // EFFECTS: handles the list menu input
     private void listMenu() {
+        while (true) {
+            displayListMenuOptions();
 
+            String input = getUserInputTrimToLower();
+
+            if (input.equals("b") || input.equals("back")) {
+                break;
+            } else {
+                handleListMenuInput(input);
+            }
+        }
+    }
+
+    // EFFECTS: displays the list menu options
+    private void displayListMenuOptions() {
+        System.out.println();
+        System.out.println("You are in folder " + currentFolder.getName() + ". Would you like to:");
+        System.out.println("  \"fi\": List the files in the current folder");
+        System.out.println("  \"fo\": List the folders in the current folder");
+        System.out.println("  \"f\": List both the files and the folders in the current folder");
+        System.out.println("  \"b\": Back to the main menu");
+    }
+
+    // MODIFIES: this
+    // EFFECTS: handles the edit menu input and calls the appropriate submenus as needed
+    private void handleListMenuInput(String input) {
+        if (input.equals("fi") || input.equals("file")) {
+            try {
+                listFilesAlphabetically(currentFolder.containedFiles());
+            } catch (SetIsEmptyException e) {
+                System.out.println("This folder does not contain any files");
+            }
+        } else if (input.equals("fo") || input.equals("folder")) {
+            try {
+                listFoldersAlphabetically(currentFolder.containedFolders());
+            } catch (SetIsEmptyException e) {
+                System.out.println("This folder does not contain any subfolders");
+            }
+        } else if (input.equals("f") || input.equals("files and folders")) {
+            try {
+                System.out.print("Files: ");
+                listFilesAlphabetically(currentFolder.containedFiles());
+            } catch (SetIsEmptyException e) {
+                System.out.println("This folder does not contain any files");
+            }
+            try {
+                System.out.print("Folders: ");
+                listFoldersAlphabetically(currentFolder.containedFolders());
+            } catch (SetIsEmptyException e) {
+                System.out.println("This folder does not contain any subfolders");
+            }
+        } else {
+            System.out.println("Your input was not recognized as any of: fi, fo, f, or b");
+        }
     }
 
 
