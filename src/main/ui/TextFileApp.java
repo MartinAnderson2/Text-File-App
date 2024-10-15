@@ -1,6 +1,8 @@
 package ui;
 
 import java.util.Scanner;
+import java.util.Set;
+import java.util.HashSet;
 import model.*;
 import ui.exceptions.*;
 
@@ -11,6 +13,8 @@ public class TextFileApp {
 
     private Folder rootFolder;
     private Folder currentFolder;
+
+    private Set<Label> allLabels;
 
     // EFFECTS: starts the Text File application
     public TextFileApp() {
@@ -83,6 +87,8 @@ public class TextFileApp {
 
         rootFolder = new Folder("root");
         currentFolder = rootFolder;
+
+        allLabels = new HashSet<Label>();
     }
     
     // EFFECTS: sends the user a welcome message
@@ -163,7 +169,9 @@ public class TextFileApp {
                 model.File newFile = currentFolder.addFile(name, path);
                 System.out.println("File with name \"" + newFile.getName() + "\" added to this folder (" + currentFolder.getName() + ")");
 
-                addFileLabels(newFile);
+                if (!allLabels.isEmpty()) {
+                    addFileLabels(newFile);
+                }
 
                 fileCreated = true;
             } else {
@@ -337,9 +345,51 @@ public class TextFileApp {
         }
     }
 
+    // MODIFES: file
     // EFFECTS: enables the user to add any labels to the file they wish to
     private void addFileLabels(model.File file) {
+        while(true) {
+            System.out.println();
+            System.out.println("Would you like to add labels to the file? Please enter y or n");
 
+            String input = getUserInputTrimToLower();
+
+            if (input.equals("n") || input.equals("no")) {
+                break;
+            } else if (input.equals("y") || input.equals("yes")) {
+                chooseLabels(file);
+            } else {
+                System.out.println("Your input was not recognized as either of: y or n");
+            }
+        }
+    }
+
+    // MODIFIES: file
+    // EFFECTS: lets the user add an arbitrary number of labels
+    private void chooseLabels(File file) {
+        if (allLabels.size() == 0) {
+            addTheOnlyCreatedLabel(file);
+        }
+        else {
+
+        }
+    }
+
+    private void addTheOnlyCreatedLabel(File file) {
+        while(true) {
+            System.out.println();
+            System.out.println("Would you like to add the label " + "labels to the file? Please enter y or n");
+            // TODO: Finish implementing this
+            String input = getUserInputTrimToLower();
+
+            if (input.equals("n") || input.equals("no")) {
+                break;
+            } else if (input.equals("y") || input.equals("yes")) {
+                chooseLabels(file);
+            } else {
+                System.out.println("Your input was not recognized as either of: y or n");
+            }
+        }
     }
 
     // MODIFIES: this
