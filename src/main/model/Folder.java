@@ -74,4 +74,9 @@ public class Folder extends NamedObject {
         }
         return null;
     }
+    
+    // EFFECTS: removes this folder's reference to file
+    public void removeFile(File file) {
+        containedFiles.remove(file);
+    }
 }

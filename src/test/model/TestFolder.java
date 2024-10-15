@@ -30,29 +30,19 @@ public class TestFolder extends TestNamedObject {
 
         empty = new Folder("Empty");
         educationFolder = new Folder("Education");
-        educationFolder.makeSubfolder("CPSC 210");
-        educationFolder.makeSubfolder("MATH 200");
-
-        cpscTwoTenFolder = educationFolder.getSubfolder("CPSC 210");
-        mathTwoHundredFolder = educationFolder.getSubfolder("MATH 200");
+        cpscTwoTenFolder = educationFolder.makeSubfolder("CPSC 210");
+        mathTwoHundredFolder = educationFolder.makeSubfolder("MATH 200");
 
         educationSubfolders = new HashSet<Folder>();
         educationSubfolders.add(cpscTwoTenFolder);
         educationSubfolders.add(mathTwoHundredFolder);
         
-        
-        educationFolder.addFile("Goals", "C:\\");
-        cpscTwoTenFolder.addFile("Personal Project Ideas", "C:\\210");
-        cpscTwoTenFolder.addFile("C01 OH Questions", "C:\\210");
-        mathTwoHundredFolder.addFile("My WeBWorK 1 Answers", "C:\\200");
-        mathTwoHundredFolder.addFile("My WeBWorK 2 Answers", "C:\\200");
-        
-        goalsFile = educationFolder.getFile("Goals");
-        personalProjectIdeasFile = cpscTwoTenFolder.getFile("Personal Project Ideas");
-        ceeZeroOneQuestionsFile = cpscTwoTenFolder.getFile("C01 OH Questions");
-        mywebworkOneAnswersFile = mathTwoHundredFolder.getFile("My WeBWorK 1 Answers");
-        myWebworkTwoAnswersFile = mathTwoHundredFolder.getFile("My WeBWorK 2 Answers");
-        
+        goalsFile = educationFolder.addFile("Goals", "C:\\");
+        personalProjectIdeasFile = cpscTwoTenFolder.addFile("Personal Project Ideas", "C:\\210");
+        ceeZeroOneQuestionsFile = cpscTwoTenFolder.addFile("C01 OH Questions", "C:\\210");
+        mywebworkOneAnswersFile = mathTwoHundredFolder.addFile("My WeBWorK 1 Answers", "C:\\200");
+        myWebworkTwoAnswersFile = mathTwoHundredFolder.addFile("My WeBWorK 2 Answers", "C:\\200");
+                
         makeSubfolderFileLists();
     }
 
@@ -237,5 +227,36 @@ public class TestFolder extends TestNamedObject {
         assertEquals(myWebworkTwoAnswersFile, mathTwoHundredFolder.getFile("My WeBWorK 2 Answers"));
 
         assertEquals(goalsFile, educationFolder.getFile("Goals"));
+    }
+
+    @Test
+    void testRemoveFile() {
+        educationFolder.removeFile(goalsFile);
+
+        Set<File> filesInEducation = educationFolder.containedFiles();
+
+        assertEquals(0, filesInEducation.size());
+        assertNull(educationFolder.getSubfolder("Goals"));
+    }
+
+    @Test
+    void testRemoveFileMultiple() {
+        cpscTwoTenFolder.removeFile(goalsFile);
+        cpscTwoTenFolder.removeFile(ceeZeroOneQuestionsFile);
+        mathTwoHundredFolder.removeFile(myWebworkTwoAnswersFile);
+        mathTwoHundredFolder.removeFile(mywebworkOneAnswersFile);
+
+        Set<File> filesInCompSciTwoTen = cpscTwoTenFolder.containedFiles();
+        Set<File> filesInMathTwoHundred = mathTwoHundredFolder.containedFiles();
+
+        assertNotEquals(cpscTwoTenFiles, cpscTwoTenFolder.containedFiles());
+        assertNotEquals(mathTwoHundredFiles, mathTwoHundredFolder.containedFiles());
+        assertEquals(1, filesInCompSciTwoTen.size());
+        assertEquals(0, filesInMathTwoHundred.size());
+        assertNull(cpscTwoTenFolder.getFile("Goals"));
+        assertNull(cpscTwoTenFolder.getFile("C01 OH Questions"));
+        assertNotNull(cpscTwoTenFolder.getFile("Personal Project Ideas"));
+        assertNull(mathTwoHundredFolder.getFile("My WeBWorK 1 Answers"));
+        assertNull(mathTwoHundredFolder.getFile("My WeBWorK 2 Answers"));
     }
 }
