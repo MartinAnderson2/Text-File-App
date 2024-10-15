@@ -360,7 +360,7 @@ public class TextFileApp {
             if (input.equals("n") || input.equals("no")) {
                 break;
             } else if (input.equals("y") || input.equals("yes")) {
-                file.addLabel(theOnlyCurrentLabel);
+                theOnlyCurrentLabel.labelFile(file);
                 System.out.println(file.getName() + " is now labelled " + theOnlyCurrentLabel.getName());
                 break;
             } else {
@@ -1494,7 +1494,7 @@ public class TextFileApp {
              if (input.equals("n") || input.equals("no")) {
                  throw new UserNoLongWantsToChangeLabelsException();
              } else if (input.equals("y") || input.equals("yes")) {
-                 file.addLabel(lastLabel);
+                 lastLabel.labelFile(file);
                  System.out.println(file.getName() + " is now labelled " + lastLabel.getName());
                  break;
             } else {

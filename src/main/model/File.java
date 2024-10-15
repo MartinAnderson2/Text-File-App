@@ -17,7 +17,7 @@ public class File extends NamedObject {
 
     // MODIFIES: this
     // EFFECTS: labels this file with label
-    public void addLabel(Label label) {
+    protected void addLabel(Label label) {
         labels.add(label);
     }
 
