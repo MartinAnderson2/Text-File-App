@@ -1180,6 +1180,9 @@ public class TextFileApp {
     // EFFECTS: creates a new folder with every File labelled file and sets currentFolder to that new folder
     private void openLabel(Label label) {
         Folder labelFolder = new Folder(label.getName());
+        for (File file : label.getLabelledFiles()) {
+            labelFolder.addFile(file.getName(), file.getFilePath());
+        }
         currentFolder = labelFolder;
     }
     
