@@ -244,7 +244,7 @@ public class TextFileApp {
             } else if (inputLowerCase.equals("namefileb")) {
                 try {
                     return nameFileB();
-                } catch (UserNoLongerWantNameBException e) {
+                } catch (UserNoLongerWantsNameBException e) {
                     // Continue the loop
                 }
             } else if (input.isEmpty()) {
@@ -310,7 +310,7 @@ public class TextFileApp {
     }
 
     // EFFECTS: lets the user name their file b or B or namefileb (or any case variants, i.e. NameFileB)
-    private String nameFileB() throws UserNoLongerWantNameBException {
+    private String nameFileB() throws UserNoLongerWantsNameBException {
         while (true) {
             System.out.println();
             System.out.println("Please enter the custom name (b, B, namefileb, namefileB, etc.) " +
@@ -320,7 +320,7 @@ public class TextFileApp {
             String inputLowerCase = input.toLowerCase();
 
             if (inputLowerCase.equals("p") || inputLowerCase.equals("prev") || inputLowerCase.equals("previous")) {
-                throw new UserNoLongerWantNameBException();
+                throw new UserNoLongerWantsNameBException();
             } else if (inputLowerCase.equals("b") || inputLowerCase.equals("namefileb")) {
                 if (currentFolderContainsFileWithName(input)) {
                     String fileAlreadyNamedInputWithCase = currentFolder.getFile(input).getName();
