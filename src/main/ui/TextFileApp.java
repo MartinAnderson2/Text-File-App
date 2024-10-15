@@ -377,7 +377,7 @@ public class TextFileApp {
                 break;
             } else if (input.equals("y") || input.equals("yes")) {
                 file.addLabel(theOnlyCurrentLabel);
-                System.out.println(file.getName() + " labelled " + theOnlyCurrentLabel.getName());
+                System.out.println(file.getName() + " is now labelled " + theOnlyCurrentLabel.getName());
                 break;
             } else {
                 System.out.println("Your input was not recognized as either of: y or n");
@@ -388,10 +388,11 @@ public class TextFileApp {
     // MODIFIES: file
     // EFFECTS: lets the user label file with as many labels as they'd like to
     private void addAsManyLabelsAsDesiredOrPossible(File file) {
-        Set<Label> unusedLabels = new HashSet<Label>(allLabels);l
+        Set<Label> unusedLabels = new HashSet<Label>(allLabels);
         try {
             chooseLabels(file, unusedLabels);
 
+            assert unusedLabels.size() == 1;
             Label lastLabel = firstLabelFoundInSet(unusedLabels);
             addLastRemainingLabel(file, lastLabel);
         } catch (UserNoLongWantsToAddLabelsException e) {
@@ -412,12 +413,12 @@ public class TextFileApp {
              if (input.equals("b") || input.equals("back")) {
                  throw new UserNoLongWantsToAddLabelsException();
              } else if (input.equals("l") || input.equals("list")) {
-                 listLabelSetAlphabetically(allLabels);
+                 listLabelSetAlphabetically(unusedLabels);
              } else if (labelExists(input)) {
                  Label label = getLabel(input);
                 if (unusedLabels.contains(label)) {
                     file.addLabel(label);
-                    System.out.println(file.getName() + " labelled " + label.getName());
+                    System.out.println(file.getName() + " is now labelled " + label.getName());
                     unusedLabels.remove(label);
                 } else {
                     System.out.println("File is already labelled " + label.getName());
@@ -441,7 +442,7 @@ public class TextFileApp {
                  throw new UserNoLongWantsToAddLabelsException();
              } else if (input.equals("y") || input.equals("yes")) {
                  file.addLabel(lastLabel);
-                 System.out.println(file.getName() + " labelled " + lastLabel.getName());
+                 System.out.println(file.getName() + " is now labelled " + lastLabel.getName());
                  break;
             } else {
                  System.out.println("Your input was not recognized as a y or n");
