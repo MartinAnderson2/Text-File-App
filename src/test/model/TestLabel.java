@@ -124,10 +124,49 @@ public class TestLabel extends TestNamedObject {
 
         assertEquals(2, filesLabelledAdjective.size());
         assertTrue(filesLabelledAdjective.contains(homeyFile));
-        assertTrue(homeyFile.isLabelled(adjectiveLabel));
-
-        assertEquals(2, filesLabelledAdjective.size());
         assertTrue(filesLabelledAdjective.contains(happyFile));
+        assertTrue(homeyFile.isLabelled(adjectiveLabel));
         assertTrue(happyFile.isLabelled(adjectiveLabel));
+    }
+
+    @Test
+    void testunlabelFileOneFile() {
+        nounLabel.labelFile(houseFile);
+
+        nounLabel.unlabelFile(houseFile);
+
+        Set<File> filesLabelledNoun = nounLabel.getLabelledFiles();
+
+        assertEquals(0, filesLabelledNoun.size());
+        assertFalse(filesLabelledNoun.contains(houseFile));
+        assertFalse(houseFile.isLabelled(nounLabel));
+    }
+
+    @Test
+    void testunlabelFileMultipleFilesMultipleLabels() {
+        nounLabel.labelFile(houseFile);
+        nounLabel.labelFile(happinessFile);
+        adjectiveLabel.labelFile(homeyFile);
+        adjectiveLabel.labelFile(happyFile);
+
+        nounLabel.unlabelFile(houseFile);
+        nounLabel.unlabelFile(happinessFile);
+        adjectiveLabel.unlabelFile(happyFile);
+        adjectiveLabel.unlabelFile(happyFile);
+
+
+        Set<File> filesLabelledNoun = nounLabel.getLabelledFiles();
+        Set<File> filesLabelledAdjective = adjectiveLabel.getLabelledFiles();
+
+        assertEquals(0, filesLabelledNoun.size());
+        assertFalse(filesLabelledNoun.contains(happinessFile));
+        assertFalse(happinessFile.isLabelled(nounLabel));
+
+        assertEquals(1, filesLabelledAdjective.size());
+        assertFalse(filesLabelledAdjective.contains(happyFile));
+        assertFalse(happyFile.isLabelled(adjectiveLabel));
+        
+        assertTrue(filesLabelledAdjective.contains(homeyFile));
+        assertTrue(homeyFile.isLabelled(adjectiveLabel));
     }
 }

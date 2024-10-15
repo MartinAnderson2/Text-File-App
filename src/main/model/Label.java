@@ -15,15 +15,25 @@ public class Label extends NamedObject {
 
     // MODIFIES: this, file
     // EFFECTS: adds file to the list of all files labelled with this label
-    //          and adds this label to the File's list of labels
+    //          and adds this label to the file's list of labels
     public void labelFile(File file) {
         labelledFiles.add(file);
 
         file.addLabel(this);
     }
 
+    // MODIFIES: this, file
+    // EFFECTS: removes file from the list of all files labelled with this label
+    //          and removes this label from file's list of labels
+    public void unlabelFile(File file) {
+        labelledFiles.remove(file);
+
+        file.removeLabel(this);
+    }
+
     // EFFECTS: returns all of the files labelled with this label
     public Set<File> getLabelledFiles() {
         return labelledFiles;
     }
+
 }

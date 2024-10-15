@@ -23,7 +23,7 @@ public class File extends NamedObject {
 
     // MODIFIES: this
     // EFFECTS: removes given label from this file. returns true if it had a label on it and false if it did not
-    public boolean removeLabel(Label label) {
+    protected boolean removeLabel(Label label) {
         return labels.remove(label);
     }
 
