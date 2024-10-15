@@ -14,6 +14,8 @@ import ui.exceptions.*;
 // Represents the application that allows users to add .txt files from their computer to the program and sort and
 // browse through them. Structure design based on "TellerApp"
 public class TextFileApp {
+    private static final String EXAMPLE_FILE_PATH = "C:\\\\Users\\\\User\\\\Documents\\\\Note Name.txt";
+
     private Scanner scanner;
 
     private Folder rootFolder;
@@ -155,8 +157,8 @@ public class TextFileApp {
         boolean fileCreated = false;
         while (!fileCreated) {
             System.out.println();
-            System.out.println("\n Please enter the .txt file's path (it should look like "
-                    + "C:\\Users\\User\\Documents\\Note Name.txt (writing .txt is optional)) or b to go back");
+            System.out.println("Please enter the .txt file's path or b to go back"); 
+            System.out.println("It should look like " + EXAMPLE_FILE_PATH + " (writing .txt is optional)");
             String path = getUserInputTrim();
             String pathLowerCase = path.toLowerCase();
             path = addDotTextIfMissing(path);
@@ -991,6 +993,7 @@ public class TextFileApp {
         }
     }
 
+
     // List Menu:
 
     // MODIFIES: this
@@ -1108,6 +1111,7 @@ public class TextFileApp {
         System.out.println("  \"fi\": Open a file in the current folder");
         System.out.println("  \"fo\": Open a folder in the current folder");
         System.out.println("  \"lf\": Open a directory containing all files labelled with a certain label");
+        System.out.println("  \"r\": Open recently-opened files");
         System.out.println("  \"b\": Back to the main menu");
     }
 
@@ -1121,6 +1125,8 @@ public class TextFileApp {
             throw new NewFolderOpenedException();
         } else if (input.equals("lf") || input.equals("labelled files")) {
             getInputToOpenLabel();
+        } else if (input.equals("r") || input.equals("recent")) {
+            // TODO: Implement opening recently-opened files
         } else {
             System.out.println("Your input was not recognized as any of: fi, fo, f, or b");
         }
