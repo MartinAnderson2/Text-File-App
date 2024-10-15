@@ -1025,34 +1025,19 @@ public class TextFileApp {
     // EFFECTS: handles the list menu input and implements the menu
     private void handleListMenuInput(String input) {
         if (input.equals("fi") || input.equals("file")) {
-            try {
-                listFilesAlphabetically(currentFolder.containedFiles());
-            } catch (SetIsEmptyException e) {
-                System.out.println("This folder does not contain any files");
-            }
+            listFilesAlphabeticallyTellUserIfNone();
         } else if (input.equals("fo") || input.equals("folder")) {
-            try {
-                listFoldersAlphabetically(currentFolder.containedFolders());
-            } catch (SetIsEmptyException e) {
-                System.out.println("This folder does not contain any subfolders");
-            }
+            listFoldersAlphabeticallyTellUserIfNone();
         } else if (input.equals("f") || input.equals("files and folders")) {
-            try {
-                System.out.print("Files: ");
-                listFilesAlphabetically(currentFolder.containedFiles());
-            } catch (SetIsEmptyException e) {
-                System.out.println("This folder does not contain any files");
-            }
-            try {
-                System.out.print("Folders: ");
-                listFoldersAlphabetically(currentFolder.containedFolders());
-            } catch (SetIsEmptyException e) {
-                System.out.println("This folder does not contain any subfolders");
-            }
+            System.out.print("Files: ");
+            listFilesAlphabeticallyTellUserIfNone();
+            System.out.print("Folders: ");
+            listFoldersAlphabeticallyTellUserIfNone();
         } else {
             System.out.println("Your input was not recognized as any of: fi, fo, f, or b");
         }
     }
+
 
     // Navigate Menu:
 
@@ -1201,6 +1186,7 @@ public class TextFileApp {
 
         try {
             Desktop.getDesktop().open(new java.io.File(file.getFilePath()));
+            System.out.println(currentFolder.getName() + " opened");
         } catch (IOException e) {
             System.out.println("File failed to open. Please contact the developer if this issue persists");
         }
@@ -1233,17 +1219,12 @@ public class TextFileApp {
             if (inputLowerCase.equals("b") || inputLowerCase.equals("back")) {
                 break;
             } else if (inputLowerCase.equals("l") || inputLowerCase.equals("list")) {
-                try {
-                    listFilesAlphabetically(currentFolder.containedFiles());
-                } catch (SetIsEmptyException e) {
-                    System.out.println(currentFolder.getName() + " (current folder) does not contain any files");
-                }
+                listFilesAlphabeticallyTellUserIfNone();
             } else if (input.isEmpty()) {
                 System.out.println("Files name was not valid");
             } else if (currentFolderContainsFileNamed(input)) {
                 try {
                     openFile(currentFolder.getFile(input));
-                    System.out.println(currentFolder.getName() + " opened");
                     break;
                 } catch (FilePathNoLongerValidException e) {
                     System.out.println("File was moved or deleted");
@@ -1508,17 +1489,22 @@ public class TextFileApp {
                     // Not going to happen since it has size > 1
                 }
             } else if (labelExists(input)) {
-                Label label = getLabel(input);
-                if (unusedLabels.contains(label)) {
-                    label.labelFile(file);
-                    System.out.println(file.getName() + " is now labelled " + label.getName());
-                    unusedLabels.remove(label);
-                } else {
-                    System.out.println("File is already labelled " + label.getName());
-                }
+                addLabelToFile(getLabel(input), unusedLabels, file);                
             } else {
                 System.out.println("Your input was not recognized as a label, l, or b");
             }
+        }
+    }
+
+    // MODIFIES: file
+    // EFFECTS: adds the label to the file and prints that this was done
+    private void addLabelToFile(Label label, Set<Label> unusedLabels, model.File file) {
+        if (unusedLabels.contains(label)) {
+            label.labelFile(file);
+            System.out.println(file.getName() + " is now labelled " + label.getName());
+            unusedLabels.remove(label);
+        } else {
+            System.out.println("File is already labelled " + label.getName());
         }
     }
 
@@ -1591,17 +1577,22 @@ public class TextFileApp {
                     // Not going to happen since it has size > 1
                 }
             } else if (labelExists(input)) {
-                Label label = getLabel(input);
-                if (labelsOnFile.contains(label)) {
-                    label.unlabelFile(file);
-                    System.out.println(file.getName() + " is no longer labelled " + label.getName());
-                    labelsOnFile.remove(label);
-                } else {
-                    System.out.println("File is already not labelled " + label.getName());
-                }
+                removeLabelFromFile(getLabel(input), labelsOnFile, file);
             } else {
                 System.out.println("Your input was not recognized as a label, l, or b");
             }
+        }
+    }
+
+    // MODIFIES: file
+    // EFFECTS: removes the label from the file and prints that this was done
+    private void removeLabelFromFile(Label label, Set<Label> labelsOnFile, model.File file) {
+        if (labelsOnFile.contains(label)) {
+            label.unlabelFile(file);
+            System.out.println(file.getName() + " is no longer labelled " + label.getName());
+            labelsOnFile.remove(label);
+        } else {
+            System.out.println("File is already not labelled " + label.getName());
         }
     }
 
@@ -1718,5 +1709,23 @@ public class TextFileApp {
         }
 
         listStringListAlphabetically(labelNameList);
+    }
+
+    // EFFECTS: lists out all of the files in this folder or a message if there are none
+    private void listFilesAlphabeticallyTellUserIfNone() {
+        try {
+            listFilesAlphabetically(currentFolder.containedFiles());
+        } catch (SetIsEmptyException e) {
+            System.out.println("This folder does not contain any files");
+        }    
+    }
+
+    // EFFECTS: lists out all of the folders in this folder or a message if there are none
+    private void listFoldersAlphabeticallyTellUserIfNone() {
+        try {
+            listFoldersAlphabetically(currentFolder.containedFolders());
+        } catch (SetIsEmptyException e) {
+            System.out.println("This folder does not contain any subfolders");
+        }  
     }
 }
