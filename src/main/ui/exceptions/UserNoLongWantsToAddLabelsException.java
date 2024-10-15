@@ -1,4 +1,4 @@
 package ui.exceptions;
 
-public class UserNoLongWantsToAddLabelsException extends Exception {
+public class UserNoLongWantsToAddLabelsException extends UserChangedTheirMindException {
 }

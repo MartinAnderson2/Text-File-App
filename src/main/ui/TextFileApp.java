@@ -233,7 +233,7 @@ public class TextFileApp {
         while (true) {
             String chosenName = chooseCustomFileName();
 
-            if (confirmCustomFileName(chosenName)) {
+            if (confirmNameCorrect(chosenName)) {
                 return chosenName;
             }
         }
@@ -261,9 +261,9 @@ public class TextFileApp {
             } else if (input.isEmpty()) {
                 System.out.println("Custom file name was not valid");
             } else if (currentFolderContainsFileWithName(input)) {
-                String fileAlreadyNamedInputWithCase = currentFolder.getFile(input).getName();
+                String fileAlreadyNamedInputWithCorrectCase = currentFolder.getFile(input).getName();
                 System.out.println(currentFolder.getName() + " (current folder) already contains a file named "
-                + fileAlreadyNamedInputWithCase);
+                + fileAlreadyNamedInputWithCorrectCase);
             } else {
                 return input;
             }
@@ -275,7 +275,7 @@ public class TextFileApp {
         while (true) {
             String chosenName = chooseCustomFileNameNoGoBack();
 
-            if (confirmCustomFileName(chosenName)) {
+            if (confirmNameCorrect(chosenName)) {
                 return chosenName;
             }
         }
@@ -293,29 +293,11 @@ public class TextFileApp {
             if (input.isEmpty()) {
                 System.out.println("Custom file name was not valid");
             } else if (currentFolderContainsFileWithName(input)) {
-                String fileAlreadyNamedInputWithCase = currentFolder.getFile(input).getName();
+                String fileAlreadyNamedInputWithCorrectCase = currentFolder.getFile(input).getName();
                 System.out.println(currentFolder.getName() + " (current folder) already contains a file named "
-                + fileAlreadyNamedInputWithCase);
+                + fileAlreadyNamedInputWithCorrectCase);
             } else {
                 return input;
-            }
-        }
-    }
-
-    // EFFECTS: returns true if the user confirms that chosenName is correct, returns false if the user confirms chosenName is incorrect
-    private boolean confirmCustomFileName(String chosenName) {
-        while(true) {
-            System.out.println();
-            System.out.println("Is the name \"" + chosenName + "\" correct? Please enter y or n");
-
-            String input = getUserInputTrimToLower();
-
-            if (input.equals("y") || input.equals("yes")) {
-                return true;
-            } else if (input.equals("n") || input.equals("no")) {
-                return false;
-            } else {
-                System.out.println("Your input was not recognized as either of: y or n");
             }
         }
     }
@@ -334,9 +316,9 @@ public class TextFileApp {
                 throw new UserNoLongerWantsNameBException();
             } else if (inputLowerCase.equals("b") || inputLowerCase.equals("namefileb")) {
                 if (currentFolderContainsFileWithName(input)) {
-                    String fileAlreadyNamedInputWithCase = currentFolder.getFile(input).getName();
+                    String fileAlreadyNamedInputWithCorrectCase = currentFolder.getFile(input).getName();
                     System.out.println(currentFolder.getName() + " (current folder) already contains a file named "
-                    + fileAlreadyNamedInputWithCase);
+                    + fileAlreadyNamedInputWithCorrectCase);
                 } else {
                     return input;
                 }
@@ -467,11 +449,89 @@ public class TextFileApp {
     // MODIFIES: this
     // EFFECTS: allows the user to create a new folder
     private void addFolderMenu() {
-        
+        while (true) {
+            String chosenName;
+            try {
+                chosenName = chooseFolderName();
+            } catch (UserNoLongerWantsToCreateFolderException e) {
+                break;
+            }
+
+            if (confirmNameCorrect(chosenName)) {
+                Folder newFolder = currentFolder.makeSubfolder(chosenName);
+                System.out.println("Created folder named \"" + newFolder.getName() + "\" in current folder (" + 
+                currentFolder.getName() + ")");
+                break;
+            }
+        }
+    }
+    
+    // EFFECTS: enables the user to choose the name of their folder
+    // throws UserNoLongerWantsToCreateFolderException if the user decides they no longer wish to create a folder
+    private String chooseFolderName() throws UserNoLongerWantsToCreateFolderException {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the custom name or b to go back (if you wish " +
+            "to name your folder b or B, enter namefolderb)");
+
+            String input = getUserInputTrim();
+            String inputLowerCase = input.toLowerCase();
+
+            if (inputLowerCase.equals("b") || inputLowerCase.equals("back")) {
+                throw new UserNoLongerWantsToCreateFolderException();
+            } else if (inputLowerCase.equals("namefolderb")) {
+                try {
+                    return nameFolderB();
+                } catch (UserNoLongerWantsNameBException e) {
+                    // Continue the loop so they can name their folder something else
+                }
+            } else if (input.isEmpty()) {
+                System.out.println("Folder name was not valid");
+            } else if (currentFolderContainsFolderWithName(input)) {
+                String folderAlreadyNamedInputWithCorrectCase = currentFolder.getSubfolder(input).getName();
+                System.out.println(currentFolder.getName() + " (current folder) already contains a folder named "
+                + folderAlreadyNamedInputWithCorrectCase);
+            } else {
+                return input;
+            }
+        }
+    }
+
+    // EFFECTS: lets the user name their folder b or B or namefolderb (or any case variants, i.e. NameFolderB)
+    private String nameFolderB() throws UserNoLongerWantsNameBException {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the custom name (b, B, namefolderb, namefolderB, etc.) " +
+            "or prev to go to the previous menu");
+
+            String input = getUserInputTrim();
+            String inputLowerCase = input.toLowerCase();
+
+            if (inputLowerCase.equals("p") || inputLowerCase.equals("prev") || inputLowerCase.equals("previous")) {
+                throw new UserNoLongerWantsNameBException();
+            } else if (inputLowerCase.equals("b") || inputLowerCase.equals("namefolderb")) {
+                if (currentFolderContainsFolderWithName(input)) {
+                    String folderAlreadyNamedInputWithCorrectCase = currentFolder.getSubfolder(input).getName();
+                    System.out.println(currentFolder.getName() + " (current folder) already contains a folder named "
+                    + folderAlreadyNamedInputWithCorrectCase);
+                } else {
+                    return input;
+                }
+            }
+            else {
+                System.out.println("Your input was not recognized as any of: b, B, namefolderb " +
+                "(or namefolderb with different capitalization)");
+            }
+        }
+    }
+
+    // EFFECTS: returns true if currentFolder contains a folder named folderName otherwise returns false
+    private boolean currentFolderContainsFolderWithName(String folderName) {
+        return currentFolder.getSubfolder(folderName) != null;
     }
 
     // MODIFIES: this
-    // EFFECTS: allows the user to add a file from their computer to the program
+    // EFFECTS: allows the user to create a new label
     private void addLabelMenu() {
         
     }
@@ -523,6 +583,24 @@ public class TextFileApp {
 
 
     // General helper methods:
+
+    // EFFECTS: returns true if the user confirms that chosenName is correct, returns false if the user confirms chosenName is incorrect
+    private boolean confirmNameCorrect(String name) {
+        while(true) {
+            System.out.println();
+            System.out.println("Is the name \"" + name + "\" correct? Please enter y or n");
+
+            String input = getUserInputTrimToLower();
+
+            if (input.equals("y") || input.equals("yes")) {
+                return true;
+            } else if (input.equals("n") || input.equals("no")) {
+                return false;
+            } else {
+                System.out.println("Your input was not recognized as either of: y or n");
+            }
+        }
+    }
 
     // EFFECTS: returns every character after the final backslash in string
     private String getCharactersAfterLastBackslash(String string) {
