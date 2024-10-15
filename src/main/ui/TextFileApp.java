@@ -561,8 +561,8 @@ public class TextFileApp {
     private void handleEditMenuInput(String input) {
         if (input.equals("fi") || input.equals("file")) {
             editFileMenu();
-        } else if (input.equals("f") || input.equals("folder")) {
-            // editFolderMenu();
+        } else if (input.equals("fo") || input.equals("folder")) {
+            editFolderMenu();
         } else if (input.equals("l") || input.equals("label")) {
             // editLabelMenu();
         } else {
@@ -631,6 +631,7 @@ public class TextFileApp {
     
     // MODIFIES: this
     // EFFECTS: handles the edit file menu input and calls the appropriate functions as needed
+    //          throws FileDeletedException if file's path is no longer valid
     private void handleEditFileMenuInput(String input, model.File file) throws FileDeletedException {
         if (input.equals("o") || input.equals("open")) {
             try {
@@ -714,6 +715,126 @@ public class TextFileApp {
         }
     }
 
+    // MODIFIES: this
+    // EFFECTS: allows the user to edit a folder: to open it, change its name, or delete it
+    private void editFolderMenu() {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the name of the subfolder you would like to edit, l to list the folders in " +
+             "this folder (" + currentFolder.getName() + "), or b to go back");
+             
+            String input = getUserInputTrim();
+            String inputLowerCase = input.toLowerCase();
+
+            if (inputLowerCase.equals("b") || inputLowerCase.equals("back")) {
+                break;
+                // Returns to the edit menu
+            } else if (inputLowerCase.equals("l") || inputLowerCase.equals("list")) {
+                try {
+                    listFoldersAlphabetically(currentFolder.containedFolders());
+                } catch (SetIsEmptyException e) {
+                    System.out.println("This folder doesn't have any subfolders");
+                }
+            } else if (currentFolderContainsFolderNamed(input)) {
+                editFolder(currentFolder.getSubfolder(input));
+                break;
+            } else {
+                System.out.println("There is no file named \"" + input + "\" in this folder");
+            }
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: enables the user to open folder, change its name, and delete it
+    private void editFolder(Folder folder) {
+        while (true) {
+            displayEditFolderMenuOptions(folder.getName());
+
+            String input = getUserInputTrimToLower();
+
+            if (input.equals("b") || input.equals("back")) {
+                break;
+            } else {
+                try {
+                    handleEditFolderMenuInput(input, folder);
+                } catch (NewFolderOpenedException | FolderDeletedException e) {
+                    break;
+                }
+            }
+        }
+    }
+
+    // EFFECTS: displays the edit folder menu options
+    private void displayEditFolderMenuOptions(String folderName) {
+        System.out.println();
+        System.out.println(folderName + " is selected. Would you like to:");
+        System.out.println("  \"o\": Open the folder");
+        System.out.println("  \"e\": Edit the folders's name");
+        System.out.println("  \"d\": Delete the folder");
+        System.out.println("  \"b\": Back to the main menu");
+    }
+    
+    // MODIFIES: this
+    // EFFECTS: handles the edit folder menu input and calls the appropriate functions as needed
+    private void handleEditFolderMenuInput(String input, Folder folder) throws NewFolderOpenedException, 
+    FolderDeletedException {
+        if (input.equals("o") || input.equals("open")) {
+            openFolder(folder);
+            System.out.println(folder.getName() + " opened");
+            throw new NewFolderOpenedException();
+        } else if (input.equals("e") || input.equals("edit")) {
+            editFolderNameMenu(folder);
+        } else if (input.equals("d") || input.equals("delete")) {
+            deleteFolder(folder);
+        } else {
+            System.out.println("Your input was not recognized as any of: o, e, d, or b");
+        }
+    }
+
+    // MODIFIES: this, folder
+    // EFFECTS: allows the user to change folder's name
+    private void editFolderNameMenu(Folder folder) {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the new folder name or b to go back (if you wish " +
+            "to rename your folder to b or B, enter namefolderb)");
+
+            String input = getUserInputTrim();
+            String inputLowerCase = input.toLowerCase();
+
+            if (inputLowerCase.equals("b") || inputLowerCase.equals("back")) {
+                break;
+            } else if (inputLowerCase.equals("namefolderb")) {
+                try {
+                    folder.setName(nameFolderB());
+                    break;
+                } catch (UserNoLongerWantsNameBException e) {
+                    // Continue the loop so they can name their folder something else
+                }
+            } else if (input.isEmpty()) {
+                System.out.println("Folder name was not valid");
+            } else if (currentFolderContainsFolderNamed(input)) {
+                String folderAlreadyNamedInputWithCorrectCase = currentFolder.getSubfolder(input).getName();
+                System.out.println(currentFolder.getName() + " (current folder) already contains a folder named "
+                + folderAlreadyNamedInputWithCorrectCase);
+            } else {
+                folder.setName(input);
+                break;
+            }
+        }
+    }
+
+    // MODIFIES: this, file
+    // EFFECTS: confirms that the user wants to delete file and then deletes this folder's reference to it as well
+    // as label's reference to it
+    private void deleteFolder(Folder folder) throws FolderDeletedException {
+        if (confirmCompleteAction("delete " + folder.getName())) {
+            currentFolder.removeSubfolder(folder);
+            System.out.println(folder.getName() + " deleted");
+            throw new FolderDeletedException();
+        }
+    }
+
 
     // List Menu:
 
@@ -765,6 +886,10 @@ public class TextFileApp {
         }
     }
 
+    // EFFECTS: opens folder
+    private void openFolder(Folder folder) {
+        currentFolder = folder;
+    }
 
     // Confirmations:
     // EFFECTS: returns true if the user confirms that they want to complete action,
