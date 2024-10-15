@@ -441,11 +441,6 @@ public class TextFileApp {
         }
     }
 
-    // EFFECTS: returns true if currentFolder contains a file named fileName otherwise returns false
-    private boolean labelExists(String labelName) {
-        return getLabel(labelName) != null;
-    }
-
     // MODIFIES: this
     // EFFECTS: allows the user to create a new folder
     private void addFolderMenu() {
@@ -471,7 +466,7 @@ public class TextFileApp {
     private String chooseFolderName() throws UserNoLongerWantsToCreateFolderException {
         while (true) {
             System.out.println();
-            System.out.println("Please enter the custom name or b to go back (if you wish " +
+            System.out.println("Please enter the folder name or b to go back (if you wish " +
             "to name your folder b or B, enter namefolderb)");
 
             String input = getUserInputTrim();
@@ -501,7 +496,7 @@ public class TextFileApp {
     private String nameFolderB() throws UserNoLongerWantsNameBException {
         while (true) {
             System.out.println();
-            System.out.println("Please enter the custom name (b, B, namefolderb, namefolderB, etc.) " +
+            System.out.println("Please enter the folder name (b, B, namefolderb, namefolderB, etc.) " +
             "or prev to go to the previous menu");
 
             String input = getUserInputTrim();
@@ -533,7 +528,78 @@ public class TextFileApp {
     // MODIFIES: this
     // EFFECTS: allows the user to create a new label
     private void addLabelMenu() {
-        
+        while (true) {
+            String chosenName;
+            try {
+                chosenName = chooseLabelName();
+            } catch (UserNoLongerWantsToCreateALabelException e) {
+                break;
+            }
+
+            if (confirmNameCorrect(chosenName)) {
+                Label newLabel = new Label(chosenName);
+                allLabels.add(newLabel);
+                System.out.println("Created label named \"" + newLabel.getName());
+                break;
+            }
+        }
+    }
+
+    // EFFECTS: enables the user to choose the name of their new label
+    // throws UserNoLongerWantsToCreateALabelException if the user decides they no longer wish to create a label
+    private String chooseLabelName() throws UserNoLongerWantsToCreateALabelException {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the label name or b to go back (if you wish " +
+            "to name your label b or B, enter namelabelb)");
+
+            String input = getUserInputTrim();
+            String inputLowerCase = input.toLowerCase();
+
+            if (inputLowerCase.equals("b") || inputLowerCase.equals("back")) {
+                throw new UserNoLongerWantsToCreateALabelException();
+            } else if (inputLowerCase.equals("namelabelb")) {
+                try {
+                    return nameLabelB();
+                } catch (UserNoLongerWantsNameBException e) {
+                    // Continue the loop so they can name their label something else
+                }
+            } else if (input.isEmpty()) {
+                System.out.println("Label name was not valid");
+            } else if (labelExists(input)) {
+                String labelAlreadyNamedInputWithCorrectCase = getLabel(input).getName();
+                System.out.println("A label already exists named  " + labelAlreadyNamedInputWithCorrectCase);
+            } else {
+                return input;
+            }
+        }
+    }
+
+    // EFFECTS: lets the user name their label b or B or namelabelb (or any case variants, i.e. NameLabelB)
+    private String nameLabelB() throws UserNoLongerWantsNameBException {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the label name (b, B, namelabelb, namelabelB, etc.) " +
+            "or prev to go to the previous menu");
+
+            String input = getUserInputTrim();
+            String inputLowerCase = input.toLowerCase();
+
+            if (inputLowerCase.equals("p") || inputLowerCase.equals("prev") || inputLowerCase.equals("previous")) {
+                throw new UserNoLongerWantsNameBException();
+            } else if (inputLowerCase.equals("b") || inputLowerCase.equals("namelabelb")) {
+                if (labelExists(input)) {
+                    String labelAlreadyNamedInputWithCorrectCase = getLabel(input).getName();
+                    System.out.println("A label already exists named  " + labelAlreadyNamedInputWithCorrectCase);
+                } else {
+                    return input;
+                }
+            }
+            else {
+                System.out.println("Your input was not recognized as any of: b, B, namelabelb " +
+                "(or namelabelb with different capitalization)");
+            }
+        }
     }
 
 
@@ -658,6 +724,11 @@ public class TextFileApp {
             }
         }
         return null;
+    }
+
+    // EFFECTS: returns true if there exists a label named labelName otherwise returns false
+    private boolean labelExists(String labelName) {
+        return getLabel(labelName) != null;
     }
 
     // EFFECTS: gets input from the user and trims it
