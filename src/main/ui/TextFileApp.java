@@ -564,7 +564,7 @@ public class TextFileApp {
         } else if (input.equals("fo") || input.equals("folder")) {
             editFolderMenu();
         } else if (input.equals("l") || input.equals("label")) {
-            // editLabelMenu();
+            editLabelMenu();
         } else {
             System.out.println("Your input was not recognized as any of: file, folder, label, or b");
         }
@@ -612,7 +612,7 @@ public class TextFileApp {
             } else {
                 try {
                     handleEditFileMenuInput(input, file);
-                } catch (FileDeletedException e) {
+                } catch (CurrentObjectDeletedException e) {
                     break;
                 }
             }
@@ -632,7 +632,7 @@ public class TextFileApp {
     // MODIFIES: this
     // EFFECTS: handles the edit file menu input and calls the appropriate functions as needed
     //          throws FileDeletedException if file's path is no longer valid
-    private void handleEditFileMenuInput(String input, model.File file) throws FileDeletedException {
+    private void handleEditFileMenuInput(String input, model.File file) throws CurrentObjectDeletedException {
         if (input.equals("o") || input.equals("open")) {
             try {
                 openFile(file);
@@ -643,7 +643,7 @@ public class TextFileApp {
             editFileNameAndLabelsMenu(file);
         } else if (input.equals("d") || input.equals("delete")) {
             deleteFile(file);
-            throw new FileDeletedException();
+            throw new CurrentObjectDeletedException();
         } else {
             System.out.println("Your input was not recognized as any of: o, e, d, or b");
         }
@@ -757,7 +757,7 @@ public class TextFileApp {
             } else {
                 try {
                     handleEditFolderMenuInput(input, folder);
-                } catch (NewFolderOpenedException | FolderDeletedException e) {
+                } catch (NewFolderOpenedException | CurrentObjectDeletedException e) {
                     break;
                 }
             }
@@ -777,7 +777,7 @@ public class TextFileApp {
     // MODIFIES: this
     // EFFECTS: handles the edit folder menu input and calls the appropriate functions as needed
     private void handleEditFolderMenuInput(String input, Folder folder) throws NewFolderOpenedException, 
-    FolderDeletedException {
+    CurrentObjectDeletedException {
         if (input.equals("o") || input.equals("open")) {
             openFolder(folder);
             System.out.println(folder.getName() + " opened");
@@ -785,7 +785,7 @@ public class TextFileApp {
         } else if (input.equals("e") || input.equals("edit")) {
             editFolderNameMenu(folder);
         } else if (input.equals("d") || input.equals("delete")) {
-            deleteFolder(folder);
+            deleteFolderMenu(folder);
         } else {
             System.out.println("Your input was not recognized as any of: o, e, d, or b");
         }
@@ -809,7 +809,7 @@ public class TextFileApp {
                     folder.setName(nameFolderB());
                     break;
                 } catch (UserNoLongerWantsNameBException e) {
-                    // Continue the loop so they can name their folder something else
+                    // Continue the loop so they can rename their folder something else
                 }
             } else if (input.isEmpty()) {
                 System.out.println("Folder name was not valid");
@@ -827,11 +827,133 @@ public class TextFileApp {
     // MODIFIES: this, file
     // EFFECTS: confirms that the user wants to delete file and then deletes this folder's reference to it as well
     // as label's reference to it
-    private void deleteFolder(Folder folder) throws FolderDeletedException {
+    private void deleteFolderMenu(Folder folder) throws CurrentObjectDeletedException {
         if (confirmCompleteAction("delete " + folder.getName())) {
             currentFolder.removeSubfolder(folder);
             System.out.println(folder.getName() + " deleted");
-            throw new FolderDeletedException();
+            throw new CurrentObjectDeletedException();
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: allows the user to edit a label: they can open it, change its name, or delete it
+    private void editLabelMenu() {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the name of the label you would like to edit, " + 
+            "l to list all created labels or b to go back");
+             
+            String input = getUserInputTrim();
+            String inputLowerCase = input.toLowerCase();
+
+            if (inputLowerCase.equals("b") || inputLowerCase.equals("back")) {
+                break;
+                // Returns to the edit menu
+            } else if (inputLowerCase.equals("l") || inputLowerCase.equals("list")) {
+                try {
+                    listLabelsAlphabetically(allLabels);
+                } catch (SetIsEmptyException e) {
+                    System.out.println("You have not created any labels");
+                }
+            } else if (labelExists(input)) {
+                editLabel(getLabel(input));
+                break;
+            } else {
+                System.out.println("There is no label named \"" + input + "\"");
+            }
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: enables the user to open label, change its name, and delete it
+    private void editLabel(Label label) {
+        while (true) {
+            displayEditLabelMenuOptions(label.getName());
+
+            String input = getUserInputTrimToLower();
+
+            if (input.equals("b") || input.equals("back")) {
+                break;
+            } else {
+                try {
+                    handleEditLabelMenuInput(input, label);
+                } catch (NewFolderOpenedException | CurrentObjectDeletedException e) {
+                    break;
+                }
+            }
+        }
+    }
+
+    // EFFECTS: displays the edit label menu options
+    private void displayEditLabelMenuOptions(String labelName) {
+        System.out.println();
+        System.out.println(labelName + " is selected. Would you like to:");
+        System.out.println("  \"o\": Open a directory with all files labelled with this label");
+        System.out.println("  \"e\": Edit the label's name");
+        System.out.println("  \"d\": Delete the label");
+        System.out.println("  \"b\": Back to the main menu");
+    }
+    
+    // MODIFIES: this
+    // EFFECTS: handles the edit label menu input and calls the appropriate functions as needed
+    private void handleEditLabelMenuInput(String input, Label label) throws NewFolderOpenedException, 
+    CurrentObjectDeletedException {
+        if (input.equals("o") || input.equals("open")) {
+            openLabel(label);
+            System.out.println("Current directory is every file labelled " + label.getName());
+            throw new NewFolderOpenedException();
+        } else if (input.equals("e") || input.equals("edit")) {
+            editLabelNameMenu(label);
+        } else if (input.equals("d") || input.equals("delete")) {
+            deleteLabelMenu(label);
+        } else {
+            System.out.println("Your input was not recognized as any of: o, e, d, or b");
+        }
+    }
+
+    // MODIFIES: this, label
+    // EFFECTS: allows the user to change label's name
+    private void editLabelNameMenu(Label label) {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the new label name or b to go back (if you wish " +
+            "to rename your label to b or B, enter namelabelb)");
+
+            String input = getUserInputTrim();
+            String inputLowerCase = input.toLowerCase();
+
+            if (inputLowerCase.equals("b") || inputLowerCase.equals("back")) {
+                break;
+            } else if (inputLowerCase.equals("namelabelb")) {
+                try {
+                    label.setName(nameLabelB());
+                    break;
+                } catch (UserNoLongerWantsNameBException e) {
+                    // Continue the loop so they can rename the label something else
+                }
+            } else if (input.isEmpty()) {
+                System.out.println("Label name was not valid");
+            } else if (labelExists(input)) {
+                String labelAlreadyNamedInputWithCorrectCase = getLabel(input).getName();
+                System.out.println("A label already exists with name " + labelAlreadyNamedInputWithCorrectCase);
+            } else {
+                label.setName(input);
+                break;
+            }
+        }
+    }
+
+    // MODIFIES: this, label
+    // EFFECTS: confirms that the user wants to delete label and then deletes this folder's reference to it
+    // and removes it from any files
+    private void deleteLabelMenu(Label label) throws CurrentObjectDeletedException {
+        if (confirmCompleteAction("delete " + label.getName())) {
+            for (File file : label.getLabelledFiles()) {
+                label.unlabelFile(file);
+            }
+            allLabels.remove(label);
+            System.out.println(label.getName() + " deleted");
+            throw new CurrentObjectDeletedException();
         }
     }
 
@@ -889,6 +1011,12 @@ public class TextFileApp {
     // EFFECTS: opens folder
     private void openFolder(Folder folder) {
         currentFolder = folder;
+    }
+
+    // EFFECTS: creates a new folder with every File labelled file and sets currentFolder to that new folder
+    private void openLabel(Label label) {
+        Folder labelFolder = new Folder(label.getName());
+        currentFolder = labelFolder;
     }
 
     // Confirmations:
