@@ -74,8 +74,6 @@ public class TextFileApp {
             navigateMenu();
         } else if (input.equals("o") || input.equals("open")) {
             openMenu();
-        } else if (input.equals("s") || input.equals("search")) {
-            searchMenu();
         } else {
             System.out.println("Your input was not recognized as any of: a, e, l, n, o, s, or q");
         }
@@ -645,15 +643,6 @@ public class TextFileApp {
     // EFFECTS: handles the "open" menu input
     private void openMenu() {
 
-    }
-
-
-    // Search Menu:
-
-    // MODIFIES: this
-    // EFFECTS: handles the search menu input
-    private void searchMenu() {
-        
     }
 
 
