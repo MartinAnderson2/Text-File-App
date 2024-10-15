@@ -36,9 +36,7 @@ public class TextFileApp {
         boolean quit = false;
         while (!quit) {
             displayMainMenuOptions();
-            String input = scanner.next();
-            input = input.trim();
-            input = input.toLowerCase();
+            String input = getUserInputTrimToLower();
 
             if (input.equals("q") || input.equals("quit")) {
                 quit = true;
@@ -57,7 +55,7 @@ public class TextFileApp {
         System.out.println("Would you like to:");
         System.out.println("  \"a\": Add a file, folder, or label to the current folder");
         System.out.println("  \"e\": Edit a file, folder, or label in the current directory");
-        System.out.println("  \"l\": List the files and folders, just files, or just folders in the current directory");
+        System.out.println("  \"l\": List the files and folders in the current directory");
         System.out.println("  \"n\": Navigate the file system");
         System.out.println("  \"o\": Open a file or folder, open all files with a given label");
         System.out.println("  \"q\": Quit the application");
@@ -998,44 +996,10 @@ public class TextFileApp {
     // MODIFIES: this
     // EFFECTS: handles the list menu input
     private void listMenu() {
-        while (true) {
-            displayListMenuOptions();
-
-            String input = getUserInputTrimToLower();
-
-            if (input.equals("b") || input.equals("back")) {
-                break;
-            } else {
-                handleListMenuInput(input);
-            }
-        }
-    }
-
-    // EFFECTS: displays the list menu options
-    private void displayListMenuOptions() {
-        System.out.println();
-        System.out.println("You are in folder " + currentFolder.getName() + ". Would you like to:");
-        System.out.println("  \"fi\": List the files in the current folder");
-        System.out.println("  \"fo\": List the folders in the current folder");
-        System.out.println("  \"f\": List both the files and the folders in the current folder");
-        System.out.println("  \"b\": Back to the main menu");
-    }
-
-    // MODIFIES: this
-    // EFFECTS: handles the list menu input and implements the menu
-    private void handleListMenuInput(String input) {
-        if (input.equals("fi") || input.equals("file")) {
-            listFilesAlphabeticallyTellUserIfNone();
-        } else if (input.equals("fo") || input.equals("folder")) {
-            listFoldersAlphabeticallyTellUserIfNone();
-        } else if (input.equals("f") || input.equals("files and folders")) {
-            System.out.print("Files: ");
-            listFilesAlphabeticallyTellUserIfNone();
-            System.out.print("Folders: ");
-            listFoldersAlphabeticallyTellUserIfNone();
-        } else {
-            System.out.println("Your input was not recognized as any of: fi, fo, f, or b");
-        }
+        System.out.print("Files: ");
+        listFilesAlphabeticallyTellUserIfNone();
+        System.out.print("Folders: ");
+        listFoldersAlphabeticallyTellUserIfNone();
     }
 
 
