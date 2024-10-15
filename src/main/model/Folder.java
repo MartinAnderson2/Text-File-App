@@ -1,29 +1,29 @@
 package model;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 // Represents a folder with a name that holds files as well as other folders and has a parent folder unless it is the root folder
 public class Folder extends NamedObject {
-    private List<Folder> subfolders;
-    private List<File> containedFiles;
+    private Set<Folder> subfolders;
+    private Set<File> containedFiles;
     private Folder parentFolder;
 
     // REQUIRES: !name.isEmpty()
     public Folder(String name) {
         this.name = name;
-        subfolders = new ArrayList<Folder>();
-        containedFiles = new ArrayList<File>();
+        subfolders = new HashSet<Folder>();
+        containedFiles = new HashSet<File>();
         parentFolder = null;
     }
 
     // EFFECTS: returns a list of folders within this folder
-    public List<Folder> containedFolders() {
+    public Set<Folder> containedFolders() {
         return subfolders;
     }
 
     // EFFECTS: returns a list of files within this folder
-    public List<File> containedFiles() {
+    public Set<File> containedFiles() {
         return containedFiles;
     }
 
@@ -36,10 +36,13 @@ public class Folder extends NamedObject {
     // REQUIRES: !name.isEmpty()
     // MODIFIES: this
     // EFFECTS: creates a new folder that is a subfolder of this folder, named name
-    public void makeSubfolder(String name) {
+    //          and returns a reference to the newly-created folder
+    public Folder makeSubfolder(String name) {
         Folder newFolder = new Folder(name);
         newFolder.parentFolder = this;
         subfolders.add(newFolder);
+
+        return newFolder;
     }
 
     // EFFECTS: if this folder contains a folder named name return it, otherwise return null
@@ -71,14 +74,4 @@ public class Folder extends NamedObject {
         }
         return null;
     }
-    
-    // TODO: See if this is possible
-    // private NamedObject getNamedObject(String name, List<NamedObject> namedObjects) {
-    //     for (NamedObject namedObject : namedObjects) {
-    //         if (namedObject.isNamed(name)) {
-    //             return namedObject;
-    //         }
-    //     }
-    //     return null;
-    // }
 }

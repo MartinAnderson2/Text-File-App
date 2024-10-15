@@ -276,4 +276,12 @@ public class TestFile extends TestNamedObject {
         assertEquals(2, javaFile.numberLabelsTaggedWith());
         assertEquals(0, beeSLFile.numberLabelsTaggedWith());
     }
+
+    @Test
+    void testSetFilepath() {
+        ceeSharpFile.setFilePath("D:\\Project.txt");
+        assertEquals("D:\\Project.txt", ceeSharpFile.getFilePath());
+        beeSLFile.setFilePath("F:\\Proj.txt");
+        assertEquals("F:\\Proj.txt", beeSLFile.getFilePath());
+    }
 }

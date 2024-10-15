@@ -6,33 +6,25 @@ import java.util.*;
 // and a set of labels that it is tagged with
 public class File extends NamedObject {
     private String filePath;
-    private List<Label> labels;
+    private Set<Label> labels;
 
     // REQUIRES: !name.isEmpty()
     public File(String name, String filePath) {
         this.name = name;
         this.filePath = filePath;
-        labels = new ArrayList<Label>();
+        labels = new HashSet<Label>();
     }
 
     // MODIFIES: this
     // EFFECTS: labels this file with label
     public void addLabel(Label label) {
-        // TODO: Check if this is the best implementation
-        if (!labels.contains(label)) {
-            labels.add(label);
-        }
+        labels.add(label);
     }
 
     // MODIFIES: this
-    // EFFECTS: removes given label from this file
+    // EFFECTS: removes given label from this file. returns true if it had a label on it and false if it did not
     public boolean removeLabel(Label label) {
-        if (labels.contains(label)) {
-            labels.remove(label);
-            return true;
-        } else {
-            return false;
-        }
+        return labels.remove(label);
     }
 
     // MODIFIES: this
