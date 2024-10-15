@@ -3,6 +3,9 @@ package ui;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Comparator;
 import model.*;
 import ui.exceptions.*;
 
@@ -358,6 +361,7 @@ public class TextFileApp {
                 break;
             } else if (input.equals("y") || input.equals("yes")) {
                 chooseLabels(file);
+                break;
             } else {
                 System.out.println("Your input was not recognized as either of: y or n");
             }
@@ -365,31 +369,99 @@ public class TextFileApp {
     }
 
     // MODIFIES: file
-    // EFFECTS: lets the user add an arbitrary number of labels
+    // EFFECTS: lets the user label file
     private void chooseLabels(File file) {
-        if (allLabels.size() == 0) {
+        if (allLabels.size() == 1) {
             addTheOnlyCreatedLabel(file);
         }
         else {
-
+            addAsManyLabelsAsDesiredOrPossible(file);
         }
     }
 
+    // REQUIRES: there is only one label in allLabels
+    // MODIFIES: file
+    // EFFECTS: enables the user to either label the file with the only current label or not label it
     private void addTheOnlyCreatedLabel(File file) {
+        Label theOnlyCurrentLabel = firstLabelFoundInSet(allLabels);
         while(true) {
             System.out.println();
-            System.out.println("Would you like to add the label " + "labels to the file? Please enter y or n");
-            // TODO: Finish implementing this
+            System.out.println("Would you like to label the file \"" + theOnlyCurrentLabel.getName() + "\"? Please enter y or n");
+
             String input = getUserInputTrimToLower();
 
             if (input.equals("n") || input.equals("no")) {
                 break;
             } else if (input.equals("y") || input.equals("yes")) {
-                chooseLabels(file);
+                file.addLabel(theOnlyCurrentLabel);
+                break;
             } else {
                 System.out.println("Your input was not recognized as either of: y or n");
             }
         }
+    }
+
+    // MODIFIES: file
+    // EFFECTS: lets the user label file with as many labels as they'd like to
+    private void addAsManyLabelsAsDesiredOrPossible(File file) {
+        Set<Label> unusedLabels = new HashSet<Label>(allLabels);
+        try {
+            chooseLabels(file, unusedLabels);
+
+            Label lastLabel = firstLabelFoundInSet(unusedLabels);
+            addLastRemainingLabel(file, lastLabel);
+        } catch (UserNoLongWantsToAddLabelsException e) {
+            // Stop whenever the user no longer wishes to add labels
+        }
+    }
+
+    // MODIFIES: file
+    // EFFECTS: lets the user label file with as many labels as they'd like to while there is more than one option
+    private void chooseLabels(File file, Set<Label> unusedLabels) throws UserNoLongWantsToAddLabelsException {
+        while (unusedLabels.size() > 1) {
+            System.out.println();
+            System.out.println("Enter the name of the label you would like to add to the file," +
+             "enter l to list the available labels, or enter b to stop adding labels");
+
+             String input = getUserInputTrimToLower();
+
+             if (input.equals("b") || input.equals("back")) {
+                 throw new UserNoLongWantsToAddLabelsException();
+             } else if (input.equals("l") || input.equals("list")) {
+                 listLabelSetAlphabetically(allLabels);
+             } else if (labelExists(input)) {
+                Label label = getLabel(input);
+                file.addLabel(label);
+                System.out.println(file.getName() + " labelled " + label.getName());
+             } else {
+                 System.out.println("Your input was not recognized as a label, list, or b");
+             }
+        }
+    }
+
+    // MODIFIES: file
+    // EFFECTS: lets the user choose whether to add the last label to the file or not
+    private void addLastRemainingLabel(File file, Label lastLabel) throws UserNoLongWantsToAddLabelsException {
+        while (true) {
+            System.out.println();
+            System.out.println("Would you like to label the file \"" + lastLabel.getName() + "\"? y or n");
+
+             String input = getUserInputTrimToLower();
+
+             if (input.equals("n") || input.equals("no")) {
+                 throw new UserNoLongWantsToAddLabelsException();
+             } else if (input.equals("y") || input.equals("yes")) {
+                 file.addLabel(lastLabel);
+                 System.out.println(file.getName() + " labelled " + lastLabel.getName());
+            } else {
+                 System.out.println("Your input was not recognized as a y or n");
+            }
+        }
+    }
+
+    // EFFECTS: returns true if currentFolder contains a file named fileName otherwise returns false
+    private boolean labelExists(String labelName) {
+        return getLabel(labelName) != null;
     }
 
     // MODIFIES: this
@@ -490,6 +562,26 @@ public class TextFileApp {
         return string.substring(0, indexOfDot);
     }
 
+    // EFFECTS: returns the first element found in a set of Labels
+    // (if it's a HashSet, this isn't necessarily - and probably isn't - the first object added)
+    private Label firstLabelFoundInSet(Set<Label> set) {
+        for (Label label : set) {
+            return label;
+        }
+
+        throw new SetIsEmptyException();
+    }
+
+    // EFFECTS: returns label with given name or null if not found
+    public Label getLabel(String name) {
+        for (Label label : allLabels) {
+            if (label.isNamed(name)) {
+                return label;
+            }
+        }
+        return null;
+    }
+
     // EFFECTS: gets input from the user and trims it
     private String getUserInputTrim() {
         String input = "";
@@ -505,5 +597,25 @@ public class TextFileApp {
         input = input.trim();
         input = input.toLowerCase();
         return input;
+    }
+
+    // REQUIRES: labelSet contains at least one element
+    // EFFECTS: lists all of the names of the labels in labelSet alphabetically
+    private void listLabelSetAlphabetically(Set<Label> labelSet) {
+        List<String> labelNameList = new ArrayList<String>();
+        for (Label label : labelSet) {
+            String labelName = label.getName();
+            labelNameList.add(labelName);
+        }
+        labelNameList.sort(Comparator.comparing(String::toLowerCase));
+        
+        int indexOfLastLabel = labelNameList.size() - 1;
+        String lastLabelName = labelNameList.get(indexOfLastLabel);
+        labelNameList.remove(indexOfLastLabel);
+
+        for (String labelName : labelNameList) {
+            System.out.print(labelName + ", ");
+        }
+        System.out.println(lastLabelName);
     }
 }
