@@ -27,12 +27,6 @@ public class File extends NamedObject {
         return labels.remove(label);
     }
 
-    // MODIFIES: this
-    // EFFECTS: removes all labels from this file
-    public void removeAllLabels() {
-        labels.clear();
-    }
-
     // EFFECTS: returns true if this file is tagged with label otherwise returns false
     public boolean isLabelled(Label label) {
         return labels.contains(label);

@@ -137,50 +137,6 @@ public class TestFile extends TestNamedObject {
     }
 
     @Test
-    void testRemoveAllLabelsNoLabels() {
-        ceeSharpFile.removeAllLabels();
-
-        assertFalse(ceeSharpFile.isLabelled());
-        assertFalse(ceeSharpFile.isLabelled(programmingLanguageLabel));
-    }
-
-    @Test
-    void testRemoveAllLabelsOneLabel() {
-        ceeSharpFile.addLabel(programmingLanguageLabel);
-
-        ceeSharpFile.removeAllLabels();
-
-        assertFalse(ceeSharpFile.isLabelled());
-        assertFalse(ceeSharpFile.isLabelled(programmingLanguageLabel));
-    }
-
-    @Test
-    void testRemoveAllLabelsMultipleLabels() {
-        beeSLFile.addLabel(programmingLanguageLabel);
-        beeSLFile.addLabel(lowerLevelComputerScienceCourseLabel);
-
-        beeSLFile.removeAllLabels();
-
-        assertFalse(beeSLFile.isLabelled());
-        assertFalse(beeSLFile.isLabelled(programmingLanguageLabel));
-        assertFalse(beeSLFile.isLabelled(lowerLevelComputerScienceCourseLabel));
-    }
-
-    @Test
-    void testRemoveAllLabelsMultipleFilesMultilpleLabels() {
-        javaFile.addLabel(programmingLanguageLabel);
-        javaFile.addLabel(lowerLevelComputerScienceCourseLabel);
-        ceeSharpFile.addLabel(lowerLevelComputerScienceCourseLabel);
-
-        javaFile.removeAllLabels();
-        ceeSharpFile.removeAllLabels();
-
-        assertFalse(ceeSharpFile.isLabelled());
-        assertFalse(ceeSharpFile.isLabelled(programmingLanguageLabel));
-        assertFalse(ceeSharpFile.isLabelled(lowerLevelComputerScienceCourseLabel));
-    }
-
-    @Test
     void testIsLabelledLabelVersionTaggedNoLabels() {
         assertFalse(javaFile.isLabelled(programmingLanguageLabel));
         assertFalse(javaFile.isLabelled(lowerLevelComputerScienceCourseLabel));
