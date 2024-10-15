@@ -1469,7 +1469,7 @@ public class TextFileApp {
             } else if (labelExists(input)) {
                 Label label = getLabel(input);
                 if (unusedLabels.contains(label)) {
-                    file.addLabel(label);
+                    label.labelFile(file);
                     System.out.println(file.getName() + " is now labelled " + label.getName());
                     unusedLabels.remove(label);
                 } else {
