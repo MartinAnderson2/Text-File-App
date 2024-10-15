@@ -1099,11 +1099,50 @@ public class TextFileApp {
     // Open Menu:
 
     // MODIFIES: this
-    // EFFECTS: handles the "open" menu input
+    // EFFECTS: handles the open menu input
     private void openMenu() {
+        while (true) {
+            displayOpenMenuOptions();
 
+            String input = getUserInputTrimToLower();
+
+            if (input.equals("b") || input.equals("back")) {
+                break;
+            } else {
+                try {
+                    handleOpenMenuInput(input);
+                } catch (NewFolderOpenedException e) {
+                    break;
+                }
+            }
+        }
     }
 
+    // EFFECTS: displays the open menu options
+    private void displayOpenMenuOptions() {
+        System.out.println();
+        System.out.println("You are in folder " + currentFolder.getName() + ". Would you like to:");
+        System.out.println("  \"fi\": Open a file in the current folder");
+        System.out.println("  \"fo\": Open a folder in the current folder");
+        System.out.println("  \"lf\": Open a directory containing all files labelled with a certain label");
+        System.out.println("  \"b\": Back to the main menu");
+    }
+    
+    // MODIFIES: this
+    // EFFECTS: handles the open menu input and implements the menu
+    private void handleOpenMenuInput(String input) throws NewFolderOpenedException {
+        if (input.equals("fi") || input.equals("file")) {
+            getInputToOpenFile();
+        } else if (input.equals("fo") || input.equals("folder")) {
+            getInputToOpenFolder();
+            throw new NewFolderOpenedException();
+        } else if (input.equals("lf") || input.equals("labelled files")) {
+            getInputToOpenLabel();
+        } else {
+            System.out.println("Your input was not recognized as any of: fi, fo, f, or b");
+        }
+    }
+    
 
     // General helper methods:
 
@@ -1143,7 +1182,41 @@ public class TextFileApp {
         Folder labelFolder = new Folder(label.getName());
         currentFolder = labelFolder;
     }
+    
+    // EFFECTS: opens file the user searches for, if one exists
+    private void getInputToOpenFile() {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the name of the file to open, l to list the options, or b to go back");
 
+            String input = getUserInputTrim();
+            String inputLowerCase = input.toLowerCase();
+
+            if (inputLowerCase.equals("b") || inputLowerCase.equals("back")) {
+                break;
+            } else if (inputLowerCase.equals("l") || inputLowerCase.equals("list")) {
+                try {
+                    listFilesAlphabetically(currentFolder.containedFiles());
+                } catch (SetIsEmptyException e) {
+                    System.out.println(currentFolder.getName() + " (current folder) does not contain any files");
+                }
+            } else if (input.isEmpty()) {
+                System.out.println("Files name was not valid");
+            } else if (currentFolderContainsFileNamed(input)) {
+                try {
+                    openFile(currentFolder.getFile(input));
+                    System.out.println(currentFolder.getName() + " opened");
+                    break;
+                } catch (FilePathNoLongerValidException e) {
+                    System.out.println("File was moved or deleted");
+                }
+            } else {
+                System.out.println("This folder (" + currentFolder.getName() +
+                ") does not contain a file named " + input);
+            }
+        }
+    }
+    
     // EFFECTS: opens folder the user searches for, if one exists
     private void getInputToOpenFolder() throws NewFolderOpenedException {
         while (true) {
@@ -1169,7 +1242,37 @@ public class TextFileApp {
                 throw new NewFolderOpenedException();
             } else {
                 System.out.println("This folder (" + currentFolder.getName() +
-                ") does not contain a file named " + input);
+                ") does not contain a subfolder named " + input);
+            }
+        }
+    }
+
+    // EFFECTS: opens directory with all files labelled with label the user searches for, if one exists
+    private void getInputToOpenLabel() throws NewFolderOpenedException {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the name of the label to open, l to list the options, or b to go back");
+
+            String input = getUserInputTrim();
+            String inputLowerCase = input.toLowerCase();
+
+            if (inputLowerCase.equals("b") || inputLowerCase.equals("back")) {
+                break;
+            } else if (inputLowerCase.equals("l") || inputLowerCase.equals("list")) {
+                try {
+                    listLabelsAlphabetically(allLabels);
+                } catch (SetIsEmptyException e) {
+                    System.out.println("You have not made any labels");
+                }
+            } else if (input.isEmpty()) {
+                System.out.println("Label name was not valid");
+            } else if (labelExists(input)) {
+                Label label = getLabel(input);
+                openLabel(label);
+                System.out.println(label.getName() + " opened");
+                throw new NewFolderOpenedException();
+            } else {
+                System.out.println("There is no label named \"" + input + "\"");
             }
         }
     }
