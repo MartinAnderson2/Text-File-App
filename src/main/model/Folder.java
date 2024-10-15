@@ -45,6 +45,12 @@ public class Folder extends NamedObject {
         return newFolder;
     }
 
+    // MODIFIES: this
+    // EFFECTS: removes this folder's reference to folder
+    public void removeSubfolder(Folder folder) {
+        subfolders.remove(folder);
+    }
+
     // EFFECTS: if this folder contains a folder named name return it, otherwise return null
     public Folder getSubfolder(String name) {
         for (Folder folder : subfolders) {
@@ -64,6 +70,11 @@ public class Folder extends NamedObject {
         containedFiles.add(newFile);
         return newFile;
     }
+    
+    // EFFECTS: removes this folder's reference to file
+    public void removeFile(File file) {
+        containedFiles.remove(file);
+    }
 
     // EFFECTS: returns file with given name or null if not found
     public File getFile(String name) {
@@ -73,10 +84,5 @@ public class Folder extends NamedObject {
             }
         }
         return null;
-    }
-    
-    // EFFECTS: removes this folder's reference to file
-    public void removeFile(File file) {
-        containedFiles.remove(file);
     }
 }
