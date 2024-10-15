@@ -198,7 +198,7 @@ public class TextFileApp {
         fileName = removeDotTXT(fileName);
 
         if (currentFolderContainsFileWithName(fileName)) {
-            return chooseCustomFileNameNoGoBack();
+            return chooseAndConfirmCustomFileNameNoGoBack();
         } else if (!fileName.isEmpty()) {
             while (true) {
                 System.out.println();
