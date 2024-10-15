@@ -3,9 +3,9 @@
 ## Purpose
 
 The application will enable the user to:
-- add `.txt` and `.md` files from anywhere on their computer  
-- give each note a category (which can be hierarchical, say: School > Science > Ecology)  
-- browse these notes based on their category (so, in the past example, looking at all notes in the ecology category)  
+- add `.txt` files from anywhere on their computer  
+- place each note in a folder (which can be hierarchical, say: School > Science > Ecology)  
+- browse these notes based on their folder (so, in the past example, looking at all notes in the ecology category)  
 - find desired notes by looking at recently-opened notes and searching the note titles  
 - open the notes in their default text editor  
 
@@ -14,7 +14,7 @@ This project is of interest to me since I will personally find it helpful for ke
 
 ## User Stories
 
-- As a user, I want to be able to add a note and add it to a list of notes of the same category.  
+- As a user, I want to be able to add a note and add it to a list of notes of the same category - a folder.  
 - As a user, I want to be able to view all of the notes I have added to a given category.  
 - As a user, I want to be able to view all of the categories I have created.  
 - As a user, I want to be able to choose a note from a list of recently-opened notes.  
