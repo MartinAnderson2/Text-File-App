@@ -369,75 +369,6 @@ public class TextFileApp {
         }
     }
 
-    // MODIFIES: file
-    // EFFECTS: lets the user label file with as many labels as they'd like to
-    private void addAsManyLabelsAsDesiredOrPossible(model.File file) {
-        Set<Label> unusedLabels = new HashSet<Label>(allLabels);
-        try {
-            chooseLabels(file, unusedLabels);
-
-            assert unusedLabels.size() == 1;
-            Label lastLabel = firstLabelFoundInSet(unusedLabels);
-            addLastRemainingLabel(file, lastLabel);
-        } catch (UserNoLongWantsToAddLabelsException e) {
-            // Stop whenever the user no longer wishes to add labels
-        }
-    }
-
-    // MODIFIES: file
-    // EFFECTS: lets the user label file with as many labels as they'd like to while there is more than one option
-    private void chooseLabels(model.File file, Set<Label> unusedLabels) throws UserNoLongWantsToAddLabelsException {
-        while (unusedLabels.size() > 1) {
-            System.out.println();
-            System.out.println("Enter the name of the label you would like to add to the file, " +
-             "enter l to list the available labels, or enter b to stop adding labels");
-
-             String input = getUserInputTrimToLower();
-
-             if (input.equals("b") || input.equals("back")) {
-                throw new UserNoLongWantsToAddLabelsException();
-            } else if (input.equals("l") || input.equals("list")) {
-                try {
-                    listLabelsAlphabetically(unusedLabels);
-                } catch (SetIsEmptyException e) {
-                    // Not going to happen since it has size > 1
-                }
-            } else if (labelExists(input)) {
-                Label label = getLabel(input);
-                if (unusedLabels.contains(label)) {
-                    file.addLabel(label);
-                    System.out.println(file.getName() + " is now labelled " + label.getName());
-                    unusedLabels.remove(label);
-                } else {
-                    System.out.println("File is already labelled " + label.getName());
-                }
-            } else {
-                System.out.println("Your input was not recognized as a label, list, or b");
-            }
-        }
-    }
-
-    // MODIFIES: file
-    // EFFECTS: lets the user choose whether to add the last label to the file or not
-    private void addLastRemainingLabel(model.File file, Label lastLabel) throws UserNoLongWantsToAddLabelsException {
-        while (true) {
-            System.out.println();
-            System.out.println("Would you like to label the file \"" + lastLabel.getName() + "\"? y or n");
-
-             String input = getUserInputTrimToLower();
-
-             if (input.equals("n") || input.equals("no")) {
-                 throw new UserNoLongWantsToAddLabelsException();
-             } else if (input.equals("y") || input.equals("yes")) {
-                 file.addLabel(lastLabel);
-                 System.out.println(file.getName() + " is now labelled " + lastLabel.getName());
-                 break;
-            } else {
-                 System.out.println("Your input was not recognized as a y or n");
-            }
-        }
-    }
-
     // MODIFIES: this
     // EFFECTS: allows the user to create a new folder
     private void addFolderMenu() {
@@ -617,22 +548,22 @@ public class TextFileApp {
     private void displayEditMenuOptions() {
         System.out.println();
         System.out.println("Would you like to:");
-        System.out.println("  \"file\": Choose a file (in the current folder -" +
+        System.out.println("  \"fi\": Choose a file (in the current folder - " +
                             currentFolder.getName() + ") to edit");
-        System.out.println("  \"folder\": Choose a folder (in the current folder -" +
+        System.out.println("  \"fo\": Choose a folder (in the current folder - " +
                             currentFolder.getName() + ") to edit");
-        System.out.println("  \"label\": Choose a label to edit");
+        System.out.println("  \"l\": Choose a label to edit");
         System.out.println("  \"b\": Back to the main menu");
     }
 
     // MODIFIES: this
     // EFFECTS: handles the edit menu input and calls the appropriate submenus as needed
     private void handleEditMenuInput(String input) {
-        if (input.equals("file")) {
+        if (input.equals("fi") || input.equals("file")) {
             editFileMenu();
-        } else if (input.equals("folder")) {
+        } else if (input.equals("f") || input.equals("folder")) {
             // editFolderMenu();
-        } else if (input.equals("label") || input.equals("l")) {
+        } else if (input.equals("l") || input.equals("label")) {
             // editLabelMenu();
         } else {
             System.out.println("Your input was not recognized as any of: file, folder, label, or b");
@@ -661,6 +592,7 @@ public class TextFileApp {
                 }
             } else if (currentFolderContainsFileNamed(input)) {
                 editFile(currentFolder.getFile(input));
+                break;
             } else {
                 System.out.println("There is no file named \"" + input + "\" in this folder");
             }
@@ -678,7 +610,11 @@ public class TextFileApp {
             if (input.equals("b") || input.equals("back")) {
                 break;
             } else {
-                handleEditFileMenuInput(input, file);
+                try {
+                    handleEditFileMenuInput(input, file);
+                } catch (FileDeletedException e) {
+                    break;
+                }
             }
         }
     }
@@ -695,7 +631,7 @@ public class TextFileApp {
     
     // MODIFIES: this
     // EFFECTS: handles the edit file menu input and calls the appropriate functions as needed
-    private void handleEditFileMenuInput(String input, model.File file) {
+    private void handleEditFileMenuInput(String input, model.File file) throws FileDeletedException {
         if (input.equals("o") || input.equals("open")) {
             try {
                 openFile(file);
@@ -703,46 +639,79 @@ public class TextFileApp {
                 System.out.println("File at " + file.getFilePath() + " no longer exists");
             }
         } else if (input.equals("e") || input.equals("edit")) {
-            editFileNameAndTagsMenu(file);
+            editFileNameAndLabelsMenu(file);
         } else if (input.equals("d") || input.equals("delete")) {
             deleteFile(file);
+            throw new FileDeletedException();
         } else {
             System.out.println("Your input was not recognized as any of: o, e, d, or b");
         }
     }
 
     // MODIFIES: this, file
-    // EFFECTS: allows the user to change file's name and add/remove tags from it
-    private void editFileNameAndTagsMenu(model.File file) {
+    // EFFECTS: allows the user to change file's name and add/remove labels from it
+    private void editFileNameAndLabelsMenu(model.File file) {
         while (true) {
-            displayEditFileNameAndTagsOptions(file.getName());
+            displayEditFileNameAndLabelsOptions(file.getName());
 
             String input = getUserInputTrimToLower();
 
             if (input.equals("b") || input.equals("back")) {
                 break;
             } else {
-                // handleEditFileNameAndTagsMenuInput(input);
+                handleEditFileNameAndLabelsMenuInput(input, file);
             }
         }
     }
 
-    // EFFECTS: displays the option to change the file's name, add a tag, remove a tag, and remove all tags
-    private void displayEditFileNameAndTagsOptions(String fileName) {
+    // EFFECTS: displays the option to change the file's name, add a label, remove a label, and remove all labels
+    private void displayEditFileNameAndLabelsOptions(String fileName) {
         System.out.println();
         System.out.println(fileName + " is selected. Would you like to:");
         System.out.println("  \"n\": Change the file's name");
         System.out.println("  \"a\": Add a label");
         System.out.println("  \"r\": Remove a label");
         System.out.println("  \"ra\": Remove all labels");
-        System.out.println("  \"b\": Back to the main menu");
+        System.out.println("  \"b\": Back to the edit file menu");
     }
 
     // MODIFIES: this, file
-    // EFFECTS: confirms that the user wants to delete file and then deletes this folder's reference to it as well\
+    // EFFECTS: calls the methods enabling the user to change file's name and add/remove labels from it
+    private void handleEditFileNameAndLabelsMenuInput(String input, model.File file) {
+        if (input.equals("n") || input.equals("name")) {
+            try {
+                file.setName(chooseAndConfirmCustomFileName());
+            } catch (UserNoLongerWantsCustomNameException e) {
+                System.out.println("Name has not been changed and will remain " + file.getName());
+            }
+        } else if (input.equals("a") || input.equals("add")) {
+            addAsManyLabelsAsDesiredOrPossible(file);
+        } else if (input.equals("r") || input.equals("remove")) {
+            removeAsManyLabelsAsDesiredOrPossible(file);
+        } else if (input.equals("ra") || input.equals("remove all")) {
+            confirmRemoveAllLables(file);
+        } else {
+            System.out.println("Your input was not recognized as any of: n, a, r, ra, or b");
+        }
+    }
+
+    // MODIFIES: file, allLabels
+    // EFFECTS: removes all labels from file
+    private void confirmRemoveAllLables(model.File file) {
+        if (confirmCompleteAction("remove all labels from " + file.getName())) {
+            removeAllLabels(file);
+            System.out.println("All labels removed");
+        }
+    }
+
+    // MODIFIES: this, file
+    // EFFECTS: confirms that the user wants to delete file and then deletes this folder's reference to it as well
     // as label's reference to it
     private void deleteFile(model.File file) {
-
+        if (confirmCompleteAction("delete " + file.getName())) {
+            currentFolder.removeFile(file);
+            removeAllLabels(file);
+        }
     }
 
 
@@ -775,6 +744,7 @@ public class TextFileApp {
 
     // General helper methods:
 
+    // Files:
     // EFFECTS: checks if path leads to a file on the user's computer
     private boolean isFilePathValid(String path) {
         java.io.File file = new java.io.File(path);
@@ -795,7 +765,35 @@ public class TextFileApp {
         }
     }
 
-    // EFFECTS: returns true if the user confirms that chosenName is correct, returns false if the user confirms chosenName is incorrect
+
+    // Confirmations:
+    // EFFECTS: returns true if the user confirms that they want to complete action,
+    // returns false if they confirm they do not want to
+    /**
+     * Prints out: "Are you sure you want to $action? Please enter yes or no"
+     */
+    private boolean confirmCompleteAction(String action) {
+        while(true) {
+            System.out.println();
+            System.out.println("Are you sure you want to " + action + "? Please enter yes or no");
+
+            String input = getUserInputTrimToLower();
+
+            if (input.equals("yes")) {
+                return true;
+            } else if (input.equals("no")) {
+                return false;
+            } else {
+                System.out.println("Your input was not recognized as either of: yes or no");
+            }
+        }
+    }
+
+    // EFFECTS: returns true if the user confirms that chosenName is correct,
+    // returns false if the user confirms chosenName is incorrect
+    /**
+     * Prints out: "Is the name $name correct? Please enter y or n"
+     */
     private boolean confirmNameCorrect(String name) {
         while(true) {
             System.out.println();
@@ -813,6 +811,8 @@ public class TextFileApp {
         }
     }
 
+
+    // Cleaning up file paths:
     // EFFECTS: returns every character after the final backslash in string
     private String getCharactersAfterLastBackslash(String string) {
         String charsAfterMostRecentBackslash = "";
@@ -851,9 +851,11 @@ public class TextFileApp {
         return string.substring(0, indexOfDot);
     }
 
+
+    // Labels:
     // EFFECTS: returns the first element found in a set of Labels
     // (if it's a HashSet, this isn't necessarily - and probably isn't - the first object added)
-    private Label firstLabelFoundInSet(Set<Label> set) throws SetIsEmptyAndShouldNotBeException{
+    private Label firstLabelFoundInSet(Set<Label> set) throws SetIsEmptyAndShouldNotBeException {
         for (Label label : set) {
             return label;
         }
@@ -876,6 +878,198 @@ public class TextFileApp {
         return getLabel(labelName) != null;
     }
 
+    // EFFECTS: returns all of the label on a file
+    private Set<Label> getLabelsOnFile(model.File file) {
+        Set<Label> labelsOnFile = new HashSet<Label>();
+        for (Label label : allLabels) {
+            if (file.isLabelled(label)) {
+                labelsOnFile.add(label);
+            }
+        }
+        return labelsOnFile;
+    }
+
+    // EFFECTS: returns every labels not on a file
+    private Set<Label> getLabelsNotOnFile(model.File file) {
+        Set<Label> unusedLabels = new HashSet<Label>(allLabels);
+        for (Label label : allLabels) {
+            if (file.isLabelled(label)) {
+                unusedLabels.remove(label);
+            }
+        }
+        return unusedLabels;
+    }
+    
+    // MODIFIES: file
+    // EFFECTS: removes every label on file
+    private void removeAllLabels(model.File file) {
+        for (Label label : getLabelsOnFile(file)) {
+            label.unlabelFile(file);
+        }
+    }
+
+    // MODIFIES: file
+    // EFFECTS: lets the user label file with as many labels as they'd like to
+    private void addAsManyLabelsAsDesiredOrPossible(model.File file) {
+        Set<Label> unusedLabels = getLabelsNotOnFile(file);
+
+        if (unusedLabels.size() > 1) {
+            try {
+                chooseLabelsToAdd(file, unusedLabels);
+                Label lastLabel = firstLabelFoundInSet(unusedLabels);
+                addLastRemainingLabel(file, lastLabel);
+            } catch (UserNoLongWantsToChangeLabelsException e) {
+                return;
+            }
+        } else if (unusedLabels.size() == 1) {
+            Label lastLabel = firstLabelFoundInSet(unusedLabels);
+            try {
+                addLastRemainingLabel(file, lastLabel);
+            } catch (UserNoLongWantsToChangeLabelsException e) {
+                return;
+            }
+        } else {
+            System.out.println(file.getName() + " already has every label");
+        }
+    }
+
+    // MODIFIES: file
+    // EFFECTS: lets the user label file with as many labels as they'd like to while there is more than one option
+    private void chooseLabelsToAdd(model.File file, Set<Label> unusedLabels) throws UserNoLongWantsToChangeLabelsException {
+        while (unusedLabels.size() > 1) {
+            System.out.println();
+            System.out.println("Enter the name of the label you would like to add to the file, " +
+             "enter l to list the available labels, or enter b to stop adding labels");
+
+             String input = getUserInputTrimToLower();
+
+             if (input.equals("b") || input.equals("back")) {
+                throw new UserNoLongWantsToChangeLabelsException();
+            } else if (input.equals("l") || input.equals("list")) {
+                try {
+                    listLabelsAlphabetically(unusedLabels);
+                } catch (SetIsEmptyException e) {
+                    // Not going to happen since it has size > 1
+                }
+            } else if (labelExists(input)) {
+                Label label = getLabel(input);
+                if (unusedLabels.contains(label)) {
+                    file.addLabel(label);
+                    System.out.println(file.getName() + " is now labelled " + label.getName());
+                    unusedLabels.remove(label);
+                } else {
+                    System.out.println("File is already labelled " + label.getName());
+                }
+            } else {
+                System.out.println("Your input was not recognized as a label, l, or b");
+            }
+        }
+    }
+
+    // MODIFIES: file
+    // EFFECTS: lets the user choose whether to add the last label to the file or not
+    private void addLastRemainingLabel(model.File file, Label lastLabel) throws UserNoLongWantsToChangeLabelsException {
+        while (true) {
+            System.out.println();
+            System.out.println("Would you like to label the file \"" + lastLabel.getName() + 
+            "\"? (This is the only label not on this file) y or n");
+
+             String input = getUserInputTrimToLower();
+
+             if (input.equals("n") || input.equals("no")) {
+                 throw new UserNoLongWantsToChangeLabelsException();
+             } else if (input.equals("y") || input.equals("yes")) {
+                 file.addLabel(lastLabel);
+                 System.out.println(file.getName() + " is now labelled " + lastLabel.getName());
+                 break;
+            } else {
+                 System.out.println("Your input was not recognized as a y or n");
+            }
+        }
+    }
+
+    // MODIFIES: file
+    // EFFECTS: lets the user remove any labels on file
+    private void removeAsManyLabelsAsDesiredOrPossible(model.File file) {
+        Set<Label> labelsOnFile = getLabelsOnFile(file);
+
+        if (labelsOnFile.size() > 1) {
+            try {
+                chooseLabelsToRemove(file, labelsOnFile);
+                Label lastLabel = firstLabelFoundInSet(labelsOnFile);
+                removeOnlyLabel(file, lastLabel);
+            } catch (UserNoLongWantsToChangeLabelsException e) {
+                return;
+            }
+        } else if (labelsOnFile.size() == 1) {
+            Label lastLabel = firstLabelFoundInSet(labelsOnFile);
+            try {
+                removeOnlyLabel(file, lastLabel);
+            } catch (UserNoLongWantsToChangeLabelsException e) {
+                return;
+            }
+        } else {
+            System.out.println(file.getName() + " already is not labelled with any labels");
+        }
+    }
+
+    // MODIFIES: file
+    // EFFECTS: lets the user remove as many labels as they'd like to while there is more than one option
+    private void chooseLabelsToRemove(model.File file, Set<Label> labelsOnFile) throws UserNoLongWantsToChangeLabelsException {
+        while (labelsOnFile.size() > 1) {
+            System.out.println();
+            System.out.println("Enter the name of the label you would like to remove to the file, " +
+             "enter l to list the labels the file is labelled with, or enter b to stop removing labels");
+
+             String input = getUserInputTrimToLower();
+
+             if (input.equals("b") || input.equals("back")) {
+                throw new UserNoLongWantsToChangeLabelsException();
+            } else if (input.equals("l") || input.equals("list")) {
+                try {
+                    listLabelsAlphabetically(labelsOnFile);
+                } catch (SetIsEmptyException e) {
+                    // Not going to happen since it has size > 1
+                }
+            } else if (labelExists(input)) {
+                Label label = getLabel(input);
+                if (labelsOnFile.contains(label)) {
+                    label.unlabelFile(file);
+                    System.out.println(file.getName() + " is no longer labelled " + label.getName());
+                    labelsOnFile.remove(label);
+                } else {
+                    System.out.println("File is already not labelled " + label.getName());
+                }
+            } else {
+                System.out.println("Your input was not recognized as a label, l, or b");
+            }
+        }
+    }
+
+    // MODIFIES: file
+    // EFFECTS: lets the user choose whether to add the last label to the file or not
+    private void removeOnlyLabel(model.File file, Label lastLabel) throws UserNoLongWantsToChangeLabelsException {
+        while (true) {
+            System.out.println();
+            System.out.println("Would you like to remove the label " + lastLabel.getName() + " from the file \""
+             + lastLabel.getName() + "\"? (This is the only label on this file) y or n");
+
+             String input = getUserInputTrimToLower();
+
+             if (input.equals("n") || input.equals("no")) {
+                 throw new UserNoLongWantsToChangeLabelsException();
+             } else if (input.equals("y") || input.equals("yes")) {
+                 lastLabel.unlabelFile(file);
+                 System.out.println(file.getName() + " is now labelled " + lastLabel.getName());
+                 break;
+            } else {
+                 System.out.println("Your input was not recognized as a y or n");
+            }
+        }
+    }
+
+
+    // currentFolder Contents:
     // EFFECTS: returns true if currentFolder contains a file named fileName otherwise returns false
     private boolean currentFolderContainsFileNamed(String fileName) {
         return currentFolder.getFile(fileName) != null;
@@ -886,6 +1080,8 @@ public class TextFileApp {
         return currentFolder.getSubfolder(folderName) != null;
     }
 
+
+    // User Input:
     // EFFECTS: gets input from the user and trims it
     private String getUserInputTrim() {
         String input = "";
@@ -903,6 +1099,8 @@ public class TextFileApp {
         return input;
     }
 
+
+    // Listing alphabetically:
     // EFFECTS: alphabetizes (ignoring case) nameList and then prints it out separated by commas
     private void listStringListAlphabetically(List<String> nameList) {
         nameList.sort(Comparator.comparing(String::toLowerCase));
