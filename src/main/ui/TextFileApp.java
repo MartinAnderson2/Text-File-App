@@ -64,7 +64,8 @@ public class TextFileApp {
     }
 
     // MODIFIES: this
-    // EFFECTS: handles the main menu input and calls the appropriate submenus as needed
+    // EFFECTS: handles the main menu input and calls the appropriate submenus as
+    // needed
     private void handleMainMenuInput(String input) {
         if (input.equals("a") || input.equals("add")) {
             addMenu();
@@ -86,14 +87,14 @@ public class TextFileApp {
     private void initialize() {
         scanner = new Scanner(System.in);
         // From TellerApp — enables input of strings with spaces
-        scanner.useDelimiter("\r?\n|\r"); 
+        scanner.useDelimiter("\r?\n|\r");
 
         rootFolder = new Folder("root");
         currentFolder = rootFolder;
 
         allLabels = new HashSet<Label>();
     }
-    
+
     // EFFECTS: sends the user a welcome message
     private void welcome() {
         System.out.println();
@@ -104,7 +105,6 @@ public class TextFileApp {
     private void goodbye() {
         System.out.println("Thank you for using the Text File application!");
     }
-
 
     // Add Menu:
 
@@ -135,7 +135,8 @@ public class TextFileApp {
     }
 
     // MODIFIES: this
-    // EFFECTS: handles the add menu input and calls the appropriate submenus as needed
+    // EFFECTS: handles the add menu input and calls the appropriate submenus as
+    // needed
     private void handleAddMenuInput(String input) {
         if (input.equals("fi") || input.equals("file")) {
             addFileMenu();
@@ -149,25 +150,27 @@ public class TextFileApp {
     }
 
     // MODIFIES: this
-    // EFFECTS: allows the user to add a file from their computer to the program by providing a path
+    // EFFECTS: allows the user to add a file from their computer to the program by
+    // providing a path
     // and optionally giving it a custom name and labels
     private void addFileMenu() {
         boolean fileCreated = false;
         while (!fileCreated) {
             System.out.println();
-            System.out.println("Please enter the .txt file's path (it should look like " +
-             "C:\\Users\\User\\Documents\\Note Name.txt (writing .txt is optional)) or b to go back");
+            System.out.println("\n Please enter the .txt file's path (it should look like "
+                    + "C:\\Users\\User\\Documents\\Note Name.txt (writing .txt is optional)) or b to go back");
             String path = getUserInputTrim();
             String pathLowerCase = path.toLowerCase();
-            path = addDotTXTIfMissing(path);
+            path = addDotTextIfMissing(path);
 
             if (pathLowerCase.equals("b") || pathLowerCase.equals("back")) {
                 break;
                 // Returns to the add menu
-            } else if (isFilePathValid(path)) {                
+            } else if (isFilePathValid(path)) {
                 String name = chooseFileName(path);
                 model.File newFile = currentFolder.addFile(name, path);
-                System.out.println("File with name \"" + newFile.getName() + "\" added to this folder (" + currentFolder.getName() + ")");
+                System.out.println("File with name \"" + newFile.getName() + "\" added to this folder ("
+                        + currentFolder.getName() + ")");
 
                 if (!allLabels.isEmpty()) {
                     addFileLabels(newFile);
@@ -181,7 +184,7 @@ public class TextFileApp {
     }
 
     // EFFECTS: enables the user to create a custom name for their newly added file
-    //          or use the name of the file on their computer
+    // or use the name of the file on their computer
     private String chooseFileName(String filePath) {
         String fileName = getCharactersAfterLastBackslash(filePath);
         fileName = removeDotTXT(fileName);
@@ -191,8 +194,8 @@ public class TextFileApp {
         } else if (!fileName.isEmpty()) {
             while (true) {
                 System.out.println();
-                System.out.println("Would you like to use the actual file's name: \"" + fileName +
-                "\" or create a custom name? Please enter actual or custom");
+                System.out.println("Would you like to use the actual file's name: \"" + fileName
+                        + "\" or create a custom name? Please enter actual or custom");
 
                 String input = getUserInputTrimToLower();
 
@@ -202,7 +205,8 @@ public class TextFileApp {
                     try {
                         return chooseAndConfirmCustomFileName();
                     } catch (UserNoLongerWantsCustomNameException e) {
-                        // Continue the loop (where they will presumably enter actual, but this lets them confirm)
+                        // Continue the loop (where they will presumably enter actual, but this lets
+                        // them confirm)
                     }
                 }
             }
@@ -211,8 +215,10 @@ public class TextFileApp {
         }
     }
 
-    // EFFECTS: enables the user to choose the custom name for their file and then confirms it is correct.
-    // Throws UserNoLongerWantsCustomNameException if they no longer wish for a custom name
+    // EFFECTS: enables the user to choose the custom name for their file and then
+    // confirms it is correct.
+    // Throws UserNoLongerWantsCustomNameException if they no longer wish for a
+    // custom name
     private String chooseAndConfirmCustomFileName() throws UserNoLongerWantsCustomNameException {
         while (true) {
             String chosenName = chooseCustomFileName();
@@ -228,8 +234,8 @@ public class TextFileApp {
     private String chooseCustomFileName() throws UserNoLongerWantsCustomNameException {
         while (true) {
             System.out.println();
-            System.out.println("Please enter the custom name or b to go back (if you wish " +
-            "to name your file b or B, enter namefileb)");
+            System.out.println("Please enter the custom name or b to go back (if you wish "
+                        + "to name your file b or B, enter namefileb)");
 
             String input = getUserInputTrim();
             String inputLowerCase = input.toLowerCase();
@@ -247,14 +253,15 @@ public class TextFileApp {
             } else if (currentFolderContainsFileNamed(input)) {
                 String fileAlreadyNamedInputWithCorrectCase = currentFolder.getFile(input).getName();
                 System.out.println(currentFolder.getName() + " (current folder) already contains a file named "
-                + fileAlreadyNamedInputWithCorrectCase);
+                        + fileAlreadyNamedInputWithCorrectCase);
             } else {
                 return input;
             }
         }
     }
 
-    // EFFECTS: enables the user to choose the custom name for their file and then confirms it is correct.
+    // EFFECTS: enables the user to choose the custom name for their file and then
+    // confirms it is correct.
     private String chooseAndConfirmCustomFileNameNoGoBack() {
         while (true) {
             String chosenName = chooseCustomFileNameNoGoBack();
@@ -279,19 +286,20 @@ public class TextFileApp {
             } else if (currentFolderContainsFileNamed(input)) {
                 String fileAlreadyNamedInputWithCorrectCase = currentFolder.getFile(input).getName();
                 System.out.println(currentFolder.getName() + " (current folder) already contains a file named "
-                + fileAlreadyNamedInputWithCorrectCase);
+                        + fileAlreadyNamedInputWithCorrectCase);
             } else {
                 return input;
             }
         }
     }
 
-    // EFFECTS: lets the user name their file b or B or namefileb (or any case variants, i.e. NameFileB)
+    // EFFECTS: lets the user name their file b or B or namefileb (or any case
+    // variants, i.e. NameFileB)
     private String nameFileB() throws UserNoLongerWantsNameBException {
         while (true) {
             System.out.println();
-            System.out.println("Please enter the custom name (b, B, namefileb, namefileB, etc.) " +
-            "or prev to go to the previous menu");
+            System.out.println("Please enter the custom name (b, B, namefileb, namefileB, etc.) "
+                        + "or prev to go to the previous menu");
 
             String input = getUserInputTrim();
             String inputLowerCase = input.toLowerCase();
@@ -302,34 +310,35 @@ public class TextFileApp {
                 if (currentFolderContainsFileNamed(input)) {
                     String fileAlreadyNamedInputWithCorrectCase = currentFolder.getFile(input).getName();
                     System.out.println(currentFolder.getName() + " (current folder) already contains a file named "
-                    + fileAlreadyNamedInputWithCorrectCase);
+                            + fileAlreadyNamedInputWithCorrectCase);
                 } else {
                     return input;
                 }
-            }
-            else {
-                System.out.println("Your input was not recognized as any of: b, B, namefileb " +
-                "(or namefileb with different capitalization)");
+            } else {
+                System.out.println("Your input was not recognized as any of: b, B, namefileb "
+                        + "(or namefileb with different capitalization)");
             }
         }
     }
 
     // MODIFES: file
-    // EFFECTS: if there is one label, asks the user if they want to label the new file with that label,
-    //  if there are more asks the user if they would like to add labels and then which labels they would like to add
+    // EFFECTS: if there is one label, asks the user if they want to label the new
+    // file with that label,
+    // if there are more asks the user if they would like to add labels and then
+    // which labels they would like to add
     private void addFileLabels(model.File file) {
         if (allLabels.size() == 1) {
             addTheOnlyCreatedLabel(file);
-        }
-        else {
+        } else {
             chooseLabels(file);
         }
     }
 
     // MODIFIES: file
-    // EFFECTS: asks the user if they would like to add labels and then lets them do so if they do
+    // EFFECTS: asks the user if they would like to add labels and then lets them do
+    // so if they do
     private void chooseLabels(model.File file) {
-        while(true) {
+        while (true) {
             System.out.println();
             System.out.println("Would you like to add labels to the file? Please enter y or n");
 
@@ -348,12 +357,14 @@ public class TextFileApp {
 
     // REQUIRES: there is only one label in allLabels
     // MODIFIES: file
-    // EFFECTS: enables the user to either label the file with the only current label or not label it
+    // EFFECTS: enables the user to either label the file with the only current
+    // label or not label it
     private void addTheOnlyCreatedLabel(model.File file) {
         Label theOnlyCurrentLabel = firstLabelFoundInSet(allLabels);
-        while(true) {
+        while (true) {
             System.out.println();
-            System.out.println("Would you like to label the file \"" + theOnlyCurrentLabel.getName() + "\"? Please enter y or n");
+            System.out.println(
+                    "Would you like to label the file \"" + theOnlyCurrentLabel.getName() + "\"? Please enter y or n");
 
             String input = getUserInputTrimToLower();
 
@@ -382,20 +393,21 @@ public class TextFileApp {
 
             if (confirmNameCorrect(chosenName)) {
                 Folder newFolder = currentFolder.makeSubfolder(chosenName);
-                System.out.println("Created folder named \"" + newFolder.getName() + "\" in current folder (" + 
-                currentFolder.getName() + ")");
+                System.out.println("Created folder named \"" + newFolder.getName() + "\" in current folder ("
+                        + currentFolder.getName() + ")");
                 break;
             }
         }
     }
-    
+
     // EFFECTS: enables the user to choose the name of their folder
-    // throws UserNoLongerWantsToCreateFolderException if the user decides they no longer wish to create a folder
+    // throws UserNoLongerWantsToCreateFolderException if the user decides they no
+    // longer wish to create a folder
     private String chooseFolderName() throws UserNoLongerWantsToCreateFolderException {
         while (true) {
             System.out.println();
-            System.out.println("Please enter the folder name or b to go back (if you wish " +
-            "to name your folder b or B, enter namefolderb)");
+            System.out.println("Please enter the folder name or b to go back (if you wish "
+                    + "to name your folder b or B, enter namefolderb)");
 
             String input = getUserInputTrim();
             String inputLowerCase = input.toLowerCase();
@@ -413,19 +425,20 @@ public class TextFileApp {
             } else if (currentFolderContainsFolderNamed(input)) {
                 String folderAlreadyNamedInputWithCorrectCase = currentFolder.getSubfolder(input).getName();
                 System.out.println(currentFolder.getName() + " (current folder) already contains a folder named "
-                + folderAlreadyNamedInputWithCorrectCase);
+                        + folderAlreadyNamedInputWithCorrectCase);
             } else {
                 return input;
             }
         }
     }
 
-    // EFFECTS: lets the user name their folder b or B or namefolderb (or any case variants, i.e. NameFolderB)
+    // EFFECTS: lets the user name their folder b or B or namefolderb (or any case
+    // variants, i.e. NameFolderB)
     private String nameFolderB() throws UserNoLongerWantsNameBException {
         while (true) {
             System.out.println();
-            System.out.println("Please enter the folder name (b, B, namefolderb, namefolderB, etc.) " +
-            "or prev to go to the previous menu");
+            System.out.println("Please enter the folder name (b, B, namefolderb, namefolderB, etc.) "
+                    + "or prev to go to the previous menu");
 
             String input = getUserInputTrim();
             String inputLowerCase = input.toLowerCase();
@@ -436,14 +449,13 @@ public class TextFileApp {
                 if (currentFolderContainsFolderNamed(input)) {
                     String folderAlreadyNamedInputWithCorrectCase = currentFolder.getSubfolder(input).getName();
                     System.out.println(currentFolder.getName() + " (current folder) already contains a folder named "
-                    + folderAlreadyNamedInputWithCorrectCase);
+                            + folderAlreadyNamedInputWithCorrectCase);
                 } else {
                     return input;
                 }
-            }
-            else {
-                System.out.println("Your input was not recognized as any of: b, B, namefolderb " +
-                "(or namefolderb with different capitalization)");
+            } else {
+                System.out.println("Your input was not recognized as any of: b, B, namefolderb "
+                        + "(or namefolderb with different capitalization)");
             }
         }
     }
@@ -469,12 +481,13 @@ public class TextFileApp {
     }
 
     // EFFECTS: enables the user to choose the name of their new label
-    // throws UserNoLongerWantsToCreateALabelException if the user decides they no longer wish to create a label
+    // throws UserNoLongerWantsToCreateALabelException if the user decides they no
+    // longer wish to create a label
     private String chooseLabelName() throws UserNoLongerWantsToCreateALabelException {
         while (true) {
             System.out.println();
-            System.out.println("Please enter the label name or b to go back (if you wish " +
-            "to name your label b or B, enter namelabelb)");
+            System.out.println("Please enter the label name or b to go back (if you wish "
+                    + "to name your label b or B, enter namelabelb)");
 
             String input = getUserInputTrim();
             String inputLowerCase = input.toLowerCase();
@@ -498,12 +511,13 @@ public class TextFileApp {
         }
     }
 
-    // EFFECTS: lets the user name their label b or B or namelabelb (or any case variants, i.e. NameLabelB)
+    // EFFECTS: lets the user name their label b or B or namelabelb (or any case
+    // variants, i.e. NameLabelB)
     private String nameLabelB() throws UserNoLongerWantsNameBException {
         while (true) {
             System.out.println();
-            System.out.println("Please enter the label name (b, B, namelabelb, namelabelB, etc.) " +
-            "or prev to go to the previous menu");
+            System.out.println("Please enter the label name (b, B, namelabelb, namelabelB, etc.) "
+                    + "or prev to go to the previous menu");
 
             String input = getUserInputTrim();
             String inputLowerCase = input.toLowerCase();
@@ -517,14 +531,12 @@ public class TextFileApp {
                 } else {
                     return input;
                 }
-            }
-            else {
-                System.out.println("Your input was not recognized as any of: b, B, namelabelb " +
-                "(or namelabelb with different capitalization)");
+            } else {
+                System.out.println("Your input was not recognized as any of: b, B, namelabelb "
+                        + "(or namelabelb with different capitalization)");
             }
         }
     }
-
 
     // Edit Menu:
 
@@ -548,16 +560,17 @@ public class TextFileApp {
     private void displayEditMenuOptions() {
         System.out.println();
         System.out.println("Would you like to:");
-        System.out.println("  \"fi\": Choose a file (in the current folder - " +
-                            currentFolder.getName() + ") to edit");
-        System.out.println("  \"fo\": Choose a folder (in the current folder - " +
-                            currentFolder.getName() + ") to edit");
+        System.out.println("  \"fi\": Choose a file (in the current folder - "
+                + currentFolder.getName() + ") to edit");
+        System.out.println("  \"fo\": Choose a folder (in the current folder - "
+                + currentFolder.getName() + ") to edit");
         System.out.println("  \"l\": Choose a label to edit");
         System.out.println("  \"b\": Back to the main menu");
     }
 
     // MODIFIES: this
-    // EFFECTS: handles the edit menu input and calls the appropriate submenus as needed
+    // EFFECTS: handles the edit menu input and calls the appropriate submenus as
+    // needed
     private void handleEditMenuInput(String input) {
         if (input.equals("fi") || input.equals("file")) {
             editFileMenu();
@@ -571,13 +584,14 @@ public class TextFileApp {
     }
 
     // MODIFIES: this
-    // EFFECTS: allows the user to edit a file: open it, change its name, changes its labels, or delete it
+    // EFFECTS: allows the user to edit a file: open it, change its name, changes
+    // its labels, or delete it
     private void editFileMenu() {
         while (true) {
             System.out.println();
-            System.out.println("Please enter the name of the file you would like to edit, l to list the files in " +
-             "this folder (" + currentFolder.getName() + "), or b to go back");
-             
+            System.out.println("Please enter the name of the file you would like to edit, l to list the files in "
+                    + "this folder (" + currentFolder.getName() + "), or b to go back");
+
             String input = getUserInputTrim();
             String inputLowerCase = input.toLowerCase();
 
@@ -600,7 +614,8 @@ public class TextFileApp {
     }
 
     // MODIFIES: this
-    // EFFECTS: enables the user to open file, change its name, changes its labels, and delete it
+    // EFFECTS: enables the user to open file, change its name, changes its labels,
+    // and delete it
     private void editFile(model.File file) {
         while (true) {
             displayEditFileMenuOptions(file.getName());
@@ -628,10 +643,11 @@ public class TextFileApp {
         System.out.println("  \"d\": Delete the file");
         System.out.println("  \"b\": Back to the main menu");
     }
-    
+
     // MODIFIES: this
-    // EFFECTS: handles the edit file menu input and calls the appropriate functions as needed
-    //          throws FileDeletedException if file's path is no longer valid
+    // EFFECTS: handles the edit file menu input and calls the appropriate functions
+    // as needed
+    // throws FileDeletedException if file's path is no longer valid
     private void handleEditFileMenuInput(String input, model.File file) throws CurrentObjectDeletedException {
         if (input.equals("o") || input.equals("open")) {
             try {
@@ -665,7 +681,8 @@ public class TextFileApp {
         }
     }
 
-    // EFFECTS: displays the option to change the file's name, add a label, remove a label, and remove all labels
+    // EFFECTS: displays the option to change the file's name, add a label, remove a
+    // label, and remove all labels
     private void displayEditFileNameAndLabelsOptions(String fileName) {
         System.out.println();
         System.out.println(fileName + " is selected. Would you like to:");
@@ -677,7 +694,8 @@ public class TextFileApp {
     }
 
     // MODIFIES: this, file
-    // EFFECTS: calls the methods enabling the user to change file's name and add/remove labels from it
+    // EFFECTS: calls the methods enabling the user to change file's name and
+    // add/remove labels from it
     private void handleEditFileNameAndLabelsMenuInput(String input, model.File file) {
         if (input.equals("n") || input.equals("name")) {
             try {
@@ -706,7 +724,8 @@ public class TextFileApp {
     }
 
     // MODIFIES: this, file
-    // EFFECTS: confirms that the user wants to delete file and then deletes this folder's reference to it as well
+    // EFFECTS: confirms that the user wants to delete file and then deletes this
+    // folder's reference to it as well
     // as label's reference to it
     private void deleteFile(model.File file) {
         if (confirmCompleteAction("delete " + file.getName())) {
@@ -716,13 +735,15 @@ public class TextFileApp {
     }
 
     // MODIFIES: this
-    // EFFECTS: allows the user to edit a folder: to open it, change its name, or delete it
+    // EFFECTS: allows the user to edit a folder: to open it, change its name, or
+    // delete it
     private void editFolderMenu() {
         while (true) {
             System.out.println();
-            System.out.println("Please enter the name of the subfolder you would like to edit, l to list the folders in " +
-             "this folder (" + currentFolder.getName() + "), or b to go back");
-             
+            System.out.println(
+                    "Please enter the name of the subfolder you would like to edit, l to list the folders in "
+                            + "this folder (" + currentFolder.getName() + "), or b to go back");
+
             String input = getUserInputTrim();
             String inputLowerCase = input.toLowerCase();
 
@@ -773,11 +794,12 @@ public class TextFileApp {
         System.out.println("  \"d\": Delete the folder");
         System.out.println("  \"b\": Back to the main menu");
     }
-    
+
     // MODIFIES: this
-    // EFFECTS: handles the edit folder menu input and calls the appropriate functions as needed
-    private void handleEditFolderMenuInput(String input, Folder folder) throws NewFolderOpenedException, 
-    CurrentObjectDeletedException {
+    // EFFECTS: handles the edit folder menu input and calls the appropriate
+    // functions as needed
+    private void handleEditFolderMenuInput(String input, Folder folder) throws NewFolderOpenedException,
+            CurrentObjectDeletedException {
         if (input.equals("o") || input.equals("open")) {
             openFolder(folder);
             System.out.println(folder.getName() + " opened");
@@ -796,8 +818,8 @@ public class TextFileApp {
     private void editFolderNameMenu(Folder folder) {
         while (true) {
             System.out.println();
-            System.out.println("Please enter the new folder name or b to go back (if you wish " +
-            "to rename your folder to b or B, enter namefolderb)");
+            System.out.println("Please enter the new folder name or b to go back (if you wish "
+                    + "to rename your folder to b or B, enter namefolderb)");
 
             String input = getUserInputTrim();
             String inputLowerCase = input.toLowerCase();
@@ -814,9 +836,7 @@ public class TextFileApp {
             } else if (input.isEmpty()) {
                 System.out.println("Folder name was not valid");
             } else if (currentFolderContainsFolderNamed(input)) {
-                String folderAlreadyNamedInputWithCorrectCase = currentFolder.getSubfolder(input).getName();
-                System.out.println(currentFolder.getName() + " (current folder) already contains a folder named "
-                + folderAlreadyNamedInputWithCorrectCase);
+                tellUserCurrentFolderContainsFileNamed(input);
             } else {
                 folder.setName(input);
                 break;
@@ -824,8 +844,16 @@ public class TextFileApp {
         }
     }
 
+    // EFFECTS: tells the user that the name that they entered is in use
+    private void tellUserCurrentFolderContainsFileNamed(String input) {
+        String folderAlreadyNamedInputWithCorrectCase = currentFolder.getSubfolder(input).getName();
+        System.out.println(currentFolder.getName() + " (current folder) already contains a folder named "
+                + folderAlreadyNamedInputWithCorrectCase);
+    }
+
     // MODIFIES: this, file
-    // EFFECTS: confirms that the user wants to delete file and then deletes this folder's reference to it as well
+    // EFFECTS: confirms that the user wants to delete file and then deletes this
+    // folder's reference to it as well
     // as label's reference to it
     private void deleteFolderMenu(Folder folder) throws CurrentObjectDeletedException {
         if (confirmCompleteAction("delete " + folder.getName())) {
@@ -836,13 +864,14 @@ public class TextFileApp {
     }
 
     // MODIFIES: this
-    // EFFECTS: allows the user to edit a label: they can open it, change its name, or delete it
+    // EFFECTS: allows the user to edit a label: they can open it, change its name,
+    // or delete it
     private void editLabelMenu() {
         while (true) {
             System.out.println();
-            System.out.println("Please enter the name of the label you would like to edit, " + 
-            "l to list all created labels or b to go back");
-             
+            System.out.println("Please enter the name of the label you would like to edit, "
+                    + "l to list all created labels or b to go back");
+
             String input = getUserInputTrim();
             String inputLowerCase = input.toLowerCase();
 
@@ -893,11 +922,12 @@ public class TextFileApp {
         System.out.println("  \"d\": Delete the label");
         System.out.println("  \"b\": Back to the main menu");
     }
-    
+
     // MODIFIES: this
-    // EFFECTS: handles the edit label menu input and calls the appropriate functions as needed
-    private void handleEditLabelMenuInput(String input, Label label) throws NewFolderOpenedException, 
-    CurrentObjectDeletedException {
+    // EFFECTS: handles the edit label menu input and calls the appropriate
+    // functions as needed
+    private void handleEditLabelMenuInput(String input, Label label) throws NewFolderOpenedException,
+            CurrentObjectDeletedException {
         if (input.equals("o") || input.equals("open")) {
             openLabel(label);
             System.out.println("Current directory is every file labelled " + label.getName());
@@ -916,8 +946,8 @@ public class TextFileApp {
     private void editLabelNameMenu(Label label) {
         while (true) {
             System.out.println();
-            System.out.println("Please enter the new label name or b to go back (if you wish " +
-            "to rename your label to b or B, enter namelabelb)");
+            System.out.println("Please enter the new label name or b to go back (if you wish "
+                    + "to rename your label to b or B, enter namelabelb)");
 
             String input = getUserInputTrim();
             String inputLowerCase = input.toLowerCase();
@@ -934,8 +964,7 @@ public class TextFileApp {
             } else if (input.isEmpty()) {
                 System.out.println("Label name was not valid");
             } else if (labelExists(input)) {
-                String labelAlreadyNamedInputWithCorrectCase = getLabel(input).getName();
-                System.out.println("A label already exists with name " + labelAlreadyNamedInputWithCorrectCase);
+                tellUserLabelAlreadyExistsWithName(input);
             } else {
                 label.setName(input);
                 break;
@@ -943,8 +972,15 @@ public class TextFileApp {
         }
     }
 
+    // EFFECTS: thells the user that there is already a label named input
+    private void tellUserLabelAlreadyExistsWithName(String input) {
+        String labelAlreadyNamedInputWithCorrectCase = getLabel(input).getName();
+        System.out.println("A label already exists with name " + labelAlreadyNamedInputWithCorrectCase);
+    }
+
     // MODIFIES: this, label
-    // EFFECTS: confirms that the user wants to delete label and then deletes this folder's reference to it
+    // EFFECTS: confirms that the user wants to delete label and then deletes this
+    // folder's reference to it
     // and removes it from any files
     private void deleteLabelMenu(Label label) throws CurrentObjectDeletedException {
         if (confirmCompleteAction("delete " + label.getName())) {
@@ -956,7 +992,6 @@ public class TextFileApp {
             throw new CurrentObjectDeletedException();
         }
     }
-
 
     // List Menu:
 
@@ -1019,7 +1054,6 @@ public class TextFileApp {
         }
     }
 
-
     // Navigate Menu:
 
     // MODIFIES: this
@@ -1041,14 +1075,15 @@ public class TextFileApp {
             }
         }
     }
-    
+
     // EFFECTS: displays the navigate menu options
     private void displayNavigateMenuOptions() {
         System.out.println();
         System.out.println("You are in folder " + currentFolder.getName() + ". Would you like to:");
         System.out.println("  \"r\": Jump to the root folder (base folder)");
-        if (currentFolderHasParent())
+        if (currentFolderHasParent()) {
             System.out.println("  \"u\": Go up one level of folders to " + currentFolder.getParentFolder().getName());
+        }
         System.out.println("  \"o\": Open a folder in this folder (" + currentFolder.getName() + ")");
         System.out.println("  \"b\": Back to the main menu");
     }
@@ -1095,7 +1130,6 @@ public class TextFileApp {
         }
     }
 
-
     // Open Menu:
 
     // MODIFIES: this
@@ -1127,7 +1161,7 @@ public class TextFileApp {
         System.out.println("  \"lf\": Open a directory containing all files labelled with a certain label");
         System.out.println("  \"b\": Back to the main menu");
     }
-    
+
     // MODIFIES: this
     // EFFECTS: handles the open menu input and implements the menu
     private void handleOpenMenuInput(String input) throws NewFolderOpenedException {
@@ -1142,7 +1176,6 @@ public class TextFileApp {
             System.out.println("Your input was not recognized as any of: fi, fo, f, or b");
         }
     }
-    
 
     // General helper methods:
 
@@ -1154,7 +1187,8 @@ public class TextFileApp {
         return file.exists();
     }
 
-    // EFFECTS: returns true if the currently-opened folder has a parent and false if it does not
+    // EFFECTS: returns true if the currently-opened folder has a parent and false
+    // if it does not
     private boolean currentFolderHasParent() {
         return currentFolder.getParentFolder() != null;
     }
@@ -1177,7 +1211,8 @@ public class TextFileApp {
         currentFolder = folder;
     }
 
-    // EFFECTS: creates a new folder with every File labelled file and sets currentFolder to that new folder
+    // EFFECTS: creates a new folder with every File labelled file and sets
+    // currentFolder to that new folder
     private void openLabel(Label label) {
         Folder labelFolder = new Folder(label.getName());
         for (File file : label.getLabelledFiles()) {
@@ -1185,7 +1220,7 @@ public class TextFileApp {
         }
         currentFolder = labelFolder;
     }
-    
+
     // EFFECTS: opens file the user searches for, if one exists
     private void getInputToOpenFile() {
         while (true) {
@@ -1214,12 +1249,12 @@ public class TextFileApp {
                     System.out.println("File was moved or deleted");
                 }
             } else {
-                System.out.println("This folder (" + currentFolder.getName() +
-                ") does not contain a file named " + input);
+                System.out.println("This folder (" + currentFolder.getName()
+                        + ") does not contain a file named " + input);
             }
         }
     }
-    
+
     // EFFECTS: opens folder the user searches for, if one exists
     private void getInputToOpenFolder() throws NewFolderOpenedException {
         while (true) {
@@ -1244,13 +1279,19 @@ public class TextFileApp {
                 System.out.println(currentFolder.getName() + " opened");
                 throw new NewFolderOpenedException();
             } else {
-                System.out.println("This folder (" + currentFolder.getName() +
-                ") does not contain a subfolder named " + input);
+                tellUserThisFolderDoesNotContainFolderNamed(input);
             }
         }
     }
 
-    // EFFECTS: opens directory with all files labelled with label the user searches for, if one exists
+    // EFFECTS: tells the user this folder does not contain a folder named input
+    private void tellUserThisFolderDoesNotContainFolderNamed(String input) {
+        System.out.println("This folder (" + currentFolder.getName()
+                + ") does not contain a subfolder named " + input);
+    }
+
+    // EFFECTS: opens directory with all files labelled with label the user searches
+    // for, if one exists
     private void getInputToOpenLabel() throws NewFolderOpenedException {
         while (true) {
             System.out.println();
@@ -1270,16 +1311,14 @@ public class TextFileApp {
             } else if (input.isEmpty()) {
                 System.out.println("Label name was not valid");
             } else if (labelExists(input)) {
-                Label label = getLabel(input);
-                openLabel(label);
-                System.out.println(label.getName() + " opened");
+                openLabel(getLabel(input));
+                System.out.println(currentFolder.getName() + " opened");
                 throw new NewFolderOpenedException();
             } else {
                 System.out.println("There is no label named \"" + input + "\"");
             }
         }
     }
-    
 
     // Confirmations:
     // EFFECTS: returns true if the user confirms that they want to complete action,
@@ -1288,7 +1327,7 @@ public class TextFileApp {
      * Prints out: "Are you sure you want to $action? Please enter yes or no"
      */
     private boolean confirmCompleteAction(String action) {
-        while(true) {
+        while (true) {
             System.out.println();
             System.out.println("Are you sure you want to " + action + "? Please enter yes or no");
 
@@ -1310,7 +1349,7 @@ public class TextFileApp {
      * Prints out: "Is the name $name correct? Please enter y or n"
      */
     private boolean confirmNameCorrect(String name) {
-        while(true) {
+        while (true) {
             System.out.println();
             System.out.println("Is the name \"" + name + "\" correct? Please enter y or n");
 
@@ -1325,7 +1364,6 @@ public class TextFileApp {
             }
         }
     }
-
 
     // Cleaning up file paths:
     // EFFECTS: returns every character after the final backslash in string
@@ -1347,7 +1385,7 @@ public class TextFileApp {
     }
 
     // EFFECTS: adds .txt to string if it does not end in .txt
-    private String addDotTXTIfMissing(String string) {
+    private String addDotTextIfMissing(String string) {
         if (string.endsWith(".txt")) {
             return string;
         } else {
@@ -1366,10 +1404,10 @@ public class TextFileApp {
         return string.substring(0, indexOfDot);
     }
 
-
     // Labels:
     // EFFECTS: returns the first element found in a set of Labels
-    // (if it's a HashSet, this isn't necessarily - and probably isn't - the first object added)
+    // (if it's a HashSet, this isn't necessarily - and probably isn't - the first
+    // object added)
     private Label firstLabelFoundInSet(Set<Label> set) throws SetIsEmptyAndShouldNotBeException {
         for (Label label : set) {
             return label;
@@ -1388,7 +1426,8 @@ public class TextFileApp {
         return null;
     }
 
-    // EFFECTS: returns true if there exists a label named labelName otherwise returns false
+    // EFFECTS: returns true if there exists a label named labelName otherwise
+    // returns false
     private boolean labelExists(String labelName) {
         return getLabel(labelName) != null;
     }
@@ -1414,7 +1453,7 @@ public class TextFileApp {
         }
         return unusedLabels;
     }
-    
+
     // MODIFIES: file
     // EFFECTS: removes every label on file
     private void removeAllLabels(model.File file) {
@@ -1449,16 +1488,18 @@ public class TextFileApp {
     }
 
     // MODIFIES: file
-    // EFFECTS: lets the user label file with as many labels as they'd like to while there is more than one option
-    private void chooseLabelsToAdd(model.File file, Set<Label> unusedLabels) throws UserNoLongWantsToChangeLabelsException {
+    // EFFECTS: lets the user label file with as many labels as they'd like to while
+    // there is more than one option
+    private void chooseLabelsToAdd(model.File file, Set<Label> unusedLabels)
+            throws UserNoLongWantsToChangeLabelsException {
         while (unusedLabels.size() > 1) {
             System.out.println();
-            System.out.println("Enter the name of the label you would like to add to the file, " +
-             "enter l to list the available labels, or enter b to stop adding labels");
+            System.out.println("Enter the name of the label you would like to add to the file, "
+                    + "enter l to list the available labels, or enter b to stop adding labels");
 
-             String input = getUserInputTrimToLower();
+            String input = getUserInputTrimToLower();
 
-             if (input.equals("b") || input.equals("back")) {
+            if (input.equals("b") || input.equals("back")) {
                 throw new UserNoLongWantsToChangeLabelsException();
             } else if (input.equals("l") || input.equals("list")) {
                 try {
@@ -1482,23 +1523,24 @@ public class TextFileApp {
     }
 
     // MODIFIES: file
-    // EFFECTS: lets the user choose whether to add the last label to the file or not
+    // EFFECTS: lets the user choose whether to add the last label to the file or
+    // not
     private void addLastRemainingLabel(model.File file, Label lastLabel) throws UserNoLongWantsToChangeLabelsException {
         while (true) {
             System.out.println();
-            System.out.println("Would you like to label the file \"" + lastLabel.getName() + 
-            "\"? (This is the only label not on this file) y or n");
+            System.out.println("Would you like to label the file \"" + lastLabel.getName()
+                    + "\"? (This is the only label not on this file) y or n");
 
-             String input = getUserInputTrimToLower();
+            String input = getUserInputTrimToLower();
 
-             if (input.equals("n") || input.equals("no")) {
-                 throw new UserNoLongWantsToChangeLabelsException();
-             } else if (input.equals("y") || input.equals("yes")) {
-                 lastLabel.labelFile(file);
-                 System.out.println(file.getName() + " is now labelled " + lastLabel.getName());
-                 break;
+            if (input.equals("n") || input.equals("no")) {
+                throw new UserNoLongWantsToChangeLabelsException();
+            } else if (input.equals("y") || input.equals("yes")) {
+                lastLabel.labelFile(file);
+                System.out.println(file.getName() + " is now labelled " + lastLabel.getName());
+                break;
             } else {
-                 System.out.println("Your input was not recognized as a y or n");
+                System.out.println("Your input was not recognized as a y or n");
             }
         }
     }
@@ -1529,16 +1571,18 @@ public class TextFileApp {
     }
 
     // MODIFIES: file
-    // EFFECTS: lets the user remove as many labels as they'd like to while there is more than one option
-    private void chooseLabelsToRemove(model.File file, Set<Label> labelsOnFile) throws UserNoLongWantsToChangeLabelsException {
+    // EFFECTS: lets the user remove as many labels as they'd like to while there is
+    // more than one option
+    private void chooseLabelsToRemove(model.File file, Set<Label> labelsOnFile)
+            throws UserNoLongWantsToChangeLabelsException {
         while (labelsOnFile.size() > 1) {
             System.out.println();
-            System.out.println("Enter the name of the label you would like to remove to the file, " +
-             "enter l to list the labels the file is labelled with, or enter b to stop removing labels");
+            System.out.println("Enter the name of the label you would like to remove to the file, "
+                    + "enter l to list the labels the file is labelled with, or enter b to stop removing labels");
 
-             String input = getUserInputTrimToLower();
+            String input = getUserInputTrimToLower();
 
-             if (input.equals("b") || input.equals("back")) {
+            if (input.equals("b") || input.equals("back")) {
                 throw new UserNoLongWantsToChangeLabelsException();
             } else if (input.equals("l") || input.equals("list")) {
                 try {
@@ -1562,39 +1606,40 @@ public class TextFileApp {
     }
 
     // MODIFIES: file
-    // EFFECTS: lets the user choose whether to add the last label to the file or not
+    // EFFECTS: lets the user choose whether to add the last label to the file or
+    // not
     private void removeOnlyLabel(model.File file, Label lastLabel) throws UserNoLongWantsToChangeLabelsException {
         while (true) {
             System.out.println();
             System.out.println("Would you like to remove the label " + lastLabel.getName() + " from the file \""
-             + lastLabel.getName() + "\"? (This is the only label on this file) y or n");
+                    + lastLabel.getName() + "\"? (This is the only label on this file) y or n");
 
-             String input = getUserInputTrimToLower();
+            String input = getUserInputTrimToLower();
 
-             if (input.equals("n") || input.equals("no")) {
-                 throw new UserNoLongWantsToChangeLabelsException();
-             } else if (input.equals("y") || input.equals("yes")) {
-                 lastLabel.unlabelFile(file);
-                 System.out.println(file.getName() + " is now labelled " + lastLabel.getName());
-                 break;
+            if (input.equals("n") || input.equals("no")) {
+                throw new UserNoLongWantsToChangeLabelsException();
+            } else if (input.equals("y") || input.equals("yes")) {
+                lastLabel.unlabelFile(file);
+                System.out.println(file.getName() + " is now labelled " + lastLabel.getName());
+                break;
             } else {
-                 System.out.println("Your input was not recognized as a y or n");
+                System.out.println("Your input was not recognized as a y or n");
             }
         }
     }
 
-
     // currentFolder Contents:
-    // EFFECTS: returns true if currentFolder contains a file named fileName otherwise returns false
+    // EFFECTS: returns true if currentFolder contains a file named fileName
+    // otherwise returns false
     private boolean currentFolderContainsFileNamed(String fileName) {
         return currentFolder.getFile(fileName) != null;
     }
 
-    // EFFECTS: returns true if currentFolder contains a folder named foldername otherwise returns false
+    // EFFECTS: returns true if currentFolder contains a folder named foldername
+    // otherwise returns false
     private boolean currentFolderContainsFolderNamed(String folderName) {
         return currentFolder.getSubfolder(folderName) != null;
     }
-
 
     // User Input:
     // EFFECTS: gets input from the user and trims it
@@ -1607,19 +1652,19 @@ public class TextFileApp {
 
     // EFFECTS: gets input from the user and trims it and turns it to lowercase
     private String getUserInputTrimToLower() {
-        String input = ""; 
+        String input = "";
         input += scanner.next();
         input = input.trim();
         input = input.toLowerCase();
         return input;
     }
 
-
     // Listing alphabetically:
-    // EFFECTS: alphabetizes (ignoring case) nameList and then prints it out separated by commas
+    // EFFECTS: alphabetizes (ignoring case) nameList and then prints it out
+    // separated by commas
     private void listStringListAlphabetically(List<String> nameList) {
         nameList.sort(Comparator.comparing(String::toLowerCase));
-        
+
         int indexOfLastLabel = nameList.size() - 1;
         String lastLabelName = nameList.get(indexOfLastLabel);
         nameList.remove(indexOfLastLabel);
