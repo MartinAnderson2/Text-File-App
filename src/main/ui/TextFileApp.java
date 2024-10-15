@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.io.IOException;
+import java.awt.Desktop;
 import model.*;
 import ui.exceptions.*;
 
@@ -33,7 +35,7 @@ public class TextFileApp {
 
         boolean quit = false;
         while (!quit) {
-            displayMainMenuCommands();
+            displayMainMenuOptions();
             String input = scanner.next();
             input = input.trim();
             input = input.toLowerCase();
@@ -49,7 +51,7 @@ public class TextFileApp {
     }
 
     // EFFECTS: displays the first level of menu options that are available
-    private void displayMainMenuCommands() {
+    private void displayMainMenuOptions() {
         System.out.println();
         System.out.println("Would you like to:");
         System.out.println("  \"a\": Add a file, folder, or label to the current folder");
@@ -109,22 +111,21 @@ public class TextFileApp {
     // MODIFIES: this
     // EFFECTS: handles the add menu input
     private void addMenu() {
-        boolean back = false;
-        while (!back) {
-            displayAddMenuCommands();
+        while (true) {
+            displayAddMenuOptions();
 
             String input = getUserInputTrimToLower();
 
             if (input.equals("b") || input.equals("back")) {
-                back = true;
+                break;
             } else {
                 handleAddMenuInput(input);
             }
         }
     }
 
-    // EFFECTS: displays the (first level of) add menu commands
-    private void displayAddMenuCommands() {
+    // EFFECTS: displays the (first level of) add menu options
+    private void displayAddMenuOptions() {
         System.out.println();
         System.out.println("Would you like to:");
         System.out.println("  \"file\": Add a file to the current folder");
@@ -163,9 +164,7 @@ public class TextFileApp {
             if (pathLowerCase.equals("b") || pathLowerCase.equals("back")) {
                 break;
                 // Returns to the add menu
-            } else if (confirmCorrectFilePathAdded(path)) {
-                System.out.println("Great!");
-                
+            } else if (isFilePathValid(path)) {                
                 String name = chooseFileName(path);
                 model.File newFile = currentFolder.addFile(name, path);
                 System.out.println("File with name \"" + newFile.getName() + "\" added to this folder (" + currentFolder.getName() + ")");
@@ -181,21 +180,13 @@ public class TextFileApp {
         }
     }
 
-    // EFFECTS: gets the user to confirm that the path they entered is correct.
-    // If they are happy with the path, returns true otherwise returns false
-    private boolean confirmCorrectFilePathAdded(String path) {
-        java.io.File file = new java.io.File(path);
-
-        return file.exists();
-    }
-
     // EFFECTS: enables the user to create a custom name for their newly added file
     //          or use the name of the file on their computer
     private String chooseFileName(String filePath) {
         String fileName = getCharactersAfterLastBackslash(filePath);
         fileName = removeDotTXT(fileName);
 
-        if (currentFolderContainsFileWithName(fileName)) {
+        if (currentFolderContainsFileNamed(fileName)) {
             return chooseAndConfirmCustomFileNameNoGoBack();
         } else if (!fileName.isEmpty()) {
             while (true) {
@@ -218,11 +209,6 @@ public class TextFileApp {
         } else {
             return chooseAndConfirmCustomFileNameNoGoBack();
         }
-    }
-
-    // EFFECTS: returns true if currentFolder contains a file named fileName otherwise returns false
-    private boolean currentFolderContainsFileWithName(String fileName) {
-        return currentFolder.getFile(fileName) != null;
     }
 
     // EFFECTS: enables the user to choose the custom name for their file and then confirms it is correct.
@@ -258,7 +244,7 @@ public class TextFileApp {
                 }
             } else if (input.isEmpty()) {
                 System.out.println("Custom file name was not valid");
-            } else if (currentFolderContainsFileWithName(input)) {
+            } else if (currentFolderContainsFileNamed(input)) {
                 String fileAlreadyNamedInputWithCorrectCase = currentFolder.getFile(input).getName();
                 System.out.println(currentFolder.getName() + " (current folder) already contains a file named "
                 + fileAlreadyNamedInputWithCorrectCase);
@@ -290,7 +276,7 @@ public class TextFileApp {
 
             if (input.isEmpty()) {
                 System.out.println("Custom file name was not valid");
-            } else if (currentFolderContainsFileWithName(input)) {
+            } else if (currentFolderContainsFileNamed(input)) {
                 String fileAlreadyNamedInputWithCorrectCase = currentFolder.getFile(input).getName();
                 System.out.println(currentFolder.getName() + " (current folder) already contains a file named "
                 + fileAlreadyNamedInputWithCorrectCase);
@@ -313,7 +299,7 @@ public class TextFileApp {
             if (inputLowerCase.equals("p") || inputLowerCase.equals("prev") || inputLowerCase.equals("previous")) {
                 throw new UserNoLongerWantsNameBException();
             } else if (inputLowerCase.equals("b") || inputLowerCase.equals("namefileb")) {
-                if (currentFolderContainsFileWithName(input)) {
+                if (currentFolderContainsFileNamed(input)) {
                     String fileAlreadyNamedInputWithCorrectCase = currentFolder.getFile(input).getName();
                     System.out.println(currentFolder.getName() + " (current folder) already contains a file named "
                     + fileAlreadyNamedInputWithCorrectCase);
@@ -342,7 +328,7 @@ public class TextFileApp {
 
     // MODIFIES: file
     // EFFECTS: asks the user if they would like to add labels and then lets them do so if they do
-    private void chooseLabels(File file) {
+    private void chooseLabels(model.File file) {
         while(true) {
             System.out.println();
             System.out.println("Would you like to add labels to the file? Please enter y or n");
@@ -363,7 +349,7 @@ public class TextFileApp {
     // REQUIRES: there is only one label in allLabels
     // MODIFIES: file
     // EFFECTS: enables the user to either label the file with the only current label or not label it
-    private void addTheOnlyCreatedLabel(File file) {
+    private void addTheOnlyCreatedLabel(model.File file) {
         Label theOnlyCurrentLabel = firstLabelFoundInSet(allLabels);
         while(true) {
             System.out.println();
@@ -385,7 +371,7 @@ public class TextFileApp {
 
     // MODIFIES: file
     // EFFECTS: lets the user label file with as many labels as they'd like to
-    private void addAsManyLabelsAsDesiredOrPossible(File file) {
+    private void addAsManyLabelsAsDesiredOrPossible(model.File file) {
         Set<Label> unusedLabels = new HashSet<Label>(allLabels);
         try {
             chooseLabels(file, unusedLabels);
@@ -400,7 +386,7 @@ public class TextFileApp {
 
     // MODIFIES: file
     // EFFECTS: lets the user label file with as many labels as they'd like to while there is more than one option
-    private void chooseLabels(File file, Set<Label> unusedLabels) throws UserNoLongWantsToAddLabelsException {
+    private void chooseLabels(model.File file, Set<Label> unusedLabels) throws UserNoLongWantsToAddLabelsException {
         while (unusedLabels.size() > 1) {
             System.out.println();
             System.out.println("Enter the name of the label you would like to add to the file, " +
@@ -409,11 +395,15 @@ public class TextFileApp {
              String input = getUserInputTrimToLower();
 
              if (input.equals("b") || input.equals("back")) {
-                 throw new UserNoLongWantsToAddLabelsException();
-             } else if (input.equals("l") || input.equals("list")) {
-                 listLabelSetAlphabetically(unusedLabels);
-             } else if (labelExists(input)) {
-                 Label label = getLabel(input);
+                throw new UserNoLongWantsToAddLabelsException();
+            } else if (input.equals("l") || input.equals("list")) {
+                try {
+                    listLabelsAlphabetically(unusedLabels);
+                } catch (SetIsEmptyException e) {
+                    // Not going to happen since it has size > 1
+                }
+            } else if (labelExists(input)) {
+                Label label = getLabel(input);
                 if (unusedLabels.contains(label)) {
                     file.addLabel(label);
                     System.out.println(file.getName() + " is now labelled " + label.getName());
@@ -421,15 +411,15 @@ public class TextFileApp {
                 } else {
                     System.out.println("File is already labelled " + label.getName());
                 }
-             } else {
-                 System.out.println("Your input was not recognized as a label, list, or b");
-             }
+            } else {
+                System.out.println("Your input was not recognized as a label, list, or b");
+            }
         }
     }
 
     // MODIFIES: file
     // EFFECTS: lets the user choose whether to add the last label to the file or not
-    private void addLastRemainingLabel(File file, Label lastLabel) throws UserNoLongWantsToAddLabelsException {
+    private void addLastRemainingLabel(model.File file, Label lastLabel) throws UserNoLongWantsToAddLabelsException {
         while (true) {
             System.out.println();
             System.out.println("Would you like to label the file \"" + lastLabel.getName() + "\"? y or n");
@@ -489,7 +479,7 @@ public class TextFileApp {
                 }
             } else if (input.isEmpty()) {
                 System.out.println("Folder name was not valid");
-            } else if (currentFolderContainsFolderWithName(input)) {
+            } else if (currentFolderContainsFolderNamed(input)) {
                 String folderAlreadyNamedInputWithCorrectCase = currentFolder.getSubfolder(input).getName();
                 System.out.println(currentFolder.getName() + " (current folder) already contains a folder named "
                 + folderAlreadyNamedInputWithCorrectCase);
@@ -512,7 +502,7 @@ public class TextFileApp {
             if (inputLowerCase.equals("p") || inputLowerCase.equals("prev") || inputLowerCase.equals("previous")) {
                 throw new UserNoLongerWantsNameBException();
             } else if (inputLowerCase.equals("b") || inputLowerCase.equals("namefolderb")) {
-                if (currentFolderContainsFolderWithName(input)) {
+                if (currentFolderContainsFolderNamed(input)) {
                     String folderAlreadyNamedInputWithCorrectCase = currentFolder.getSubfolder(input).getName();
                     System.out.println(currentFolder.getName() + " (current folder) already contains a folder named "
                     + folderAlreadyNamedInputWithCorrectCase);
@@ -525,11 +515,6 @@ public class TextFileApp {
                 "(or namefolderb with different capitalization)");
             }
         }
-    }
-
-    // EFFECTS: returns true if currentFolder contains a folder named folderName otherwise returns false
-    private boolean currentFolderContainsFolderWithName(String folderName) {
-        return currentFolder.getSubfolder(folderName) != null;
     }
 
     // MODIFIES: this
@@ -615,7 +600,115 @@ public class TextFileApp {
     // MODIFIES: this
     // EFFECTS: handles the edit menu input
     private void editMenu() {
-        
+        while (true) {
+            displayEditMenuOptions();
+
+            String input = getUserInputTrimToLower();
+
+            if (input.equals("b") || input.equals("back")) {
+                break;
+            } else {
+                handleEditMenuInput(input);
+            }
+        }
+    }
+
+    // EFFECTS: displays the (first level of) edit menu options
+    private void displayEditMenuOptions() {
+        System.out.println();
+        System.out.println("Would you like to:");
+        System.out.println("  \"file\": Choose a file (in the current folder -" +
+                            currentFolder.getName() + ") to edit");
+        System.out.println("  \"folder\": Choose a folder (in the current folder -" +
+                            currentFolder.getName() + ") to edit");
+        System.out.println("  \"label\": Choose a label to edit");
+        System.out.println("  \"b\": Back to the main menu");
+    }
+
+    // MODIFIES: this
+    // EFFECTS: handles the edit menu input and calls the appropriate submenus as needed
+    private void handleEditMenuInput(String input) {
+        if (input.equals("file")) {
+            editFileMenu();
+        } else if (input.equals("folder")) {
+            // editFolderMenu();
+        } else if (input.equals("label") || input.equals("l")) {
+            // editLabelMenu();
+        } else {
+            System.out.println("Your input was not recognized as any of: file, folder, label, or b");
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: allows the user to edit a file: open it, change its name, changes its labels, or delete it
+    private void editFileMenu() {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the name of the file you would like to edit, l to list the files in " +
+             "this folder (" + currentFolder.getName() + "), or b to go back");
+             
+            String input = getUserInputTrim();
+            String inputLowerCase = input.toLowerCase();
+
+            if (inputLowerCase.equals("b") || inputLowerCase.equals("back")) {
+                break;
+                // Returns to the edit menu
+            } else if (inputLowerCase.equals("l") || inputLowerCase.equals("list")) {
+                try {
+                    listFilesAlphabetically(currentFolder.containedFiles());
+                } catch (SetIsEmptyException e) {
+                    System.out.println("There are no files in this folder");
+                }
+            } else if (currentFolderContainsFileNamed(input)) {
+                editFile(currentFolder.getFile(input));
+            } else {
+                System.out.println("There is no file named \"" + input + "\" in this folder");
+            }
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: enables the user to open file, change its name, changes its labels, and delete it
+    private void editFile(model.File file) {
+        while (true) {
+            displayEditFileMenuOptions(file.getName());
+
+            String input = getUserInputTrimToLower();
+
+            if (input.equals("b") || input.equals("back")) {
+                break;
+            } else {
+                handleEditFileMenuInput(input, file);
+            }
+        }
+    }
+
+    // EFFECTS: displays the (first level of) edit menu options
+    private void displayEditFileMenuOptions(String fileName) {
+        System.out.println();
+        System.out.println(fileName + " is selected. Would you like to:");
+        System.out.println("  \"o\": Open the file in your default text editor");
+        System.out.println("  \"e\": Edit the file's name or add/remove labels");
+        System.out.println("  \"d\": Delete the file");
+        System.out.println("  \"b\": Back to the main menu");
+    }
+    
+    // MODIFIES: this
+    // EFFECTS: handles the edit file menu input and calls the appropriate functions as needed
+    private void handleEditFileMenuInput(String input, model.File file) {
+        if (input.equals("o") || input.equals("open")) {
+            try {
+                openFile(file);
+            } catch (FilePathNoLongerValidException e) {
+                System.out.println("File at " + file.getFilePath() + " no longer exists");
+            }
+        } else if (input.equals("e") || input.equals("edit")) {
+            // editFileNameAndTagsMenu();
+        } else if (input.equals("d") || input.equals("delete")) {
+            // deleteFile();
+        } else {
+            System.out.println("Your input was not recognized as any of: o, e, d, or b");
+        }
     }
 
 
@@ -647,6 +740,26 @@ public class TextFileApp {
 
 
     // General helper methods:
+
+    // EFFECTS: checks if path leads to a file on the user's computer
+    private boolean isFilePathValid(String path) {
+        java.io.File file = new java.io.File(path);
+
+        return file.exists();
+    }
+
+    // EFFECTS: opens file if it still exists
+    private void openFile(model.File file) throws FilePathNoLongerValidException {
+        if (!isFilePathValid(file.getFilePath())) {
+            throw new FilePathNoLongerValidException();
+        }
+
+        try {
+            Desktop.getDesktop().open(new java.io.File(file.getFilePath()));
+        } catch (IOException e) {
+            System.out.println("File failed to open. Please contact the developer if this issue persists");
+        }
+    }
 
     // EFFECTS: returns true if the user confirms that chosenName is correct, returns false if the user confirms chosenName is incorrect
     private boolean confirmNameCorrect(String name) {
@@ -706,12 +819,12 @@ public class TextFileApp {
 
     // EFFECTS: returns the first element found in a set of Labels
     // (if it's a HashSet, this isn't necessarily - and probably isn't - the first object added)
-    private Label firstLabelFoundInSet(Set<Label> set) {
+    private Label firstLabelFoundInSet(Set<Label> set) throws SetIsEmptyAndShouldNotBeException{
         for (Label label : set) {
             return label;
         }
 
-        throw new SetIsEmptyException();
+        throw new SetIsEmptyAndShouldNotBeException();
     }
 
     // EFFECTS: returns label with given name or null if not found
@@ -727,6 +840,16 @@ public class TextFileApp {
     // EFFECTS: returns true if there exists a label named labelName otherwise returns false
     private boolean labelExists(String labelName) {
         return getLabel(labelName) != null;
+    }
+
+    // EFFECTS: returns true if currentFolder contains a file named fileName otherwise returns false
+    private boolean currentFolderContainsFileNamed(String fileName) {
+        return currentFolder.getFile(fileName) != null;
+    }
+
+    // EFFECTS: returns true if currentFolder contains a folder named foldername otherwise returns false
+    private boolean currentFolderContainsFolderNamed(String folderName) {
+        return currentFolder.getSubfolder(folderName) != null;
     }
 
     // EFFECTS: gets input from the user and trims it
@@ -746,23 +869,62 @@ public class TextFileApp {
         return input;
     }
 
-    // REQUIRES: labelSet contains at least one element
+    // EFFECTS: alphabetizes (ignoring case) nameList and then prints it out separated by commas
+    private void listStringListAlphabetically(List<String> nameList) {
+        nameList.sort(Comparator.comparing(String::toLowerCase));
+        
+        int indexOfLastLabel = nameList.size() - 1;
+        String lastLabelName = nameList.get(indexOfLastLabel);
+        nameList.remove(indexOfLastLabel);
+
+        for (String labelName : nameList) {
+            System.out.print(labelName + ", ");
+        }
+        System.out.println(lastLabelName);
+    }
+
+    // EFFECTS: lists the names of all of the files in fileSet
+    private void listFilesAlphabetically(Set<model.File> fileSet) throws SetIsEmptyException {
+        if (fileSet.isEmpty()) {
+            throw new SetIsEmptyException();
+        }
+
+        List<String> fileNameList = new ArrayList<String>();
+        for (model.File file : fileSet) {
+            String fileName = file.getName();
+            fileNameList.add(fileName);
+        }
+
+        listStringListAlphabetically(fileNameList);
+    }
+
+    // EFFECTS: lists the names of all of the files in folderSet
+    private void listFoldersAlphabetically(Set<Folder> folderSet) throws SetIsEmptyException {
+        if (folderSet.isEmpty()) {
+            throw new SetIsEmptyException();
+        }
+
+        List<String> folderNameList = new ArrayList<String>();
+        for (Folder folder : folderSet) {
+            String folderName = folder.getName();
+            folderNameList.add(folderName);
+        }
+
+        listStringListAlphabetically(folderNameList);
+    }
+
     // EFFECTS: lists all of the names of the labels in labelSet alphabetically
-    private void listLabelSetAlphabetically(Set<Label> labelSet) {
+    private void listLabelsAlphabetically(Set<Label> labelSet) throws SetIsEmptyException {
+        if (labelSet.isEmpty()) {
+            throw new SetIsEmptyException();
+        }
+
         List<String> labelNameList = new ArrayList<String>();
         for (Label label : labelSet) {
             String labelName = label.getName();
             labelNameList.add(labelName);
         }
-        labelNameList.sort(Comparator.comparing(String::toLowerCase));
-        
-        int indexOfLastLabel = labelNameList.size() - 1;
-        String lastLabelName = labelNameList.get(indexOfLastLabel);
-        labelNameList.remove(indexOfLastLabel);
 
-        for (String labelName : labelNameList) {
-            System.out.print(labelName + ", ");
-        }
-        System.out.println(lastLabelName);
+        listStringListAlphabetically(labelNameList);
     }
 }

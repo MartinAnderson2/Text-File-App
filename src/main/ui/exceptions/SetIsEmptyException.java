@@ -1,4 +1,4 @@
 package ui.exceptions;
 
-public class SetIsEmptyException extends RuntimeException {
+public class SetIsEmptyException extends Exception {
 }
