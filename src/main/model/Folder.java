@@ -55,8 +55,11 @@ public class Folder extends NamedObject {
     // REQUIRES: !name.isEmpty()
     // MODIFIES: this
     // EFFECTS creates a new file named name with path path that is within this foler
-    public void addFile(String name, String path) {
-        containedFiles.add(new File(name, path));
+    // and returns a reference to the newly created file
+    public File addFile(String name, String path) {
+        File newFile = new File(name, path);
+        containedFiles.add(newFile);
+        return newFile;
     }
 
     // EFFECTS: returns file with given name or null if not found
