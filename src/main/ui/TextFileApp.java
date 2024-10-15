@@ -53,6 +53,7 @@ public class TextFileApp {
     // EFFECTS: displays the first level of menu options that are available
     private void displayMainMenuOptions() {
         System.out.println();
+        System.out.println("Current directory is: " + currentFolder.getName());
         System.out.println("Would you like to:");
         System.out.println("  \"a\": Add a file, folder, or label to the current folder");
         System.out.println("  \"e\": Edit a file, folder, or label in the current directory");
@@ -157,8 +158,8 @@ public class TextFileApp {
             System.out.println("Please enter the .txt file's path (it should look like " +
              "C:\\Users\\User\\Documents\\Note Name.txt (writing .txt is optional)) or b to go back");
             String path = getUserInputTrim();
-            path = addDotTXTIfMissing(path);
             String pathLowerCase = path.toLowerCase();
+            path = addDotTXTIfMissing(path);
 
             if (pathLowerCase.equals("b") || pathLowerCase.equals("back")) {
                 break;
@@ -986,7 +987,7 @@ public class TextFileApp {
     }
 
     // MODIFIES: this
-    // EFFECTS: handles the edit menu input and calls the appropriate submenus as needed
+    // EFFECTS: handles the list menu input and implements the menu
     private void handleListMenuInput(String input) {
         if (input.equals("fi") || input.equals("file")) {
             try {
@@ -1024,7 +1025,74 @@ public class TextFileApp {
     // MODIFIES: this
     // EFFECTS: handles the navigate menu input
     private void navigateMenu() {
-        
+        while (true) {
+            displayNavigateMenuOptions();
+
+            String input = getUserInputTrimToLower();
+
+            if (input.equals("b") || input.equals("back")) {
+                break;
+            } else {
+                try {
+                    handleNavigateMenuInput(input);
+                } catch (NewFolderOpenedException e) {
+                    break;
+                }
+            }
+        }
+    }
+    
+    // EFFECTS: displays the navigate menu options
+    private void displayNavigateMenuOptions() {
+        System.out.println();
+        System.out.println("You are in folder " + currentFolder.getName() + ". Would you like to:");
+        System.out.println("  \"r\": Jump to the root folder (base folder)");
+        if (currentFolderHasParent())
+            System.out.println("  \"u\": Go up one level of folders to " + currentFolder.getParentFolder().getName());
+        System.out.println("  \"o\": Open a folder in this folder (" + currentFolder.getName() + ")");
+        System.out.println("  \"b\": Back to the main menu");
+    }
+
+    // MODIFIES: this
+    // EFFECTS: handles the navigate menu input and implements the menu
+    private void handleNavigateMenuInput(String input) throws NewFolderOpenedException {
+        if (currentFolderHasParent()) {
+            handleNavigateMenuInputHasParent(input);
+        } else {
+            handleNavigateMenuInputNoParent(input);
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: handles the navigate menu input and implements the menu
+    private void handleNavigateMenuInputHasParent(String input) throws NewFolderOpenedException {
+        if (input.equals("r") || input.equals("root")) {
+            currentFolder = rootFolder;
+            System.out.println("root opened");
+            throw new NewFolderOpenedException();
+        } else if (currentFolderHasParent() && (input.equals("u") || input.equals("up"))) {
+            currentFolder = currentFolder.getParentFolder();
+            System.out.println(currentFolder.getName() + " opened");
+            throw new NewFolderOpenedException();
+        } else if (input.equals("o") || input.equals("open")) {
+            getInputToOpenFolder();
+        } else {
+            System.out.println("Your input was not recognized as any of: r, u, o, or b");
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: handles the navigate menu input and implements the menu
+    private void handleNavigateMenuInputNoParent(String input) throws NewFolderOpenedException {
+        if (input.equals("r") || input.equals("root")) {
+            currentFolder = rootFolder;
+            System.out.println("root opened");
+            throw new NewFolderOpenedException();
+        } else if (input.equals("o") || input.equals("open")) {
+            getInputToOpenFolder();
+        } else {
+            System.out.println("Your input was not recognized as any of: r, o, or b");
+        }
     }
 
 
@@ -1045,6 +1113,11 @@ public class TextFileApp {
         java.io.File file = new java.io.File(path);
 
         return file.exists();
+    }
+
+    // EFFECTS: returns true if the currently-opened folder has a parent and false if it does not
+    private boolean currentFolderHasParent() {
+        return currentFolder.getParentFolder() != null;
     }
 
     // EFFECTS: opens file if it still exists
@@ -1070,6 +1143,37 @@ public class TextFileApp {
         Folder labelFolder = new Folder(label.getName());
         currentFolder = labelFolder;
     }
+
+    // EFFECTS: opens folder the user searches for, if one exists
+    private void getInputToOpenFolder() throws NewFolderOpenedException {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the name of the folder to open, l to list the options, or b to go back");
+
+            String input = getUserInputTrim();
+            String inputLowerCase = input.toLowerCase();
+
+            if (inputLowerCase.equals("b") || inputLowerCase.equals("back")) {
+                break;
+            } else if (inputLowerCase.equals("l") || inputLowerCase.equals("list")) {
+                try {
+                    listFoldersAlphabetically(currentFolder.containedFolders());
+                } catch (SetIsEmptyException e) {
+                    System.out.println(currentFolder.getName() + " (current folder) does not contain any subfolders");
+                }
+            } else if (input.isEmpty()) {
+                System.out.println("Folder name was not valid");
+            } else if (currentFolderContainsFolderNamed(input)) {
+                openFolder(currentFolder.getSubfolder(input));
+                System.out.println(currentFolder.getName() + " opened");
+                throw new NewFolderOpenedException();
+            } else {
+                System.out.println("This folder (" + currentFolder.getName() +
+                ") does not contain a file named " + input);
+            }
+        }
+    }
+    
 
     // Confirmations:
     // EFFECTS: returns true if the user confirms that they want to complete action,
