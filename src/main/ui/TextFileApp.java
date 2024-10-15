@@ -128,20 +128,20 @@ public class TextFileApp {
     private void displayAddMenuOptions() {
         System.out.println();
         System.out.println("Would you like to:");
-        System.out.println("  \"file\": Add a file to the current folder");
-        System.out.println("  \"folder\": Add a folder to the current folder");
-        System.out.println("  \"label\": Create a new label");
+        System.out.println("  \"fi\": Add a file to the current folder");
+        System.out.println("  \"fo\": Add a folder to the current folder");
+        System.out.println("  \"l\": Create a new label");
         System.out.println("  \"b\": Back to the main menu");
     }
 
     // MODIFIES: this
     // EFFECTS: handles the add menu input and calls the appropriate submenus as needed
     private void handleAddMenuInput(String input) {
-        if (input.equals("file")) {
+        if (input.equals("fi") || input.equals("file")) {
             addFileMenu();
-        } else if (input.equals("folder")) {
+        } else if (input.equals("fo") || input.equals("folder")) {
             addFolderMenu();
-        } else if (input.equals("label")) {
+        } else if (input.equals("l") || input.equals("label")) {
             addLabelMenu();
         } else {
             System.out.println("Your input was not recognized as any of: file, folder, label, or b");
@@ -683,7 +683,7 @@ public class TextFileApp {
         }
     }
 
-    // EFFECTS: displays the (first level of) edit menu options
+    // EFFECTS: displays the (first level of) edit file menu options
     private void displayEditFileMenuOptions(String fileName) {
         System.out.println();
         System.out.println(fileName + " is selected. Would you like to:");
@@ -703,12 +703,46 @@ public class TextFileApp {
                 System.out.println("File at " + file.getFilePath() + " no longer exists");
             }
         } else if (input.equals("e") || input.equals("edit")) {
-            // editFileNameAndTagsMenu();
+            editFileNameAndTagsMenu(file);
         } else if (input.equals("d") || input.equals("delete")) {
-            // deleteFile();
+            deleteFile(file);
         } else {
             System.out.println("Your input was not recognized as any of: o, e, d, or b");
         }
+    }
+
+    // MODIFIES: this, file
+    // EFFECTS: allows the user to change file's name and add/remove tags from it
+    private void editFileNameAndTagsMenu(model.File file) {
+        while (true) {
+            displayEditFileNameAndTagsOptions(file.getName());
+
+            String input = getUserInputTrimToLower();
+
+            if (input.equals("b") || input.equals("back")) {
+                break;
+            } else {
+                // handleEditFileNameAndTagsMenuInput(input);
+            }
+        }
+    }
+
+    // EFFECTS: displays the option to change the file's name, add a tag, remove a tag, and remove all tags
+    private void displayEditFileNameAndTagsOptions(String fileName) {
+        System.out.println();
+        System.out.println(fileName + " is selected. Would you like to:");
+        System.out.println("  \"n\": Change the file's name");
+        System.out.println("  \"a\": Add a label");
+        System.out.println("  \"r\": Remove a label");
+        System.out.println("  \"ra\": Remove all labels");
+        System.out.println("  \"b\": Back to the main menu");
+    }
+
+    // MODIFIES: this, file
+    // EFFECTS: confirms that the user wants to delete file and then deletes this folder's reference to it as well\
+    // as label's reference to it
+    private void deleteFile(model.File file) {
+
     }
 
 
