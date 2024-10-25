@@ -30,6 +30,14 @@ public class Label extends NamedObject {
 
         file.removeLabel(this);
     }
+    
+    // MODIFIES: this, every File in labelledFiles
+    // EFFECTS: removes this label from every files's list of labels and removes every File reference this label stores
+    public void unlabelAllFiles() {
+        for (File file : labelledFiles) {
+            this.unlabelFile(file);
+        }
+    }
 
     // EFFECTS: returns all of the files labelled with this label
     public Set<File> getLabelledFiles() {

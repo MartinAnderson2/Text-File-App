@@ -37,11 +37,11 @@ public class TestFolder extends TestNamedObject {
         educationSubfolders.add(cpscTwoTenFolder);
         educationSubfolders.add(mathTwoHundredFolder);
         
-        goalsFile = educationFolder.addFile("Goals", "C:\\");
-        personalProjectIdeasFile = cpscTwoTenFolder.addFile("Personal Project Ideas", "C:\\210");
-        ceeZeroOneQuestionsFile = cpscTwoTenFolder.addFile("C01 OH Questions", "C:\\210");
-        mywebworkOneAnswersFile = mathTwoHundredFolder.addFile("My WeBWorK 1 Answers", "C:\\200");
-        myWebworkTwoAnswersFile = mathTwoHundredFolder.addFile("My WeBWorK 2 Answers", "C:\\200");
+        goalsFile = educationFolder.makeSubfile("Goals", "C:\\");
+        personalProjectIdeasFile = cpscTwoTenFolder.makeSubfile("Personal Project Ideas", "C:\\210");
+        ceeZeroOneQuestionsFile = cpscTwoTenFolder.makeSubfile("C01 OH Questions", "C:\\210");
+        mywebworkOneAnswersFile = mathTwoHundredFolder.makeSubfile("My WeBWorK 1 Answers", "C:\\200");
+        myWebworkTwoAnswersFile = mathTwoHundredFolder.makeSubfile("My WeBWorK 2 Answers", "C:\\200");
                 
         makeSubfolderFileLists();
     }
@@ -58,55 +58,55 @@ public class TestFolder extends TestNamedObject {
     @Test
     void testConstructor() {
         assertEquals(educationFolder, cpscTwoTenFolder.getParentFolder());
-        assertEquals(cpscTwoTenFiles, cpscTwoTenFolder.containedFiles());
+        assertEquals(cpscTwoTenFiles, cpscTwoTenFolder.getSubfiles());
         assertEquals(educationFolder, mathTwoHundredFolder.getParentFolder());
-        assertEquals(mathTwoHundredFiles, mathTwoHundredFolder.containedFiles());
+        assertEquals(mathTwoHundredFiles, mathTwoHundredFolder.getSubfiles());
 
-        assertEquals(educationSubfolders, educationFolder.containedFolders());
+        assertEquals(educationSubfolders, educationFolder.getSubfolders());
     }
 
     @Test
     void testContainedFoldersEmpty() {
-        assertTrue(empty.containedFolders().isEmpty());
+        assertTrue(empty.getSubfolders().isEmpty());
     }
     
     @Test
     void testContainedFoldersContainsFiles() {
-        assertTrue(cpscTwoTenFolder.containedFolders().isEmpty());
+        assertTrue(cpscTwoTenFolder.getSubfolders().isEmpty());
     }
 
     @Test
     void testContainedFoldersContainsFilesAndFolders() {
-        assertEquals(educationSubfolders, educationFolder.containedFolders());
+        assertEquals(educationSubfolders, educationFolder.getSubfolders());
     }
 
     @Test
     void testContainedFoldersContainsFilesAndFoldersMultiple() {
-        assertEquals(educationSubfolders, educationFolder.containedFolders());
+        assertEquals(educationSubfolders, educationFolder.getSubfolders());
 
-        assertTrue(cpscTwoTenFolder.containedFolders().isEmpty());
+        assertTrue(cpscTwoTenFolder.getSubfolders().isEmpty());
     }
 
     @Test
     void testContainedFilesEmpty() {
-        assertTrue(empty.containedFiles().isEmpty());
+        assertTrue(empty.getSubfiles().isEmpty());
     }
     
     @Test
     void testContainedFilesContainsFiles() {
-        assertEquals(cpscTwoTenFiles, cpscTwoTenFolder.containedFiles());
+        assertEquals(cpscTwoTenFiles, cpscTwoTenFolder.getSubfiles());
     }
 
     @Test
     void testContainedFilesContainsFilesAndFolders() {
-        assertTrue(educationFolder.containedFiles().contains(goalsFile));
+        assertTrue(educationFolder.getSubfiles().contains(goalsFile));
     }
 
     @Test
     void testContainedFilesContainsFilesAndFoldersMultiple() {
-        assertTrue(educationFolder.containedFiles().contains(goalsFile));
+        assertTrue(educationFolder.getSubfiles().contains(goalsFile));
 
-        assertEquals(cpscTwoTenFiles, cpscTwoTenFolder.containedFiles());
+        assertEquals(cpscTwoTenFiles, cpscTwoTenFolder.getSubfiles());
     }
 
     @Test
@@ -124,7 +124,7 @@ public class TestFolder extends TestNamedObject {
     void testMakeSubfolderIsEmpty() {
         Folder newFolder = empty.makeSubfolder("no longer empty");
 
-        Set<Folder> foldersInEmpty = empty.containedFolders();
+        Set<Folder> foldersInEmpty = empty.getSubfolders();
         
         assertFalse(foldersInEmpty.isEmpty());
         assertEquals("no longer empty", newFolder.getName());
@@ -135,7 +135,7 @@ public class TestFolder extends TestNamedObject {
     void testMakeSubfolderHasFiles() {
         Folder newFolder = cpscTwoTenFolder.makeSubfolder("labs");
 
-        Set<Folder> foldersInCompSciTwoTen = cpscTwoTenFolder.containedFolders();
+        Set<Folder> foldersInCompSciTwoTen = cpscTwoTenFolder.getSubfolders();
 
         assertFalse(foldersInCompSciTwoTen.isEmpty());
         assertEquals("labs", newFolder.getName());
@@ -147,7 +147,7 @@ public class TestFolder extends TestNamedObject {
     void testMakeSubfolderHasFoldersAndFiles() {
         Folder newFolder = educationFolder.makeSubfolder("CPSC 213");
 
-        Set<Folder> foldersInEducation = educationFolder.containedFolders();
+        Set<Folder> foldersInEducation = educationFolder.getSubfolders();
 
         assertEquals(3, foldersInEducation.size());
         assertEquals("CPSC 213", newFolder.getName());
@@ -159,8 +159,8 @@ public class TestFolder extends TestNamedObject {
         Folder newCompSciFolder = cpscTwoTenFolder.makeSubfolder("lectures");
         Folder newMathFolder = mathTwoHundredFolder.makeSubfolder("midterms");
 
-        Set<Folder> foldersInCompSciTwoTen = cpscTwoTenFolder.containedFolders();
-        Set<Folder> foldersInMathTwoHundred = mathTwoHundredFolder.containedFolders();
+        Set<Folder> foldersInCompSciTwoTen = cpscTwoTenFolder.getSubfolders();
+        Set<Folder> foldersInMathTwoHundred = mathTwoHundredFolder.getSubfolders();
 
         assertFalse(foldersInCompSciTwoTen.isEmpty());
         assertEquals("lectures", newCompSciFolder.getName());
@@ -174,9 +174,9 @@ public class TestFolder extends TestNamedObject {
     void testRemoveSubfolderIsEmpty() {
         Folder newFolder = empty.makeSubfolder("no longer empty");
 
-        empty.removeSubfolder(newFolder);
+        empty.removeSubfolder(newFolder.getName());
 
-        Set<Folder> foldersInEmpty = empty.containedFolders();
+        Set<Folder> foldersInEmpty = empty.getSubfolders();
         assertTrue(foldersInEmpty.isEmpty());
     }
 
@@ -184,10 +184,10 @@ public class TestFolder extends TestNamedObject {
     void testRemoveSubfolderHasFiles() {
         Folder newFolder = cpscTwoTenFolder.makeSubfolder("labs");
 
-        cpscTwoTenFolder.removeSubfolder(newFolder);
+        cpscTwoTenFolder.removeSubfolder(newFolder.getName());
         newFolder = null;
 
-        Set<Folder> foldersInCompSciTwoTen = cpscTwoTenFolder.containedFolders();
+        Set<Folder> foldersInCompSciTwoTen = cpscTwoTenFolder.getSubfolders();
         assertTrue(foldersInCompSciTwoTen.isEmpty());
     }
     
@@ -195,9 +195,9 @@ public class TestFolder extends TestNamedObject {
     void testRemoveSubfolderHasFoldersAndFiles() {
         Folder newFolder = educationFolder.makeSubfolder("CPSC 213");
 
-        educationFolder.removeSubfolder(newFolder);;
+        educationFolder.removeSubfolder(newFolder.getName());;
 
-        Set<Folder> foldersInEducation = educationFolder.containedFolders();
+        Set<Folder> foldersInEducation = educationFolder.getSubfolders();
         assertEquals(2, foldersInEducation.size());
     }
 
@@ -208,13 +208,13 @@ public class TestFolder extends TestNamedObject {
         Folder newMathFolder = mathTwoHundredFolder.makeSubfolder("midterms");
         Folder newMathFolderTwo = mathTwoHundredFolder.makeSubfolder("practice problems");
         
-        cpscTwoTenFolder.removeSubfolder(newCompSciFolder);
-        cpscTwoTenFolder.removeSubfolder(newCompSciFolderTwo);
+        cpscTwoTenFolder.removeSubfolder(newCompSciFolder.getName());
+        cpscTwoTenFolder.removeSubfolder(newCompSciFolderTwo.getName());
         
-        mathTwoHundredFolder.removeSubfolder(newMathFolder);
+        mathTwoHundredFolder.removeSubfolder(newMathFolder.getName());
 
-        Set<Folder> foldersInCompSciTwoTen = cpscTwoTenFolder.containedFolders();
-        Set<Folder> foldersInMathTwoHundred = mathTwoHundredFolder.containedFolders();
+        Set<Folder> foldersInCompSciTwoTen = cpscTwoTenFolder.getSubfolders();
+        Set<Folder> foldersInMathTwoHundred = mathTwoHundredFolder.getSubfolders();
 
         assertTrue(foldersInCompSciTwoTen.isEmpty());
         assertEquals(1, foldersInMathTwoHundred.size());
@@ -254,20 +254,20 @@ public class TestFolder extends TestNamedObject {
 
     @Test
     void testAddFileOneFolder() {
-        assertEquals(cpscTwoTenFiles, cpscTwoTenFolder.containedFiles());
+        assertEquals(cpscTwoTenFiles, cpscTwoTenFolder.getSubfiles());
     }
 
     @Test
     void testAddFileMultipleFolders() {
-        assertEquals(cpscTwoTenFiles, cpscTwoTenFolder.containedFiles());
-        assertEquals(mathTwoHundredFiles, mathTwoHundredFolder.containedFiles());
+        assertEquals(cpscTwoTenFiles, cpscTwoTenFolder.getSubfiles());
+        assertEquals(mathTwoHundredFiles, mathTwoHundredFolder.getSubfiles());
     }
 
     @Test
     void testRemoveFile() {
-        educationFolder.removeFile(goalsFile);
+        educationFolder.removeSubfile(goalsFile.getName());
 
-        Set<File> filesInEducation = educationFolder.containedFiles();
+        Set<File> filesInEducation = educationFolder.getSubfiles();
 
         assertEquals(0, filesInEducation.size());
         assertNull(educationFolder.getSubfolder("Goals"));
@@ -275,40 +275,40 @@ public class TestFolder extends TestNamedObject {
 
     @Test
     void testRemoveFileMultiple() {
-        cpscTwoTenFolder.removeFile(goalsFile);
-        cpscTwoTenFolder.removeFile(ceeZeroOneQuestionsFile);
-        mathTwoHundredFolder.removeFile(myWebworkTwoAnswersFile);
-        mathTwoHundredFolder.removeFile(mywebworkOneAnswersFile);
+        cpscTwoTenFolder.removeSubfile(goalsFile.getName());
+        cpscTwoTenFolder.removeSubfile(ceeZeroOneQuestionsFile.getName());
+        mathTwoHundredFolder.removeSubfile(myWebworkTwoAnswersFile.getName());
+        mathTwoHundredFolder.removeSubfile(mywebworkOneAnswersFile.getName());
 
-        Set<File> filesInCompSciTwoTen = cpscTwoTenFolder.containedFiles();
-        Set<File> filesInMathTwoHundred = mathTwoHundredFolder.containedFiles();
+        Set<File> filesInCompSciTwoTen = cpscTwoTenFolder.getSubfiles();
+        Set<File> filesInMathTwoHundred = mathTwoHundredFolder.getSubfiles();
 
-        assertNotEquals(cpscTwoTenFiles, cpscTwoTenFolder.containedFiles());
-        assertNotEquals(mathTwoHundredFiles, mathTwoHundredFolder.containedFiles());
+        assertNotEquals(cpscTwoTenFiles, cpscTwoTenFolder.getSubfiles());
+        assertNotEquals(mathTwoHundredFiles, mathTwoHundredFolder.getSubfiles());
         assertEquals(1, filesInCompSciTwoTen.size());
         assertEquals(0, filesInMathTwoHundred.size());
-        assertNull(cpscTwoTenFolder.getFile("Goals"));
-        assertNull(cpscTwoTenFolder.getFile("C01 OH Questions"));
-        assertNotNull(cpscTwoTenFolder.getFile("Personal Project Ideas"));
-        assertNull(mathTwoHundredFolder.getFile("My WeBWorK 1 Answers"));
-        assertNull(mathTwoHundredFolder.getFile("My WeBWorK 2 Answers"));
+        assertNull(cpscTwoTenFolder.getSubfile("Goals"));
+        assertNull(cpscTwoTenFolder.getSubfile("C01 OH Questions"));
+        assertNotNull(cpscTwoTenFolder.getSubfile("Personal Project Ideas"));
+        assertNull(mathTwoHundredFolder.getSubfile("My WeBWorK 1 Answers"));
+        assertNull(mathTwoHundredFolder.getSubfile("My WeBWorK 2 Answers"));
     }
 
     @Test
     void testGetFileFail() {
-        assertNull(empty.getFile("name"));
+        assertNull(empty.getSubfile("name"));
 
-        assertNull(cpscTwoTenFolder.getFile("not in here"));
+        assertNull(cpscTwoTenFolder.getSubfile("not in here"));
     }
 
     @Test
     void testGetFileSucceed() {
-        assertEquals(personalProjectIdeasFile, cpscTwoTenFolder.getFile("Personal Project Ideas"));
-        assertEquals(ceeZeroOneQuestionsFile, cpscTwoTenFolder.getFile("C01 OH Questions"));
+        assertEquals(personalProjectIdeasFile, cpscTwoTenFolder.getSubfile("Personal Project Ideas"));
+        assertEquals(ceeZeroOneQuestionsFile, cpscTwoTenFolder.getSubfile("C01 OH Questions"));
 
-        assertEquals(mywebworkOneAnswersFile, mathTwoHundredFolder.getFile("My WeBWorK 1 Answers"));
-        assertEquals(myWebworkTwoAnswersFile, mathTwoHundredFolder.getFile("My WeBWorK 2 Answers"));
+        assertEquals(mywebworkOneAnswersFile, mathTwoHundredFolder.getSubfile("My WeBWorK 1 Answers"));
+        assertEquals(myWebworkTwoAnswersFile, mathTwoHundredFolder.getSubfile("My WeBWorK 2 Answers"));
 
-        assertEquals(goalsFile, educationFolder.getFile("Goals"));
+        assertEquals(goalsFile, educationFolder.getSubfile("Goals"));
     }
 }

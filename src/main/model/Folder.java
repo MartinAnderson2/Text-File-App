@@ -7,25 +7,25 @@ import java.util.HashSet;
 // and has a parent folder unless it is the root folder
 public class Folder extends NamedObject {
     private Set<Folder> subfolders;
-    private Set<File> containedFiles;
+    private Set<File> subfiles;
     private Folder parentFolder;
 
     // REQUIRES: !name.isEmpty()
     public Folder(String name) {
         this.name = name;
         subfolders = new HashSet<Folder>();
-        containedFiles = new HashSet<File>();
+        subfiles = new HashSet<File>();
         parentFolder = null;
     }
 
     // EFFECTS: returns a list of folders within this folder
-    public Set<Folder> containedFolders() {
+    public Set<Folder> getSubfolders() {
         return subfolders;
     }
 
     // EFFECTS: returns a list of files within this folder
-    public Set<File> containedFiles() {
-        return containedFiles;
+    public Set<File> getSubfiles() {
+        return subfiles;
     }
 
     // REQUIRES: this folder is not the root folder
@@ -48,8 +48,8 @@ public class Folder extends NamedObject {
 
     // MODIFIES: this
     // EFFECTS: removes this folder's reference to folder
-    public void removeSubfolder(Folder folder) {
-        subfolders.remove(folder);
+    public void removeSubfolder(String folderName) {
+        subfolders.remove(getSubfolder(folderName));
     }
 
     // EFFECTS: if this folder contains a folder named name return it, otherwise return null
@@ -66,20 +66,20 @@ public class Folder extends NamedObject {
     // MODIFIES: this
     // EFFECTS creates a new file named name with path path that is within this foler
     // and returns a reference to the newly created file
-    public File addFile(String name, String path) {
+    public File makeSubfile(String name, String path) {
         File newFile = new File(name, path);
-        containedFiles.add(newFile);
+        subfiles.add(newFile);
         return newFile;
     }
     
     // EFFECTS: removes this folder's reference to file
-    public void removeFile(File file) {
-        containedFiles.remove(file);
+    public void removeSubfile(String fileName) {
+        subfiles.remove(getSubfile(fileName));
     }
 
     // EFFECTS: returns file with given name or null if not found
-    public File getFile(String name) {
-        for (File file : containedFiles) {
+    public File getSubfile(String name) {
+        for (File file : subfiles) {
             if (file.isNamed(name)) {
                 return file;
             }
