@@ -21,3 +21,5 @@ This project is of interest to me since I will personally find it helpful for ke
 - As a user, I want to be able to search through the titles of my notes to find the one I desire.  
 - As a user, I want to be able to change the categorization of a note I have previously added. 
 - As a user, I want to be able to open my note after finding the desired one.  
+- As a user, I want to be given the option to save my file system when I quit
+- As a user, I want to be given the option to reload that save and resume where I left off when I start the application
