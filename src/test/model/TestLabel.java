@@ -7,7 +7,11 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import ui.exceptions.NameIsEmptyException;
+
 public class TestLabel extends TestNamedObject {
+    Folder arbitraryFolder;
+
     Label nounLabel;
     Label adjectiveLabel;
 
@@ -18,15 +22,19 @@ public class TestLabel extends TestNamedObject {
 
     @BeforeEach
     void runBefore() {
-        namedObject = new Label("name");
+        try {
+            namedObject = new Label("name");
 
-        nounLabel = new Label("Noun");
-        adjectiveLabel = new Label("Adjective");
+            nounLabel = new Label("Noun");
+            adjectiveLabel = new Label("Adjective");
 
-        houseFile = new File("House", "C:\\210");
-        happinessFile = new File("Happiness", "C:\\Haha\\Yes");
-        homeyFile = new File("Homey", "C:\\110");
-        happyFile = new File("Happy", "C:\\yeah");
+            houseFile = new File("House", "C:\\210");
+            happinessFile = new File("Happiness", "C:\\Haha\\Yes");
+            homeyFile = new File("Homey", "C:\\110");
+            happyFile = new File("Happy", "C:\\yeah");
+        } catch (NameIsEmptyException e) {
+            fail("NameIsEmptyException thrown when name was not empty");
+        }
     }
 
     @Test

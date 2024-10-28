@@ -1,6 +1,12 @@
 package model;
 
 import java.util.Set;
+
+import ui.exceptions.NameIsEmptyException;
+import ui.exceptions.NameIsTakenException;
+import ui.exceptions.NoSuchFileFoundException;
+import ui.exceptions.NoSuchFolderFoundException;
+
 import java.util.HashSet;
 
 // Represents a folder with a name that holds files as well as other folders
@@ -10,8 +16,13 @@ public class Folder extends NamedObject {
     private Set<File> subfiles;
     private Folder parentFolder;
 
-    // REQUIRES: !name.isEmpty()
-    public Folder(String name) {
+    // EFFECTS: constructs a new root folder named name with empty lists of subfiles and subfolders
+    // and no parent folder
+    // throws NameIsEmptyException if name.isEmpty() is true
+    public Folder(String name) throws NameIsEmptyException {
+        if (name.isEmpty()) {
+            throw new NameIsEmptyException();
+        }
         this.name = name;
         subfolders = new HashSet<Folder>();
         subfiles = new HashSet<File>();
@@ -28,62 +39,105 @@ public class Folder extends NamedObject {
         return subfiles;
     }
 
-    // REQUIRES: this folder is not the root folder
     // EFFECTS: returns this folder's parent folder
-    public Folder getParentFolder() {
+    // throws NoSuchFolderFoundException if this folder does not have a parent folder
+    public Folder getParentFolder() throws NoSuchFolderFoundException {
+        if (parentFolder == null) {
+            throw new NoSuchFolderFoundException();
+        }
         return parentFolder;
     }
 
-    // REQUIRES: !name.isEmpty()
     // MODIFIES: this
     // EFFECTS: creates a new folder that is a subfolder of this folder, named name
-    //          and returns a reference to the newly-created folder
-    public Folder makeSubfolder(String name) {
+    // throws NameIsEmptyException if name is empty
+    public void makeSubfolder(String name) throws NameIsEmptyException, NameIsTakenException {
+        if (name.isEmpty()) {
+            throw new NameIsEmptyException();
+        }
+        if (hasSubfolder(name)) {
+            throw new NameIsEmptyException();
+        }
         Folder newFolder = new Folder(name);
         newFolder.parentFolder = this;
         subfolders.add(newFolder);
-
-        return newFolder;
     }
 
     // MODIFIES: this
-    // EFFECTS: removes this folder's reference to folder
-    public void removeSubfolder(String folderName) {
+    // EFFECTS: removes this folder's reference to Folder named folderName (ignoring case)
+    // throws NoSuchFolderFoundException if this does not contain a subfolder named folderName (ignores case)
+    public void removeSubfolder(String folderName) throws NoSuchFolderFoundException {
         subfolders.remove(getSubfolder(folderName));
     }
 
-    // EFFECTS: if this folder contains a folder named name return it, otherwise return null
-    public Folder getSubfolder(String name) {
+    // EFFECTS: returns true if this contains a Folder named folderName otherwise returns false
+    public boolean hasSubfolder(String folderName) {
+        try {
+            getSubfolder(folderName);
+            return true;
+        } catch (NoSuchFolderFoundException e) {
+            return false;
+        }
+    }
+
+    // EFFECTS: if this folder contains a folder named name (ignoring case) returns it,
+    // otherwise throws NoSuchFolderFoundException
+    public Folder getSubfolder(String name) throws NoSuchFolderFoundException {
         for (Folder folder : subfolders) {
             if (folder.isNamed(name)) {
                 return folder;
             }
         }
-        return null;
+        throw new NoSuchFolderFoundException();
     }
 
-    // REQUIRES: !name.isEmpty()
     // MODIFIES: this
-    // EFFECTS creates a new file named name with path path that is within this foler
-    // and returns a reference to the newly created file
-    public File makeSubfile(String name, String path) {
-        File newFile = new File(name, path);
-        subfiles.add(newFile);
-        return newFile;
+    // EFFECTS creates a new file named name with path path that is within this folder
+    // throws NameIsEmptyException if name is empty
+    // throws NameIsTakenException if this contains a file named name (ignores case)
+    public void makeSubfile(String name, String path) throws NameIsEmptyException, NameIsTakenException {
+        if (name.isEmpty()) {
+            throw new NameIsEmptyException();
+        }
+        try {
+            throw new NameIsTakenException(getSubfile(name).name);
+        } catch (NoSuchFileFoundException e) {
+            File newFile = new File(name, path);
+            subfiles.add(newFile);
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: adds a pre-existing subfile
+    public void addExistingSubfile(File file) {
+        subfiles.add(file);
     }
     
-    // EFFECTS: removes this folder's reference to file
-    public void removeSubfile(String fileName) {
+    // MODIFIES: this
+    // EFFECTS: removes this folder's reference to file named fileName (ignoring case)
+    // throws NoSuchFileFoundException if this does not contain a file named fileName (ignoring case)
+    public void removeSubfile(String fileName) throws NoSuchFileFoundException {
         subfiles.remove(getSubfile(fileName));
     }
 
-    // EFFECTS: returns file with given name or null if not found
-    public File getSubfile(String name) {
+    // EFFECTS: returns true if this contains a File named fileName otherwise returns false
+    public boolean hasSubfile(String fileName) {
+        try {
+            getSubfile(fileName);
+            return true;
+        } catch (NoSuchFileFoundException e) {
+            return false;
+        }
+    }
+
+    // EFFECTS: returns file with given name
+    // throws NoSuchFileExistsException if this folder does not contain a file named fileName (ignoring case)
+    public File getSubfile(String name) throws NoSuchFileFoundException {
         for (File file : subfiles) {
             if (file.isNamed(name)) {
                 return file;
             }
         }
-        return null;
+        throw new NoSuchFileFoundException();
     }
 }

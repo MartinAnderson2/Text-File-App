@@ -2,15 +2,20 @@ package model;
 
 import java.util.*;
 
+import ui.exceptions.NameIsEmptyException;
+
 // Represents a file having a name, a file path where it is stored on the user's computer,
 // and a set of labels that it is tagged with
 public class File extends NamedObject {
     private String filePath;
     private Set<Label> labels;
-    private int numLabels;
 
-    // REQUIRES: !name.isEmpty()
-    public File(String name, String filePath) {
+    // EFFECTS: constructs a new file named name with path filePath and an empty list of labels it is labelled with
+    // throws NameIsEmptyException if name is empty
+    public File(String name, String filePath) throws NameIsEmptyException {
+        if (name.isEmpty()) {
+            throw new NameIsEmptyException();
+        }
         this.name = name;
         this.filePath = filePath;
         labels = new HashSet<Label>();
@@ -18,18 +23,15 @@ public class File extends NamedObject {
 
     // MODIFIES: this
     // EFFECTS: labels this file with label
+    // INVARIANT: label must have a reference to this while this is labelled
     protected void addLabel(Label label) {
         labels.add(label);
-        numLabels++;
     }
 
     // MODIFIES: this
     // EFFECTS: removes given label from this file. returns true if it had a label on it and false if it did not
     protected boolean removeLabel(Label label) {
         boolean succeeded = labels.remove(label);
-        if (succeeded) {
-            numLabels--;
-        }
         return succeeded;
     }
 
@@ -62,8 +64,9 @@ public class File extends NamedObject {
         return getCharactersAfterLastBackslash(path);
     }
 
-        // EFFECTS: returns the name of a file on the user's computer given a string of its path.
-    // This is the contents of the string after the last backslash
+    // EFFECTS: returns the name of a file on the user's computer given a string of its path, without the file
+    // extension. This is the contents of the string after the last backslash minus the text after (and including) the
+    // final period
     public static String getNameOfFileOnDiskWithoutExtension(String path) {
         return getCharactersBeforeLastDot(getCharactersAfterLastBackslash(path));
     }
@@ -80,20 +83,20 @@ public class File extends NamedObject {
     }
 
     public int getNumLabels() {
-        return numLabels;
+        return labels.size();
     }
 
 
     // Helper Methods:
 
-    // EFFECTS: returns all characters after the final backslash of string; returns null if no backlash is present
-    private static String getCharactersAfterLastBackslash(String string) {
+    // EFFECTS: returns all characters after the final backslash of string; returns string if no backlash is present
+    private static String getCharactersAfterLastBackslash(String string)  {
         for (int i = string.length() - 1; i > 0; i--) {
             if (string.charAt(i) == '\\') {
                 return (string.substring(i + 1));
             }
         }
-        return null;
+        return string;
     }
 
     // EFFECTS: returns string with all characters after and including the final dot (.) removed

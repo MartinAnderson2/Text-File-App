@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import ui.exceptions.NameIsEmptyException;
+
 public class TestFile extends TestNamedObject {
     File ceeSharpFile;
     File beeSLFile;
@@ -15,14 +17,18 @@ public class TestFile extends TestNamedObject {
     
     @BeforeEach
     void runBefore() {
-        namedObject = new File("name", "C:\\Users\\You\\biography.txt");
+        try {
+            namedObject = new File("name", "C:\\Users\\You\\biography.txt");
 
-        ceeSharpFile = new File("C#", "C:\\Users\\You\\repo\\C Sharp.txt");
-        beeSLFile = new File("BSL", "C:\\Users\\You\\Documents\\Dr Racket Files\\lecture 2 notes.txt");
-        javaFile = new File("Java", "C:\\Users\\You\\.vscode\\specification.txt");
+            ceeSharpFile = new File("C#", "C:\\Users\\You\\repo\\C Sharp.txt");
+            beeSLFile = new File("BSL", "C:\\Users\\You\\Documents\\Dr Racket Files\\lecture 2 notes.txt");
+            javaFile = new File("Java", "C:\\Users\\You\\.vscode\\specification.txt");
 
-        programmingLanguageLabel = new Label("Programming Language");
-        lowerLevelComputerScienceCourseLabel = new Label("Taught in lower level computer science courses at UBC");
+            programmingLanguageLabel = new Label("Programming Language");
+            lowerLevelComputerScienceCourseLabel = new Label("Taught in lower level computer science courses at UBC");
+        } catch (NameIsEmptyException e) {
+            fail("NameIsEmptyException thrown when name was not empty");
+        }
     }
 
     @Test

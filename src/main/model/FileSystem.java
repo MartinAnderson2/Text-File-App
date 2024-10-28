@@ -3,7 +3,14 @@ package model;
 import java.util.Set;
 
 import ui.exceptions.FilePathNoLongerValidException;
+import ui.exceptions.NameIsEmptyException;
+import ui.exceptions.NameIsTakenException;
+import ui.exceptions.NoSuchFileFoundException;
+import ui.exceptions.NoSuchFolderFoundException;
+import ui.exceptions.NoSuchLabelFoundException;
+import ui.exceptions.RequiresClauseNotMetRuntimeException;
 import ui.exceptions.SetIsEmptyAndShouldNotBeException;
+import ui.exceptions.ThereExistsMoreThanOneLabelException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -11,11 +18,11 @@ import java.util.LinkedList;
 import java.io.IOException;
 import java.awt.Desktop;
 
-// Represents a file system with folders and files as well as labels that can be applied to files.
-// Folders can be navigated and it is possible to get all of the folders and all of the files in the current folder.
-// Files, folders, and labels can be created and deleted. Files can be labelled and unlabelled. Files can be opened in
-// the user's default text editor. Folders can be opened to access their contents. It is possible to list all files
-// labelled with a given label.
+// Represents a file system with Folders and Files as well as Labels that can be applied to Files.
+// Folders can be navigated and it is possible to get all of the Folders and all of the Files in the current Folder.
+// Files, Folders, and Labels can be created and deleted. Files can be labelled and unlabelled. Files can be opened in
+// the user's default text editor. Folders can be opened to access their contents. It is possible to list all Files
+// labelled with a given Label.
 public class FileSystem {
     public static final String EXAMPLE_FILE_PATH = "C:\\Users\\User\\Documents\\Note Name.txt";
 
@@ -28,10 +35,14 @@ public class FileSystem {
     // rootFolder: for the Folder that contains the initial Folders and Files, and indirectly contains every Folder and
     //             File since every Folder or File is a subfolder or subfile of root or one of root's subfolders (or a
     //             subfolder's subfolder, and so on...)
-    // currentFolder: initialized to the root folder such that folders can be created and files can be added
-    // allLabels: stores all of the labels the user creates
+    // currentFolder: initialized to the root Folder such that Folders can be created and Files can be added
+    // allLabels: stores all of the Labels the user creates
     public FileSystem() {
-        rootFolder = new Folder("root");
+        try {
+            rootFolder = new Folder("root");
+        } catch (NameIsEmptyException e) {
+            // Won't happen unless Folder is implemented incorrectly
+        }
         currentFolder = rootFolder;
 
         labels = new HashSet<Label>();
@@ -47,9 +58,10 @@ public class FileSystem {
         return currentFolder.getName();
     }
 
-    // REQUIRES: currentFolderHasParent() is true
-    // EFFECTS: returns currentFolder's parent's name
-    public String getParentFolderName() {
+    // EFFECTS: returns currentFolder's parent's name. Throws NoSuchFolderFoundException if currentFolder does not have
+    // a parent Folder
+    // throws NoSuchFolderFoundException if currentFolder does not have a parent
+    public String getParentFolderName() throws NoSuchFolderFoundException {
         return currentFolder.getParentFolder().getName();
     }
 
@@ -60,16 +72,18 @@ public class FileSystem {
 
     // File:
 
-    // REQUIRES: currentFolder does not contain a File named name and !name.isEmpty()
+    // MODIFIES: this
     // EFFECTS: creates a new File in currentFolder with given name and path
-    public void createFile(String name, String path) {
+    // throws NameIsEmptyException if the provided name is empty
+    // throws NameIsTakenException if currentFolder already contains a Folder named name
+    public void createFile(String name, String path) throws NameIsEmptyException, NameIsTakenException {
         currentFolder.makeSubfile(name, path);
     }
 
-    // REQUIRES: fileWithNameAlreadyExists(fileName) is true
     // EFFECTS: opens File named fileName in user's default text editor
     // throws FilePathNoLongerValidException if the File no longer exists on their computer
-    public void openFile(String fileName) throws FilePathNoLongerValidException {
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    public void openFile(String fileName) throws NoSuchFileFoundException, FilePathNoLongerValidException {
         File file = currentFolder.getSubfile(fileName);
 
         if (!FileSystem.isFilePathValid(file.getFilePath())) {
@@ -79,53 +93,68 @@ public class FileSystem {
 
         try {
             Desktop.getDesktop().open(new java.io.File(file.getFilePath()));
-            System.out.println(getCurrentFolderName() + " opened");
         } catch (IOException e) {
-            System.out.println("File failed to open. Please contact the developer if this issue persists");
+            throw new FilePathNoLongerValidException();
         }
     }
 
-    // REQUIRES : fileWithNameAlreadyExists(fileName) is true
     // MODIFIES: this
     // EFFECTS: deletes File named fileName
-    public void deleteFile(String fileName) {
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    public void deleteFile(String fileName) throws NoSuchFileFoundException {
         removeAllLabels(fileName);
         currentFolder.removeSubfile(fileName);
     }
 
-    // REQUIRES: fileWithNameAlreadyExists(fileName) is true
     // EFFECTS: sets the name of File named fileName to newName
-    public void setFileName(String fileName, String newName) {
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    // throws NameIsTakenException if currentFolder already contains a Folder named name
+    // throws NameIsEmptyException is fileName.isEmpty() is true
+    public void setFileName(String fileName, String newName)
+            throws NoSuchFileFoundException, NameIsTakenException, NameIsEmptyException {
+        if (fileWithNameAlreadyExists(fileName)) {
+            throw new NameIsTakenException(getCapitalizationOfFile(fileName));
+        }
         currentFolder.getSubfile(fileName).setName(newName);
     }
 
-    // REQUIRES: fileWithNameAlreadyExists(fileName) is true
     // EFFECTS: returns the file path of File named fileName
-    public String getFilePath(String fileName) {
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    public String getFilePath(String fileName) throws NoSuchFileFoundException {
         return currentFolder.getSubfile(fileName).getFilePath();
     }
 
     // EFFECTS: returns true if currentFolder contains a File named fileName otherwise returns false
     public boolean fileWithNameAlreadyExists(String fileName) {
-        return currentFolder.getSubfile(fileName) != null;
+        try {
+            currentFolder.getSubfile(fileName);
+            return true;
+        } catch (NoSuchFileFoundException e) {
+            return false;
+        }
     }
 
-    // REQUIRES: fileWithNameAlreadyExists(fileNameWrongCase) is true,
-    // i.e. currentFolder contains a File named fileNameWrongCase (but potentially with different capitalization)
+    // REQUIRES: fileWithNameAlreadyExists(fileNameWrongCase) is true
     // EFFECTS: returns the actual capitalization of the name of the File named fileNameWrongCase
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
     public String getCapitalizationOfFile(String fileNameWrongCase) {
-        return currentFolder.getSubfile(fileNameWrongCase).getName();
+        try {
+            return currentFolder.getSubfile(fileNameWrongCase).getName();
+        } catch (NoSuchFileFoundException e) {
+            throw new RequiresClauseNotMetRuntimeException();
+        }
     }
 
-    // REQUIRES: fileWithNameAlreadyExists(fileName) is true and labelExists(labelName)
-    // EFFECTS: returns true if File named FileName is labelled with label named LabelName
-    public boolean fileLabelled(String fileName, String labelName) {
+    // EFFECTS: returns true if File named FileName is labelled with Label named LabelName
+    // throws NoSuchFileFoundException if there are no files named fileName in currentFolder
+    // throws NoSuchLabelFoundException if there are no labels named labelName
+    public boolean fileLabelled(String fileName, String labelName)
+            throws NoSuchFileFoundException, NoSuchLabelFoundException {
         File file = currentFolder.getSubfile(fileName);
         Label label = getLabel(labelName);
         return file.isLabelled(label);
     }
 
-    // REQUIRES: fileWithNameAlreadyExists(fileName) is true
     // EFFECTS: returns a list of the names of the Files that are subfiles of currentFolder
     public List<String> getNamesOfAllSubfiles() {
         List<String> namesOfSubfiles = new LinkedList<String>();
@@ -137,57 +166,68 @@ public class FileSystem {
 
     // Folder:
 
-    // REQUIRES: !folderName.isEmpty()
     // MODIFIES: currentFolder
     // EFFECTS: creates a new subfolder in the current directory with name folderName
-    public void createFolder(String folderName) {
+    // throws NameIsEmptyException is folderName.isEmpty() is true
+    // throws NameIsTakenException is folderWithNameAlreadyExists(folderName) is true
+    public void createFolder(String folderName) throws NameIsEmptyException, NameIsTakenException {
         currentFolder.makeSubfolder(folderName);
     }
 
-    // REQUIRES: folderWithNameAlreadyExists(folderName) is true
     // MODIFIES: this
     // EFFECTS: opens Folder named folderName, i.e. makes that Folder the current directory
-    public void openFolder(String folderName) {
+    // throws NoSuchFolderFoundException if there are no Folders named folderName in currentFolder
+    public void openFolder(String folderName) throws NoSuchFolderFoundException {
         currentFolder = currentFolder.getSubfolder(folderName);
     }
 
-    // REQURIES: currentFolderHasParent() is true
     // MODIFIES: this
-    // EFFECTS: opens the parent folder of currentFolder
-    public void goUpOneDirectoryLevel() {
+    // EFFECTS: opens the parent Folder of currentFolder
+    // throws NoSuchFolderFoundException if currentFolder does not have a parent
+    public void goUpOneDirectoryLevel() throws NoSuchFolderFoundException {
         currentFolder = currentFolder.getParentFolder();
     }
 
     // MODIFIES: this
-    // EFFECTS: opens the root folder
+    // EFFECTS: opens the root Folder
     public void openRootFolder() {
         currentFolder = rootFolder;
     }
 
-    // REQUIRES: folderWithNameAlreadyExists(folderName) is true
     // MODIFIES: this
     // EFFECTS: deletes Folder named folderName
-    public void deleteFolder(String folderName) {
+    // throws NoSuchFolderFoundException if there are no Folders named folderName in currentFolder
+    public void deleteFolder(String folderName) throws NoSuchFolderFoundException {
         currentFolder.removeSubfolder(folderName);
     }
 
-    // REQUIRES: folderWithNameAlreadyExists(folderName) is true
     // EFFECTS: sets the name of Folder named folderName to newName
-    public void setFolderName(String folderName, String newName) {
+    // throws NoSuchFolderFoundException if there are no Folders named folderName in currentFolder
+    // throws NameIsTakenException if currentFolder already contains a Folder named name
+    // throws NameIsEmptyException is folderName.isEmpty() is true
+    public void setFolderName(String folderName, String newName)
+            throws NoSuchFolderFoundException, NameIsTakenException, NameIsEmptyException {
+        if (folderWithNameAlreadyExists(folderName)) {
+            throw new NameIsTakenException(getCapitalizationOfFolder(folderName));
+        }
         currentFolder.getSubfolder(folderName).setName(newName);
     }
 
-    // EFFECTS: returns true if the currently-opened folder has a parent and false if it does not
+    // EFFECTS: returns true if the currently-opened Folder has a parent and false if it does not
     public boolean currentFolderHasParent() {
-        return currentFolder.getParentFolder() != null;
+        try {
+            currentFolder.getParentFolder();
+            return true;
+        } catch (NoSuchFolderFoundException e) {
+            return false;
+        }
     }
 
     // EFFECTS: returns true if currentFolder contains a Folder named folderName otherwise returns false
     public boolean folderWithNameAlreadyExists(String folderName) {
-        return currentFolder.getSubfolder(folderName) != null;
+        return currentFolder.hasSubfolder(folderName);
     }
 
-    // REQUIRES: folderWithNameAlreadyExists(folderName) is true
     // EFFECTS: returns a list of the names of the Folders that are direct subfolders of currentFolder
     public List<String> getNamesOfAllSubfolders() {
         List<String> namesOfSubfolders = new LinkedList<String>();
@@ -197,103 +237,141 @@ public class FileSystem {
         return namesOfSubfolders;
     }
 
-    // REQUIRES: folderWithNameAlreadyExists(folderNameWrongCase) is true,
-    // i.e. currentFolder contains a Folder named folderNameWrongCase (but potentially with different capitalization)
+    // REQUIRES: folderWithNameAlreadyExists(folderNameWrongCase) is true
     // EFFECTS: returns the actual capitalization of the name of the Folder named folderNameWrongCase
+    // throws NoSuchFolderFoundException if there are no Folders named folderNameWrongCase in currentFolder
     public String getCapitalizationOfFolder(String folderNameWrongCase) {
-        return currentFolder.getSubfolder(folderNameWrongCase).getName();
+        try {
+            return currentFolder.getSubfolder(folderNameWrongCase).getName();
+        } catch (NoSuchFolderFoundException e) {
+            throw new RequiresClauseNotMetRuntimeException();
+        }
     }
 
     // Label:
 
-    // REQUIRES: !labelName.isEmpty()
     // MODIFIES: this
     // EFFECTS: creates a new Label named labelName (and no Files are labelled it)
-    public void createLabel(String labelName) {
+    // throws NameIsEmptyException if labelName is empty
+    // throws NameIsTakenException if there is already a label named labelName
+    public void createLabel(String labelName) throws NameIsEmptyException, NameIsTakenException {
+        if (labelName.isEmpty()) {
+            throw new NameIsEmptyException();
+        }
+        if (labelExists(labelName)) {
+            throw new NameIsTakenException(getCapitalizationOfLabel(labelName));
+        }
         labels.add(new Label(labelName));
     }
 
-    // REQUIRES: labelExists(labelName) is true
     // MODIFIES: this
-    // EFFECTS: creates a new folder with every File labelled file and sets currentFolder to that new folder
-    // this is not an actual folder in the file system but rataher a fake one to view all files labelled with the
-    // given label. This is a read-only directory
-    public void openLabel(String labelName) {
+    // EFFECTS: creates a new Folder with every File labelled File and sets currentFolder to that new Folder
+    // this is not an actual Folder in the File system but rataher a fake one to view all Files labelled with the
+    // given Label. This is a brand-new directory to which adding and removing Files and Folders is pointless
+    // throws NoSuchLabelFoundException if there are no Labels named labelName
+    // throws NameIsTakenException if currentFolder already contains a 
+    public void openLabel(String labelName) throws NameIsEmptyException, NoSuchLabelFoundException {
+        if (labelName.isEmpty()) {
+            throw new NameIsEmptyException();
+        }
         Folder labelFolder = new Folder(labelName);
         for (File file : getLabel(labelName).getLabelledFiles()) {
-            labelFolder.makeSubfile(file.getName(), file.getFilePath());
+            labelFolder.addExistingSubfile(file);
         }
         currentFolder = labelFolder;
     }
 
-    // REQUIRES: labelExists(labelName) is true
     // MODIFIES: this
     // EFFECTS: deletes Label with name labelName
-    public void deleteLabel(String labelName) {
+    // throws NoSuchLabelFoundException if there are no Labels named labelName
+    public void deleteLabel(String labelName) throws NoSuchLabelFoundException {
         Label label = getLabel(labelName);
         label.unlabelAllFiles();
         labels.remove(label);
         System.out.println(labelName + " has been deleted");
     }
 
-    // REQUIRES: exactlyOneLabelExists() is true and fileWithNameAlreadyExists(fileName) is true
-    // MODIFIES: this (specifically File named fileName)
-    // EFFECTS: labels File named fileName with the only label that the user has made so far
-    public void labelFileWithTheOnlyLabel(String fileName) {
+    // MODIFIES: this
+    // EFFECTS: labels File named fileName with the only Label that the user has made so far
+    // throws SetIsEmptyAndShouldNotBeException if there are no Labels in labels
+    // throws NoSuchFileFoundException if there are no Files named fileName
+    // throws ThereExistsMoreThanOneLabelException if there is more than one Label in labels
+    public void labelFileWithTheOnlyLabel(String fileName)
+            throws SetIsEmptyAndShouldNotBeException, NoSuchFileFoundException, ThereExistsMoreThanOneLabelException {
+        if (!exactlyOneLabelExists()) {
+            throw new ThereExistsMoreThanOneLabelException();
+        }
         firstLabelFound(labels).labelFile(currentFolder.getSubfile(fileName));
     }
 
-    // REQUIRES: fileWithNameAlreadyExists(fileName) is true and labelExists(labelName) is true
-    // MODIFIES: this (specifically File named fileName)
+    // MODIFIES: this
     // EFFECTS: labels File named fileName with the Label named labelName
-    public void labelFile(String fileName, String labelName) {
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    // throws NoSuchLabelFoundException if there are no Labels named labelName
+    public void labelFile(String fileName, String labelName)
+            throws NoSuchFileFoundException, NoSuchLabelFoundException {
         File file = currentFolder.getSubfile(fileName);
         Label label = getLabel(labelName);
         label.labelFile(file);
     }
 
-    // REQUIRES: fileWithNameAlreadyExists(fileName) is true and labelExists(labelName) is true
-    // MODIFIES: this (specifically File named fileName)
+    // MODIFIES: this
     // EFFECTS: removes Label named labelName from the File named fileName
-    public void unlabelFile(String fileName, String labelName) {
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    public void unlabelFile(String fileName, String labelName)
+            throws NoSuchFileFoundException, NoSuchLabelFoundException {
         File file = currentFolder.getSubfile(fileName);
         Label label = getLabel(labelName);
         label.unlabelFile(file);
     }
 
-    // REQUIRES: labelExists(labelName) is true
     // MODIFIES: this
     // EFFECTS: sets the name of Label named labelName to newName
-    public void setLabelName(String labelName, String newName) {
-        getLabel(labelName).setName(newName);
+    // throws NoSuchLabelFoundException if there are no Labels named labelName
+    public void setLabelName(String labelName, String newName) throws NoSuchLabelFoundException {
+        try {
+            getLabel(labelName).setName(newName);
+        } catch (NameIsEmptyException e) {
+            throw new NoSuchLabelFoundException();
+        }
     }
 
-    // EFFECTS: returns true if the user has created any labels and false if no labels have been made
+    // EFFECTS: returns true if the user has created any Labels and false if no Labels have been made
     public boolean anyLabelsExist() {
         return !labels.isEmpty();
     }
 
-    // EFFECTS: returns true if the user has created exactly 1 label
+    // EFFECTS: returns true if the user has created exactly 1 Label
     public boolean exactlyOneLabelExists() {
         return labels.size() == 1;
     }
 
-    // EFFECTS: returns true if there exists a label named labelName otherwise returns false
+    // EFFECTS: returns true if there exists a Label named labelName otherwise returns false
     public boolean labelExists(String labelName) {
-        return labels.contains(getLabel(labelName));
+        try {
+            getLabel(labelName);
+            return true;
+        } catch (NoSuchLabelFoundException e) {
+            return false;
+        }
     }
 
-    // REQUIRES: labelExists(labelNameWrongCase) is true,
-    // i.e. labels contains a Label named labelNameWrongCase (but potentially with different capitalization)
+    // REQUIRES: labelExists(labelNameWrongCase) is true
     // EFFECTS: returns the actual capitalization of the name of the Label named labelNameWrongCase
+    // throws NoSuchLabelFoundException if there are no Labels named labelNameWrongCase
     public String getCapitalizationOfLabel(String labelNameWrongCase) {
-        return getLabel(labelNameWrongCase).getName();
+        try {
+            return getLabel(labelNameWrongCase).getName();
+        } catch (NoSuchLabelFoundException e) {
+            throw new RequiresClauseNotMetRuntimeException();
+        }
     }
 
-    // REQUIRES: fileWithNameAlreadyExists(fileName) is true
     // MODIFIES: this (File named fileName)
-    // EFFECTS: removes all of the labels on File named fileName
-    public void removeAllLabels(String fileName) {
+    // EFFECTS: removes all of the Labels on File named fileName
+    // throws NoSuchFileFoundException if there are no Files named fileName
+    public void removeAllLabels(String fileName) throws NoSuchFileFoundException {
         File file = currentFolder.getSubfile(fileName);
         
         for (Label label : labels) {
@@ -303,9 +381,12 @@ public class FileSystem {
         }
     }
 
-    // REQUIRES: exactlyOneLabelExists() is true
-    // EFFECTS: returns the name of the only label the user has made
-    public String getOnlyLabelName() {
+    // EFFECTS: returns the name of the only Label the user has made
+    // throws ThereExistsMoreThanOneLabelException if there is more than one Label
+    public String getOnlyLabelName() throws ThereExistsMoreThanOneLabelException {
+        if (!exactlyOneLabelExists()) {
+            throw new ThereExistsMoreThanOneLabelException();
+        }
         return firstLabelFound(labels).getName();
     }
 
@@ -313,14 +394,15 @@ public class FileSystem {
         return labels.size();
     }
 
-    // REQUIRES: fileWithNameAlreadyExists(fileName) is true
-    public int getNumLabelsOnFile(String fileName) {
+    // EFFECTS: returns the number of Labels on File named fileName
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    public int getNumLabelsOnFile(String fileName) throws NoSuchFileFoundException {
         return currentFolder.getSubfile(fileName).getNumLabels();
     }
 
-    // REQUIRES: fileWithNameAlreadyExists(fileName) is true
-    // EFFECTS: returns the number of labels that are not on File named fileName
-    public int getNumLabelsNotOnFile(String fileName) {
+    // EFFECTS: returns the number of Labels that are not on File named fileName
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    public int getNumLabelsNotOnFile(String fileName) throws NoSuchFileFoundException {
         return getNumLabels() - currentFolder.getSubfile(fileName).getNumLabels();
     }
 
@@ -333,9 +415,9 @@ public class FileSystem {
         return namesOfLabels;
     }
 
-    // REQUIRES: fileWithNameAlreadyExists(fileName) is true
     // EFFECTS: returns a list of the names of the Labels on File named fileName
-    public List<String> getNamesOfAllLabelsOnFile(String fileName) {
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    public List<String> getNamesOfAllLabelsOnFile(String fileName) throws NoSuchFileFoundException {
         File file = currentFolder.getSubfile(fileName);
         List<String> namesOfLabelsOnFile = new LinkedList<String>();
         for (Label label : labels) {
@@ -346,9 +428,9 @@ public class FileSystem {
         return namesOfLabelsOnFile;
     }
 
-    // REQUIRES: fileWithNameAlreadyExists(fileName) is true
     // EFFECTS: returns a list of the names of the Labels not on File named fileName
-    public List<String> getNamesOfAllLabelsNotOnFile(String fileName) {
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    public List<String> getNamesOfAllLabelsNotOnFile(String fileName) throws NoSuchFileFoundException {
         File file = currentFolder.getSubfile(fileName);
         List<String> namesOfLabelsNotOnFile = new LinkedList<String>();
         for (Label label : labels) {
@@ -364,7 +446,7 @@ public class FileSystem {
      *  Static Methods:
      */
 
-    // EFFECTS: returns true if a file exists at path on the user's computer otherwise returns false
+    // EFFECTS: returns true if a File exists at path on the user's computer otherwise returns false
     public static boolean isFilePathValid(String path) {
         java.io.File file = new java.io.File(path);
 
@@ -378,6 +460,7 @@ public class FileSystem {
 
     // EFFECTS: returns the first element found in a set of Labels
     // (this isn't necessarily - and probably isn't - the first object added)
+    // throws SetIsEmptyAndShouldNotBeException if labels is empty
     private Label firstLabelFound(Set<Label> labels) throws SetIsEmptyAndShouldNotBeException {
         for (Label label : labels) {
             return label;
@@ -385,14 +468,14 @@ public class FileSystem {
         throw new SetIsEmptyAndShouldNotBeException();
     }
 
-    // TODO:
-    // EFFECTS: returns label with given name or null if not found
-    private Label getLabel(String name) {
+    // EFFECTS: returns Label with given name or null if not found
+    // throws NoSuchLabelFoundException if there are no Labels named labelName
+    private Label getLabel(String name) throws NoSuchLabelFoundException {
         for (Label label : labels) {
             if (label.isNamed(name)) {
                 return label;
             }
         }
-        return null;
+        throw new NoSuchLabelFoundException();
     }
 }

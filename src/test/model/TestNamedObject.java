@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import ui.exceptions.NameIsEmptyException;
+
 public abstract class TestNamedObject {
     NamedObject namedObject;
 
@@ -14,131 +16,140 @@ public abstract class TestNamedObject {
 
     @Test
     void testIsBeginningOfNameEmptyInput() {
-        namedObject.setName("Apple");
+        setNamedObjectNameFailIfExceptionThrown("Apple");
         assertTrue(namedObject.isBeginningOfName(""));
     }
 
     @Test
     void testIsBeginningOfNameEmptyInputs() {
-        namedObject.setName("Orange");
+        setNamedObjectNameFailIfExceptionThrown("Orange");
         assertTrue(namedObject.isBeginningOfName(""));
         assertFalse(namedObject.isBeginningOfName("Apple"));
     }
 
     @Test
     void testIsBeginningOfNameNoMatch() {
-        namedObject.setName("Apple");
+        setNamedObjectNameFailIfExceptionThrown("Apple");
         assertFalse(namedObject.isBeginningOfName("Coconut"));
     }
 
     @Test
     void testIsBeginningOfNameJustFirstCharacterMatches() {
-        namedObject.setName("Raspberry");
+        setNamedObjectNameFailIfExceptionThrown("Raspberry");
         assertFalse(namedObject.isBeginningOfName("Rose Hip"));
     }
 
     @Test
     void testIsBeginningOfNameFirstCharactersButNotAllMatch() {
-        namedObject.setName("Apple");
+        setNamedObjectNameFailIfExceptionThrown("Apple");
         assertFalse(namedObject.isBeginningOfName("Apricot"));
     }
 
     @Test
     void testIsBeginningOfNameOneCharacterAndMatches() {
-        namedObject.setName("Apple");
+        setNamedObjectNameFailIfExceptionThrown("Apple");
         assertTrue(namedObject.isBeginningOfName("A"));
     }
 
     @Test
     void testIsBeginningOfNameMultipleCharactersButNotFullAndMatches() {
-        namedObject.setName("Orange");
+        setNamedObjectNameFailIfExceptionThrown("Orange");
         assertTrue(namedObject.isBeginningOfName("Ora"));
     }
 
     @Test
     void testIsBeginningOfNameAllCharactersMatch() {
-        namedObject.setName("Apple");
+        setNamedObjectNameFailIfExceptionThrown("Apple");
         assertTrue(namedObject.isBeginningOfName("Apple"));
         assertTrue(namedObject.isBeginningOfName(namedObject.getName()));
     }
 
     @Test
     void testIsBeginningOfNameAllCharactersMatchButInputIsLonger() {
-        namedObject.setName("Orange");
+        setNamedObjectNameFailIfExceptionThrown("Orange");
         assertFalse(namedObject.isBeginningOfName("Oranges"));
     }
 
     @Test
     void testIsBeginningOfNameWrongCase() {
-        namedObject.setName("Orange");
+        setNamedObjectNameFailIfExceptionThrown("Orange");
         assertTrue(namedObject.isBeginningOfName("orange"));
     }
 
 
     @Test
     void testIsNamedEmpty() {
-        namedObject.setName("Acer");
+        setNamedObjectNameFailIfExceptionThrown("Acer");
         assertFalse(namedObject.isNamed(""));
     }
 
     @Test
     void testIsNamedAllCharactersWrong() {
-        namedObject.setName("Acer");
+        setNamedObjectNameFailIfExceptionThrown("Acer");
         assertFalse(namedObject.isNamed("MSI"));
     }
 
     @Test
     void testIsNamedFirstCharacterWrong() {
-        namedObject.setName("Lenovo");
+        setNamedObjectNameFailIfExceptionThrown("Lenovo");
         assertFalse(namedObject.isNamed("Penovo"));
     }
 
     @Test
     void testIsNamedMiddleCharacterWrong() {
-        namedObject.setName("Lenovo");
+        setNamedObjectNameFailIfExceptionThrown("Lenovo");
         assertFalse(namedObject.isNamed("Lenxvo"));
     }
 
     @Test
     void testIsNamedLastCharacterWrong() {
-        namedObject.setName("ASUS");
+        setNamedObjectNameFailIfExceptionThrown("ASUS");
         assertFalse(namedObject.isNamed("ASUT"));
     }
 
     @Test
     void testIsNamedRight() {
-        namedObject.setName("ASUS");
+        setNamedObjectNameFailIfExceptionThrown("ASUS");
         assertTrue(namedObject.isNamed("ASUS"));
         assertTrue(namedObject.isNamed(namedObject.getName()));
     }
 
     @Test
     void testIsNamedRightButLonger() {
-        namedObject.setName("HP");
+        setNamedObjectNameFailIfExceptionThrown("HP");
         assertFalse(namedObject.isNamed("HPs"));
     }
 
     @Test
     void testIsNamedWrongCaseOneCharacter() {
-        namedObject.setName("H");
+        setNamedObjectNameFailIfExceptionThrown("H");
         assertTrue(namedObject.isNamed("h"));
     }
 
     @Test
     void testIsNamedRightLowerCaseDiffers() {
-        namedObject.setName("HP");
+        setNamedObjectNameFailIfExceptionThrown("HP");
         assertTrue(namedObject.isNamed("Hp"));
     }
 
     @Test
     void testIsNamedRightUpperCaseDiffers() {
-        namedObject.setName("Lenovo");
+        setNamedObjectNameFailIfExceptionThrown("Lenovo");
         assertTrue(namedObject.isNamed("LenoVo"));
     }
 
     @Test
     void testIsNamedRightCasesDiffer() {
-        namedObject.setName("Acer");
+        setNamedObjectNameFailIfExceptionThrown("Acer");
         assertTrue(namedObject.isNamed("aCER"));
+    }
+    
+    // EFFECTS: sets namedObject's name to name and fails if NameIsEmptyException thrown
+    private void setNamedObjectNameFailIfExceptionThrown(String name) {
+        try {
+            namedObject.setName(name);
+        } catch (NameIsEmptyException e) {
+            fail("NameIsEmptyException thrown when name was not empty");
+        }
     }
 }

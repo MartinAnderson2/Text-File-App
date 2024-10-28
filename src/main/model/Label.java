@@ -1,14 +1,21 @@
 package model;
 
 import java.util.Set;
+
+import ui.exceptions.NameIsEmptyException;
+
 import java.util.HashSet;
 
 // Represents a label having a name and a list of all files labelled with this label
 public class Label extends NamedObject {
     Set<File> labelledFiles;
 
-    // REQUIRES: !name.isEmpty()
-    public Label(String name) {
+    // EFFECTS: constructs a label named name with an empty list of files labelled with it
+    // throws NameIsEmptyException if name is empty
+    public Label(String name) throws NameIsEmptyException {
+        if (name.isEmpty()) {
+            throw new NameIsEmptyException();
+        }
         this.name = name;
         labelledFiles = new HashSet<>();
     }
