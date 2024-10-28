@@ -2,7 +2,7 @@ package model;
 
 import java.util.Set;
 
-import ui.exceptions.NameIsEmptyException;
+import model.exceptions.NameIsEmptyException;
 
 import java.util.HashSet;
 

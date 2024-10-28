@@ -7,7 +7,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ui.exceptions.NameIsEmptyException;
+import model.exceptions.NameIsEmptyException;
 
 public class TestLabel extends TestNamedObject {
     Folder arbitraryFolder;

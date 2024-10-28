@@ -1,8 +1,7 @@
 package ui;
 
-// TODO: move exceptions to model package
-
 import model.*;
+import model.exceptions.*;
 import ui.exceptions.*;
 
 import java.util.Scanner;

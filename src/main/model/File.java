@@ -2,7 +2,7 @@ package model;
 
 import java.util.*;
 
-import ui.exceptions.NameIsEmptyException;
+import model.exceptions.NameIsEmptyException;
 
 // Represents a file having a name, a file path where it is stored on the user's computer,
 // and a set of labels that it is tagged with

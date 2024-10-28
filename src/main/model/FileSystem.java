@@ -2,15 +2,7 @@ package model;
 
 import java.util.Set;
 
-import ui.exceptions.FilePathNoLongerValidException;
-import ui.exceptions.NameIsEmptyException;
-import ui.exceptions.NameIsTakenException;
-import ui.exceptions.NoSuchFileFoundException;
-import ui.exceptions.NoSuchFolderFoundException;
-import ui.exceptions.NoSuchLabelFoundException;
-import ui.exceptions.RequiresClauseNotMetRuntimeException;
-import ui.exceptions.SetIsEmptyAndShouldNotBeException;
-import ui.exceptions.ThereExistsMoreThanOneLabelException;
+import model.exceptions.*;
 
 import java.util.HashSet;
 import java.util.List;

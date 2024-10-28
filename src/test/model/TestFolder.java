@@ -5,10 +5,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ui.exceptions.NameIsEmptyException;
-import ui.exceptions.NameIsTakenException;
-import ui.exceptions.NoSuchFileFoundException;
-import ui.exceptions.NoSuchFolderFoundException;
+import model.exceptions.NameIsEmptyException;
+import model.exceptions.NameIsTakenException;
+import model.exceptions.NoSuchFileFoundException;
+import model.exceptions.NoSuchFolderFoundException;
 
 import java.util.*;
 

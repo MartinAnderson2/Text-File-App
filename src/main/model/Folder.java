@@ -2,10 +2,7 @@ package model;
 
 import java.util.Set;
 
-import ui.exceptions.NameIsEmptyException;
-import ui.exceptions.NameIsTakenException;
-import ui.exceptions.NoSuchFileFoundException;
-import ui.exceptions.NoSuchFolderFoundException;
+import model.exceptions.*;
 
 import java.util.HashSet;
 

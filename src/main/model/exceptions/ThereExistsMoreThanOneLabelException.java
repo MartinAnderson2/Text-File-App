@@ -1,4 +1,4 @@
-package ui.exceptions;
+package model.exceptions;
 
 public class ThereExistsMoreThanOneLabelException extends Exception {
 }

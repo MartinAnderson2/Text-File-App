@@ -1,4 +1,4 @@
-package ui.exceptions;
+package model.exceptions;
 
 public class NoSuchLabelFoundException extends NoSuchObjectFoundException {
 }
