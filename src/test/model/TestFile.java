@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import model.exceptions.NameIsEmptyException;
 
 public class TestFile extends TestNamedObject {
+    Folder rootFolder;
+
     File ceeSharpFile;
     File beeSLFile;
     File javaFile;
@@ -18,11 +20,13 @@ public class TestFile extends TestNamedObject {
     @BeforeEach
     void runBefore() {
         try {
-            namedObject = new File("name", "C:\\Users\\You\\biography.txt");
+            rootFolder = new Folder("root");
 
-            ceeSharpFile = new File("C#", "C:\\Users\\You\\repo\\C Sharp.txt");
-            beeSLFile = new File("BSL", "C:\\Users\\You\\Documents\\Dr Racket Files\\lecture 2 notes.txt");
-            javaFile = new File("Java", "C:\\Users\\You\\.vscode\\specification.txt");
+            namedObject = new File("name", "C:\\Users\\You\\biography.txt", rootFolder);
+
+            ceeSharpFile = new File("C#", "C:\\Users\\You\\repo\\C Sharp.txt", rootFolder);
+            beeSLFile = new File("BSL", "C:\\Users\\You\\Documents\\Dr Racket Files\\lecture 2 notes.txt", rootFolder);
+            javaFile = new File("Java", "C:\\Users\\You\\.vscode\\specification.txt", rootFolder);
 
             programmingLanguageLabel = new Label("Programming Language");
             lowerLevelComputerScienceCourseLabel = new Label("Taught in lower level computer science courses at UBC");

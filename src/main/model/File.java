@@ -8,16 +8,19 @@ import model.exceptions.NameIsEmptyException;
 // and a set of labels that it is tagged with
 public class File extends NamedObject {
     private String filePath;
+    private Folder parentFolder;
     private Set<Label> labels;
 
-    // EFFECTS: constructs a new file named name with path filePath and an empty list of labels it is labelled with
+    // EFFECTS: constructs a new file named name with path filePath, parent Folder parentFolder,
+    // and an empty list of labels it is labelled with
     // throws NameIsEmptyException if name is empty
-    public File(String name, String filePath) throws NameIsEmptyException {
+    public File(String name, String filePath, Folder parentFolder) throws NameIsEmptyException {
         if (name.isEmpty()) {
             throw new NameIsEmptyException();
         }
         this.name = name;
         this.filePath = filePath;
+        this.parentFolder = parentFolder;
         labels = new HashSet<Label>();
     }
 
@@ -80,6 +83,10 @@ public class File extends NamedObject {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public Folder getParentFolder() {
+        return parentFolder;
     }
 
     public int getNumLabels() {

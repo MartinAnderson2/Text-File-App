@@ -249,7 +249,7 @@ public class TestFolder extends TestNamedObject {
         Folder newFolder;
         try {
             educationFolder.makeSubfolder("CPSC 213");
-            newFolder = cpscTwoTenFolder.getSubfolder("CPSC 213");
+            newFolder = educationFolder.getSubfolder("CPSC 213");
         } catch (NoSuchFolderFoundException e) {
             fail("Subfolder just created not found");
             // So compiler doesn't complain about newFolder not being assigned a value
@@ -541,7 +541,7 @@ public class TestFolder extends TestNamedObject {
 
     @Test
     void testRemoveFileMultiple() {
-        removeSubfileCreatedInRunBefore(cpscTwoTenFolder, goalsFile.getName());
+        removeSubfileCreatedInRunBefore(educationFolder, goalsFile.getName());
         removeSubfileCreatedInRunBefore(cpscTwoTenFolder, ceeZeroOneQuestionsFile.getName());
         removeSubfileCreatedInRunBefore(mathTwoHundredFolder, myWebworkTwoAnswersFile.getName());
         removeSubfileCreatedInRunBefore(mathTwoHundredFolder, mywebworkOneAnswersFile.getName());
@@ -575,13 +575,15 @@ public class TestFolder extends TestNamedObject {
     void testGetFileFail() {
         try {
             empty.getSubfile("name");
-        } catch (NoSuchFileFoundException e) {
             fail("Parent folder did not throw NoSuchFileFoundException when returning a file that doesn't exist");
+        } catch (NoSuchFileFoundException e) {
+            // Expected
         }
         try {
             cpscTwoTenFolder.getSubfile("not in here");
-        } catch (NoSuchFileFoundException e) {
             fail("Parent folder did not throw NoSuchFileFoundException when returning a file that doesn't exist");
+        } catch (NoSuchFileFoundException e) {
+            // Expected
         }
     }
 

@@ -99,7 +99,7 @@ public class Folder extends NamedObject {
         try {
             throw new NameIsTakenException(getSubfile(name).name);
         } catch (NoSuchFileFoundException e) {
-            File newFile = new File(name, path);
+            File newFile = new File(name, path, this);
             subfiles.add(newFile);
         }
     }

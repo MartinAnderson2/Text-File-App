@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import model.exceptions.NameIsEmptyException;
 
 public class TestLabel extends TestNamedObject {
-    Folder arbitraryFolder;
+    Folder rootFolder;
 
     Label nounLabel;
     Label adjectiveLabel;
@@ -28,10 +28,10 @@ public class TestLabel extends TestNamedObject {
             nounLabel = new Label("Noun");
             adjectiveLabel = new Label("Adjective");
 
-            houseFile = new File("House", "C:\\210");
-            happinessFile = new File("Happiness", "C:\\Haha\\Yes");
-            homeyFile = new File("Homey", "C:\\110");
-            happyFile = new File("Happy", "C:\\yeah");
+            houseFile = new File("House", "C:\\210", rootFolder);
+            happinessFile = new File("Happiness", "C:\\Haha\\Yes", rootFolder);
+            homeyFile = new File("Homey", "C:\\110", rootFolder);
+            happyFile = new File("Happy", "C:\\yeah", rootFolder);
         } catch (NameIsEmptyException e) {
             fail("NameIsEmptyException thrown when name was not empty");
         }

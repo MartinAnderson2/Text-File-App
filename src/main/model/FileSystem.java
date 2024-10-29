@@ -6,6 +6,7 @@ import model.exceptions.*;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.io.IOException;
 import java.awt.Desktop;
@@ -17,18 +18,26 @@ import java.awt.Desktop;
 // labelled with a given Label.
 public class FileSystem {
     public static final String EXAMPLE_FILE_PATH = "C:\\Users\\User\\Documents\\Note Name.txt";
+    private static final int MAX_NUM_RECENTLY_OPENED_STORED = 10;
 
     private Folder rootFolder;
     private Folder currentFolder;
 
     private Set<Label> labels;
 
+    private List<File> recentlyOpenedFiles;
+    private List<Folder> recentlyOpenedFolders;
+    private List<Label> recentlyOpenedLabels;
+
     // EFFECTS: initializes the variables needed for the file system:
     // rootFolder: for the Folder that contains the initial Folders and Files, and indirectly contains every Folder and
     //             File since every Folder or File is a subfolder or subfile of root or one of root's subfolders (or a
     //             subfolder's subfolder, and so on...)
     // currentFolder: initialized to the root Folder such that Folders can be created and Files can be added
-    // allLabels: stores all of the Labels the user creates
+    // labels: stores all of the Labels the user creates
+    // recentlyOpenedFile: stores the names of the MAX_RECENTLY_OPENED_STORED most recently-opened Files
+    // recentlyOpenedFolder: stores the MAX_RECENTLY_OPENED_STORED most recently-opened Folders
+    // recentlyOpenedLabel: stores the MAX_RECENTLY_OPENED_STORED most recently-opened Label
     public FileSystem() {
         try {
             rootFolder = new Folder("root");
@@ -38,6 +47,9 @@ public class FileSystem {
         currentFolder = rootFolder;
 
         labels = new HashSet<Label>();
+        recentlyOpenedFiles = new LinkedList<File>();
+        recentlyOpenedFolders = new LinkedList<Folder>();
+        recentlyOpenedLabels = new LinkedList<Label>();
     }
 
 
@@ -72,19 +84,27 @@ public class FileSystem {
         currentFolder.makeSubfile(name, path);
     }
 
-    // EFFECTS: opens File named fileName in user's default text editor
+    // EFFECTS: opens File named fileName in user's default text editor. Adds File named fileName to list of
+    // recently-opened Files
     // throws FilePathNoLongerValidException if the File no longer exists on their computer
     // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
     public void openFile(String fileName) throws NoSuchFileFoundException, FilePathNoLongerValidException {
         File file = currentFolder.getSubfile(fileName);
 
+        openFile(file);
+    }
+
+    // EFFECTS: opens file in user's default text editor. Adds File named fileName to list of recently-opened Files
+    // throws FilePathNoLongerValidException if the File no longer exists on their computer
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    private void openFile(File file) throws NoSuchFileFoundException, FilePathNoLongerValidException {
         if (!FileSystem.isFilePathValid(file.getFilePath())) {
             throw new FilePathNoLongerValidException();
         }
 
-
         try {
             Desktop.getDesktop().open(new java.io.File(file.getFilePath()));
+            addRecentlyOpenedFile(file);
         } catch (IOException e) {
             throw new FilePathNoLongerValidException();
         }
@@ -94,7 +114,13 @@ public class FileSystem {
     // EFFECTS: deletes File named fileName
     // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
     public void deleteFile(String fileName) throws NoSuchFileFoundException {
+        File file = currentFolder.getSubfile(fileName);
+        recentlyOpenedFiles.remove(file);
         removeAllLabels(fileName);
+
+        if (file.getParentFolder() != currentFolder) {
+            file.getParentFolder().removeSubfile(fileName);
+        }
         currentFolder.removeSubfile(fileName);
     }
 
@@ -156,6 +182,30 @@ public class FileSystem {
         return namesOfSubfiles;
     }
 
+    // EFFECTS: returns a list of the names of the up to MAX_NUM_RECENTLY_OPENED_STORED last files opened
+    public List<String> getNamesOfRecentlyOpenedFiles() {
+        List<String> namesOfRecentlyOpenedFiles = new ArrayList<String>();
+        for (File file : recentlyOpenedFiles) {
+            namesOfRecentlyOpenedFiles.add(file.getName());
+        }
+        return namesOfRecentlyOpenedFiles;
+    }
+
+    // EFFECTS: opens File named fileName in user's default text editor if it is in recentlyOpenedFiles
+    // throws NoSuchFileFoundException if there is no File named fileName in recentlyOpenedFiles
+    // throws FilePathNoLongerValidException if the File named fileName failed to open (due to the path no longer being
+    // valid)
+    public void openRecentlyOpenedFile(String fileName)
+            throws NoSuchFileFoundException, FilePathNoLongerValidException {
+        for (File file : recentlyOpenedFiles) {
+            if (file.isNamed(fileName)) {
+                openFile(file);
+                return;
+            }
+        }
+        throw new NoSuchFileFoundException();
+    }
+
     // Folder:
 
     // MODIFIES: currentFolder
@@ -167,10 +217,19 @@ public class FileSystem {
     }
 
     // MODIFIES: this
-    // EFFECTS: opens Folder named folderName, i.e. makes that Folder the current directory
+    // EFFECTS: opens Folder named folderName, i.e. makes that Folder the current directory. Adds Folder named
+    // folderName to list of recently-opened Folders
     // throws NoSuchFolderFoundException if there are no Folders named folderName in currentFolder
     public void openFolder(String folderName) throws NoSuchFolderFoundException {
-        currentFolder = currentFolder.getSubfolder(folderName);
+        openFolder(currentFolder.getSubfolder(folderName));
+    }
+    
+    // MODIFIES: this
+    // EFFECTS: opens folderToOpen, i.e. makes that Folder the current directory. Adds folderToOpen to list of
+    // recently-opened Folders
+    private void openFolder(Folder folderToOpen) {
+        currentFolder = folderToOpen;
+        addRecentlyOpenedFolder(folderToOpen);     
     }
 
     // MODIFIES: this
@@ -190,6 +249,7 @@ public class FileSystem {
     // EFFECTS: deletes Folder named folderName
     // throws NoSuchFolderFoundException if there are no Folders named folderName in currentFolder
     public void deleteFolder(String folderName) throws NoSuchFolderFoundException {
+        recentlyOpenedFolders.remove(currentFolder.getSubfolder(folderName));
         currentFolder.removeSubfolder(folderName);
     }
 
@@ -240,6 +300,27 @@ public class FileSystem {
         }
     }
 
+    // EFFECTS: returns a list of the names of the up to MAX_NUM_RECENTLY_OPENED_STORED last folders opened
+    public List<String> getNamesOfRecentlyOpenedFolders() {
+        List<String> namesOfRecentlyOpenedFolders = new ArrayList<String>();
+        for (Folder folder : recentlyOpenedFolders) {
+            namesOfRecentlyOpenedFolders.add(folder.getName());
+        }
+        return namesOfRecentlyOpenedFolders;
+    }
+
+    // EFFECTS: opens Folder named folderName (sets currentFolder to it) if it is in recentlyOpenedFolders
+    // throws NoSuchFolderFoundException if there is no Folder named folderName in recentlyOpenedFolders
+    public void openRecentlyOpenedFolder(String folderName) throws NoSuchFolderFoundException {
+        for (Folder folder : recentlyOpenedFolders) {
+            if (folder.isNamed(folderName)) {
+                openFolder(folder);
+                return;
+            }
+        }
+        throw new NoSuchFolderFoundException();
+    }
+
     // Label:
 
     // MODIFIES: this
@@ -257,20 +338,29 @@ public class FileSystem {
     }
 
     // MODIFIES: this
-    // EFFECTS: creates a new Folder with every File labelled File and sets currentFolder to that new Folder
+    // EFFECTS: creates a new Folder with every File labelled with Label named labelName and sets currentFolder to that
+    // new Folder. This is not an actual Folder in the file system but rathaer a 'fake' one to view all Files labelled
+    // with the given Label. This is a brand-new directory to which adding and removing Files and Folders is pointless
+    // throws NameIsEmptyException if labelName is empty 
+    // throws NoSuchLabelFoundException if there are no Labels named labelName
+    public void openLabel(String labelName) throws NameIsEmptyException, NoSuchLabelFoundException {
+        Label label = getLabel(labelName);
+        openLabel(label);
+    }
+
+    // MODIFIES: this
+    // EFFECTS: creates a new Folder with every File labelled label and sets currentFolder to that new Folder
     // this is not an actual Folder in the File system but rataher a fake one to view all Files labelled with the
     // given Label. This is a brand-new directory to which adding and removing Files and Folders is pointless
-    // throws NoSuchLabelFoundException if there are no Labels named labelName
-    // throws NameIsTakenException if currentFolder already contains a 
-    public void openLabel(String labelName) throws NameIsEmptyException, NoSuchLabelFoundException {
-        if (labelName.isEmpty()) {
-            throw new NameIsEmptyException();
-        }
-        Folder labelFolder = new Folder(labelName);
-        for (File file : getLabel(labelName).getLabelledFiles()) {
+    // throws NameIsEmptyException if labelName is empty 
+    private void openLabel(Label label) throws NameIsEmptyException {
+        Folder labelFolder = new Folder(label.getName());
+
+        for (File file : label.getLabelledFiles()) {
             labelFolder.addExistingSubfile(file);
         }
         currentFolder = labelFolder;
+        addRecentlyOpenedLabel(label);
     }
 
     // MODIFIES: this
@@ -279,6 +369,7 @@ public class FileSystem {
     public void deleteLabel(String labelName) throws NoSuchLabelFoundException {
         Label label = getLabel(labelName);
         label.unlabelAllFiles();
+        recentlyOpenedLabels.remove(label);
         labels.remove(label);
         System.out.println(labelName + " has been deleted");
     }
@@ -433,6 +524,32 @@ public class FileSystem {
         return namesOfLabelsNotOnFile;
     }
 
+    // EFFECTS: returns a list of the names of the up to MAX_NUM_RECENTLY_OPENED_STORED last labels 'opened'
+    public List<String> getNamesOfRecentlyOpenedLabels() {
+        List<String> namesOfRecentlyOpenedLabels = new ArrayList<String>();
+        for (Label label : recentlyOpenedLabels) {
+            namesOfRecentlyOpenedLabels.add(label.getName());
+        }
+        return namesOfRecentlyOpenedLabels;
+    }
+
+    // EFFECTS: 'opens' Label named labelName (opens a new Folder containing every File labelled with Label) if it is
+    // in recentlyOpenedLabels
+    // throws NoSuchLabelFoundException if there is no Label named labelName in recentlyOpenedLabels
+    public void openRecentlyOpenedLabel(String labelName) throws NoSuchLabelFoundException {
+        for (Label label : recentlyOpenedLabels) {
+            if (label.isNamed(labelName)) {
+                try {
+                    openLabel(label);
+                } catch (NameIsEmptyException e) {
+                    throw new NoSuchLabelFoundException();
+                }
+                return;
+            }
+        }
+        throw new NoSuchLabelFoundException();
+    }
+
 
     /*
      *  Static Methods:
@@ -469,5 +586,62 @@ public class FileSystem {
             }
         }
         throw new NoSuchLabelFoundException();
+    }
+
+    // REQUIRES: recentlyOpenedFile.size() <= MAX_RECENTLY_OPENED_STORED
+    // MODIFIES: this
+    // EFFECTS: if recentlyOpenedFiles contains file, does nothing. If recentlyOpenedFiles contains less than
+    // MAX_RECENTLY_OPENED_STORED Strings, adds file.
+    // If recentlyOpenedFiles contains MAX_RECENTLY_OPENED_STORED Strings, removes the first element and adds file.
+    private void addRecentlyOpenedFile(File file) {
+        if (recentlyOpenedFiles.contains(file)) {
+            return;
+        }
+
+        int size = recentlyOpenedFiles.size();
+        int indexOfLast = size - 1;
+
+        if (size == MAX_NUM_RECENTLY_OPENED_STORED) {
+            recentlyOpenedFiles.remove(indexOfLast);
+        }
+        recentlyOpenedFiles.add(0, file);
+    }
+
+    // REQUIRES: recentlyOpenedFolder.size() <= MAX_RECENTLY_OPENED_STORED
+    // MODIFIES: this
+    // EFFECTS: if recentlyOpenedFolders contains folder, does nothing. If recentlyOpenedFolders contains less than
+    // MAX_RECENTLY_OPENED_STORED Strings, adds folder.
+    // If recentlyOpenedFolders contains MAX_RECENTLY_OPENED_STORED Strings, removes the first element and adds folder.
+    private void addRecentlyOpenedFolder(Folder folder) {
+        if (recentlyOpenedFolders.contains(folder)) {
+            return;
+        }
+
+        int size = recentlyOpenedFolders.size();
+        int indexOfLast = size - 1;
+
+        if (size == MAX_NUM_RECENTLY_OPENED_STORED) {
+            recentlyOpenedFolders.remove(indexOfLast);
+        }
+        recentlyOpenedFolders.add(0, folder);
+    }
+
+    // REQUIRES: recentlyOpenedLabel.size() <= MAX_RECENTLY_OPENED_STORED
+    // MODIFIES: this
+    // EFFECTS: if recentlyOpenedLabels contains label, does nothing. If recentlyOpenedLabels contains less than
+    // MAX_RECENTLY_OPENED_STORED Strings, adds label.
+    // If recentlyOpenedLabels contains MAX_RECENTLY_OPENED_STORED Strings, removes the first element and adds label.
+    private void addRecentlyOpenedLabel(Label label) {
+        if (recentlyOpenedLabels.contains(label)) {
+            return;
+        }
+
+        int size = recentlyOpenedLabels.size();
+        int indexOfLast = size - 1;
+
+        if (size == MAX_NUM_RECENTLY_OPENED_STORED) {
+            recentlyOpenedLabels.remove(indexOfLast);
+        }
+        recentlyOpenedLabels.add(0, label);
     }
 }

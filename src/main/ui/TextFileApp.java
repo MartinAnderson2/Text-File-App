@@ -1075,7 +1075,7 @@ public class TextFileApp {
     // Load Menu:
 
     // MODIFIES: this
-    // EFFECTS: TODO
+    // EFFECTS: TODO: load state from file
     private void loadMenu() {
         System.out.print("Not implemented...");
     }
@@ -1178,7 +1178,7 @@ public class TextFileApp {
         System.out.println("  \"fi\": Open a file in the current folder");
         System.out.println("  \"fo\": Open a folder in the current folder");
         System.out.println("  \"lf\": Open a directory containing all files labelled with a certain label");
-        // System.out.println("  \"r\": Open recently-opened files");
+        System.out.println("  \"r\": Open recently-opened files, folders, or recently-viewed labels");
         System.out.println("  \"b\": Back to the main menu");
     }
 
@@ -1192,13 +1192,12 @@ public class TextFileApp {
             getInputToOpenFile();
         } else if (input.equalsIgnoreCase("fo") || input.equalsIgnoreCase("folder")) {
             getInputToOpenFolder();
-            throw new NewFolderOpenedException();
         } else if (input.equalsIgnoreCase("lf") || input.equalsIgnoreCase("labelled files")) {
             getInputToOpenLabel();
-        // } else if (input.equalsIgnoreCase("r") || input.equalsIgnoreCase("recent")) {
-            // TODO: Implement opening recently-opened files
+        } else if (input.equalsIgnoreCase("r") || input.equalsIgnoreCase("recent")) {
+            openRecentMenu();
         } else {
-            System.out.println("Your input was not recognized as any of: fi, fo, lf, or b");
+            System.out.println("Your input was not recognized as any of: fi, fo, lf, r, or b");
         }
     }
 
@@ -1233,8 +1232,165 @@ public class TextFileApp {
         }
     }
 
+    // MODIFIES: this
+    // EFFECTS: gets input from the user so they can decide to open a recently-opened File, Folder, or Label or go back
+    // handles going back and hands off the rest to handleOpenRecentMenuInput
+    private void openRecentMenu() throws NewFolderOpenedException {
+        while (true) {
+            displayOpenRecentMenuOptions();
+
+            String input = getUserInputTrim();
+
+            if (input.equalsIgnoreCase("b") || input.equalsIgnoreCase("back")) {
+                break;
+            } else {
+                handleOpenRecentMenuInput(input);
+            }
+        }
+    }
+
+    // EFFECTS: displays the open recent menu options (open recently-opened file, folder or label or go back)
+    private void displayOpenRecentMenuOptions() {
+        System.out.println();
+        System.out.println("  \"fi\": Open a recently-opened file");
+        System.out.println("  \"fo\": Open a recently-opened folder");
+        System.out.println("  \"l\": Show all files labelled with a recently-viewed label");
+        System.out.println("  \"b\": Back to the open menu");
+    }
+
+    // MODIFIES: this
+    // EFFECTS: calls the appropriate function such that the user can choose a recently-opened File, Folder, or Label
+    private void handleOpenRecentMenuInput(String input) throws NewFolderOpenedException {
+        if (input.equalsIgnoreCase("fi") || input.equalsIgnoreCase("file")) {
+            getInputToOpenRecentFile();
+        } else if (input.equalsIgnoreCase("fo") || input.equalsIgnoreCase("folder")) {
+            getInputToOpenRecentFolder();
+        } else if (input.equalsIgnoreCase("l") || input.equalsIgnoreCase("label")) {
+            getInputToOpenRecentLabel();
+        } else {
+            System.out.println("Your input was not recognized as any of: fi, fo, l, or b");
+        }
+    }
+
+    // EFFECTS: lists the names of the Files that have been opened recently then gets input from the user. If it is b,
+    // goes back, otherwise opens file named input, if one has been recently-opened and still exists
+    private void getInputToOpenRecentFile() {
+        while (true) {
+            System.out.println();
+            System.out.println("Please input the name of the recently-opened file you would like to open "
+                    + "or b to go back");
+            try {
+                List<String> recentlyOpenedFileNames = fileSystem.getNamesOfRecentlyOpenedFiles();
+                System.out.print("Recently-opened files: ");
+                listStringsInOrder(recentlyOpenedFileNames);
+            } catch (ListEmptyException e) {
+                System.out.println("No files have been opened recently. Returning to previous menu.");
+                break;
+            }
+
+            String input = getUserInputTrim();
+
+            if (input.equalsIgnoreCase("b") || input.equalsIgnoreCase("back")) {
+                break;
+            } else {
+                handleOpenRecentFileInput(input);
+            }
+        }
+    }
+
+    // EFFECTS: opens File named fileName if one has been opened recently. Tells user if their input was invalid or if
+    // the file was moved or deleted
+    private void handleOpenRecentFileInput(String fileName) {
+        try {
+            fileSystem.openRecentlyOpenedFile(fileName);
+        } catch (NoSuchFileFoundException e) {
+            System.out.println("No file named " + fileName + " has been opened recently.");
+        } catch (FilePathNoLongerValidException e) {
+            System.out.println("File was moved or deleted");
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: lists the names of the Folders that have been opened recently then gets input from the user. If it is b,
+    // goes back, otherwise opens Folder named input, if one has been recently-opened
+    private void getInputToOpenRecentFolder() throws NewFolderOpenedException {
+        while (true) {
+            System.out.println();
+            System.out.println("Please input the name of the recently-opened folder you would like to open "
+                    + "or b to go back");
+            try {
+                List<String> recentlyOpenedFolderNames = fileSystem.getNamesOfRecentlyOpenedFolders();
+                System.out.print("Recently-opened folders: ");
+                listStringsInOrder(recentlyOpenedFolderNames);
+            } catch (ListEmptyException e) {
+                System.out.println("No folders have been opened recently. Returning to previous menu.");
+                break;
+            }
+
+            String input = getUserInputTrim();
+
+            if (input.equalsIgnoreCase("b") || input.equalsIgnoreCase("back")) {
+                break;
+            } else {
+                handleOpenRecentFolderInput(input);
+            }
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: opens Folder named folderName if one has been opened recently. Tells user if their input was invalid
+    private void handleOpenRecentFolderInput(String folderName) throws NewFolderOpenedException {
+        try {
+            fileSystem.openRecentlyOpenedFolder(folderName);
+            throw new NewFolderOpenedException();
+        } catch (NoSuchFolderFoundException e) {
+            System.out.println("No folder named " + folderName + " has been opened recently.");
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: lists the names of the Labels that have been 'opened' recently then gets input from the user. If it is
+    // b, goes back, otherwise opens new Folder with all files labelled with Label named input, if one has been opened
+    // recently
+    private void getInputToOpenRecentLabel() throws NewFolderOpenedException {
+        while (true) {
+            System.out.println();
+            System.out.println("Please input the name of the label for which you have recently viewed files labled"
+                    + " with it or b to go back");
+            try {
+                List<String> recentlyOpenedLabelNames = fileSystem.getNamesOfRecentlyOpenedLabels();
+                System.out.print("Recently-viewed labels: ");
+                listStringsInOrder(recentlyOpenedLabelNames);
+            } catch (ListEmptyException e) {
+                System.out.println("No labels have had files labelled with them viewed recently. "
+                        + "Returning to previous menu.");
+                break;
+            }
+
+            String input = getUserInputTrim();
+
+            if (input.equalsIgnoreCase("b") || input.equalsIgnoreCase("back")) {
+                break;
+            } else {
+                handleOpenRecentLabelInput(input);
+            }
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: opens new Folder named labelName containing all Files labelled with Label named labelName, if one has
+    // been opened recently. Tells user if their input was invalid
+    private void handleOpenRecentLabelInput(String labelName) throws NewFolderOpenedException {
+        try {
+            fileSystem.openRecentlyOpenedLabel(labelName);
+            throw new NewFolderOpenedException();
+        } catch (NoSuchLabelFoundException e) {
+            System.out.println("No label named " + labelName + " has had files labelled with it viewed recently.");
+        }
+    }
+
     // Save Menu:
-    // EFFECTS: TODO
+    // EFFECTS: TODO: Save current state to file
     private void saveMenu() {
         System.out.println("Not implemented...");
     }
@@ -1588,8 +1744,23 @@ public class TextFileApp {
     }
 
     /* 
-     *  Listing alphabetically:
+     *  Listing:
      */
+    // EFFECTS: prints it out separated by commas (with no comma after the last element)
+    private void listStringsInOrder(List<String> strings) throws ListEmptyException {
+        if (strings.isEmpty()) {
+            throw new ListEmptyException();
+        }
+        
+        int indexOfLastString = strings.size() - 1;
+        String lastString = strings.get(indexOfLastString);
+        strings.remove(indexOfLastString);
+
+        for (String string : strings) {
+            System.out.print(string + ", ");
+        }
+        System.out.println(lastString);
+    }
 
     // EFFECTS: alphabetizes strings, ignoring case, and then prints it out separated by commas
     // (with no comma after the last element)
@@ -1602,14 +1773,7 @@ public class TextFileApp {
         // https://stackoverflow.com/questions/8432581/how-to-sort-a-listobject-alphabetically-using-object-name-field
         strings.sort(Comparator.comparing(String::toLowerCase));
 
-        int indexOfLastLabel = strings.size() - 1;
-        String lastLabelName = strings.get(indexOfLastLabel);
-        strings.remove(indexOfLastLabel);
-
-        for (String labelName : strings) {
-            System.out.print(labelName + ", ");
-        }
-        System.out.println(lastLabelName);
+        listStringsInOrder(strings);
     }
 
     // EFFECTS: lists out all of the files in this folder or a message if there are none
@@ -1619,14 +1783,5 @@ public class TextFileApp {
         } catch (ListEmptyException e) {
             System.out.println("This folder does not contain any files");
         }    
-    }
-
-    // EFFECTS: lists out all of the folders in this folder or a message if there are none
-    private void listFoldersAlphabeticallyTellUserIfNone() {
-        try {
-            listStringsAlphabetically(fileSystem.getNamesOfAllSubfolders());
-        } catch (ListEmptyException e) {
-            System.out.println("This folder does not contain any subfolders");
-        }  
     }
 }

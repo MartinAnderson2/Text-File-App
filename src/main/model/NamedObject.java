@@ -12,8 +12,7 @@ public abstract class NamedObject {
         if (input.length() > name.length()) {
             return false;
         }
-// TODO: check if either of these other conditions are needed
-        return input.isEmpty() || (input.equalsIgnoreCase(name.substring(0, input.length())));
+        return (input.equalsIgnoreCase(name.substring(0, input.length())));
     }
 
     // EFFECTS: returns true if input matches this file's name regardless of case
