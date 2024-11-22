@@ -1,9 +1,10 @@
 package model;
 
-import java.util.Set;
-
 import model.exceptions.*;
+import persistence.*;
 
+import org.json.JSONObject;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
@@ -16,7 +17,8 @@ import java.awt.Desktop;
 // Files, Folders, and Labels can be created and deleted. Files can be labelled and unlabelled. Files can be opened in
 // the user's default text editor. Folders can be opened to access their contents. It is possible to list all Files
 // labelled with a given Label.
-public class FileSystem {
+public class FileSystem implements Writable {
+    public static final String AUTOSAVE_FILE_PATH = "Data\\Autosave.json";
     public static final String EXAMPLE_FILE_PATH = "C:\\Users\\User\\Documents\\Note Name.txt";
     private static final int MAX_NUM_RECENTLY_OPENED_STORED = 10;
 
@@ -537,6 +539,37 @@ public class FileSystem {
             }
         }
         throw new NoSuchLabelFoundException();
+    }
+
+
+    /*
+     *  Persistence-related Methods:
+     */
+
+    // EFFECTS: returns a JSON representation of this file system
+    @Override
+    public JSONObject toJson() {
+        return new JSONObject(); // stub
+    }
+
+    // EFFECTS: saves a JSON representation of this file system to AUTOSAVE_FILE_PATH
+    public void autoSave() {
+
+    }
+
+    // EFFECTS: saves a jSON representation of this file system to filePath
+    public void manuallySave(String filePath) {
+
+    }
+
+    // EFFECTS: loads a JSON representation of a file system
+    public static FileSystem autoLoad() {
+        return new FileSystem(); // stub
+    }
+
+    // EFFECTS: loads a JSON representation of a file system from filePath
+    public static FileSystem manuallyLoad(String filePath) {
+        return new FileSystem(); // stub
     }
 
 

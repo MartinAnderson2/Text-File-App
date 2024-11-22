@@ -1,11 +1,15 @@
 package model;
 
+import persistence.Writable;
+
 import java.util.Set;
+
+import org.json.JSONObject;
 
 import java.util.HashSet;
 
 // Represents a label having a name and a list of all files labelled with this label
-public class Label extends NamedObject {
+public class Label extends NamedObject implements Writable {
     Set<File> labelledFiles;
 
     // REQUIRES: name.isBlank() is false
@@ -48,4 +52,9 @@ public class Label extends NamedObject {
         return labelledFiles;
     }
 
+    // EFFECTS: returns a JSON representation of this label
+    @Override
+    public JSONObject toJson() {
+        return new JSONObject(); // stub
+    }
 }

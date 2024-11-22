@@ -2,13 +2,17 @@ package model;
 
 import java.util.Set;
 
-import model.exceptions.*;
+import org.json.JSONObject;
 
 import java.util.HashSet;
 
+import model.exceptions.*;
+import persistence.Writable;
+
+
 // Represents a folder with a name that holds files as well as other folders
 // and has a parent folder unless it is the root folder
-public class Folder extends NamedObject {
+public class Folder extends NamedObject implements Writable {
     private Set<Folder> subfolders;
     private Set<File> subfiles;
     private Folder parentFolder;
@@ -138,5 +142,11 @@ public class Folder extends NamedObject {
         } catch (NoSuchFileFoundException e) {
             return false;
         }
+    }
+
+    // EFFECTS: returns a JSON representation of this file (including its subfolders and files)
+    @Override
+    public JSONObject toJson() {
+        return new JSONObject(); // stub
     }
 }

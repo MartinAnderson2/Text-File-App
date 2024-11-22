@@ -1,10 +1,14 @@
 package model;
 
+import persistence.Writable;
+
 import java.util.*;
+
+import org.json.JSONObject;
 
 // Represents a file having a name, a file path where it is stored on the user's computer,
 // and a set of labels that it is labelled with
-public class File extends NamedObject {
+public class File extends NamedObject implements Writable {
     private String filePath;
     private Folder parentFolder;
     private Set<Label> labels;
@@ -66,6 +70,15 @@ public class File extends NamedObject {
     // EFFECTS: returns the name of this File in the user's file system on their computer
     public String getNameOfFileOnDisk() {
         return getCharactersAfterLastSlash(this.filePath);
+    }
+    
+
+    // Persistence-Related Method:
+
+    // EFFECTS: returns a JSON representation of this file
+    @Override
+    public JSONObject toJson() {
+        return new JSONObject(); // stub
     }
 
 

@@ -1,9 +1,12 @@
 package model;
 
+import org.json.JSONObject;
+
 import model.exceptions.NameIsBlankException;
+import persistence.Writable;
 
 // Represents an arbitrary object that has a name and includes methods for handling that name
-public abstract class NamedObject {
+public abstract class NamedObject implements Writable {
     private String name;
 
     // REQUIRES: name.isBlank() is false
@@ -43,5 +46,11 @@ public abstract class NamedObject {
             return false;
         }
         return (input.equalsIgnoreCase(name.substring(0, input.length())));
+    }
+
+    // EFFECTS: returns a JSON representation of this named object
+    @Override
+    public JSONObject toJson() {
+        return new JSONObject(); // stub
     }
 }
