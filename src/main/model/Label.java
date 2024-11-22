@@ -2,21 +2,17 @@ package model;
 
 import java.util.Set;
 
-import model.exceptions.NameIsEmptyException;
-
 import java.util.HashSet;
 
 // Represents a label having a name and a list of all files labelled with this label
 public class Label extends NamedObject {
     Set<File> labelledFiles;
 
+    // REQUIRES: name.isBlank() is false
     // EFFECTS: constructs a label named name with an empty list of files labelled with it
-    // throws NameIsEmptyException if name is empty
-    public Label(String name) throws NameIsEmptyException {
-        if (name.isEmpty()) {
-            throw new NameIsEmptyException();
-        }
-        this.name = name;
+    // throws NameIsBlankException if name.isBlank() is true (name is empty or just whitespace)
+    public Label(String name) {
+        super(name);
         labelledFiles = new HashSet<>();
     }
 
@@ -42,8 +38,9 @@ public class Label extends NamedObject {
     // EFFECTS: removes this label from every files's list of labels and removes every File reference this label stores
     public void unlabelAllFiles() {
         for (File file : labelledFiles) {
-            this.unlabelFile(file);
+            file.removeLabel(this);
         }
+        labelledFiles.clear();
     }
 
     // EFFECTS: returns all of the files labelled with this label

@@ -13,25 +13,23 @@ public class Folder extends NamedObject {
     private Set<File> subfiles;
     private Folder parentFolder;
 
+    // REQUIRES: name.isBlank() is false
     // EFFECTS: constructs a new root folder named name with empty lists of subfiles and subfolders
     // and no parent folder
-    // throws NameIsEmptyException if name.isEmpty() is true
-    public Folder(String name) throws NameIsEmptyException {
-        if (name.isEmpty()) {
-            throw new NameIsEmptyException();
-        }
-        this.name = name;
-        subfolders = new HashSet<Folder>();
-        subfiles = new HashSet<File>();
+    // throws NameIsBlankException if name.isBlank() is true (name is empty or just whitespace)
+    public Folder(String name) {
+        super(name);
+        subfolders = new HashSet<>();
+        subfiles = new HashSet<>();
         parentFolder = null;
     }
 
-    // EFFECTS: returns a list of folders within this folder
+    // EFFECTS: returns a reference to the set of folders within this folder
     public Set<Folder> getSubfolders() {
         return subfolders;
     }
 
-    // EFFECTS: returns a list of files within this folder
+    // EFFECTS: returns a reference to the set of files within this folder
     public Set<File> getSubfiles() {
         return subfiles;
     }
@@ -45,16 +43,40 @@ public class Folder extends NamedObject {
         return parentFolder;
     }
 
+    // EFFECTS: if this folder contains a folder named name (ignoring case) returns it,
+    // otherwise throws NoSuchFolderFoundException
+    public Folder getSubfolder(String name) throws NoSuchFolderFoundException {
+        for (Folder folder : subfolders) {
+            if (folder.isNamed(name)) {
+                return folder;
+            }
+        }
+        throw new NoSuchFolderFoundException();
+    }
+
+    // EFFECTS: returns file with given name
+    // throws NoSuchFileExistsException if this folder does not contain a file named fileName (ignoring case)
+    public File getSubfile(String name) throws NoSuchFileFoundException {
+        for (File file : subfiles) {
+            if (file.isNamed(name)) {
+                return file;
+            }
+        }
+        throw new NoSuchFileFoundException();
+    }
+
     // MODIFIES: this
     // EFFECTS: creates a new folder that is a subfolder of this folder, named name
-    // throws NameIsEmptyException if name is empty
-    public void makeSubfolder(String name) throws NameIsEmptyException, NameIsTakenException {
-        if (name.isEmpty()) {
-            throw new NameIsEmptyException();
+    // throws NameIsTakenException if this already contains a subfolder named name
+    // throws NameIsBlankException if name is blank
+    public void makeSubfolder(String name) throws NameIsTakenException {
+        try {
+            Folder folderNamedName = getSubfolder(name);
+            throw new NameIsTakenException(folderNamedName.getName());
+        } catch (NoSuchFolderFoundException e) {
+            // Continue since name is not taken
         }
-        if (hasSubfolder(name)) {
-            throw new NameIsEmptyException();
-        }
+        
         Folder newFolder = new Folder(name);
         newFolder.parentFolder = this;
         subfolders.add(newFolder);
@@ -77,27 +99,13 @@ public class Folder extends NamedObject {
         }
     }
 
-    // EFFECTS: if this folder contains a folder named name (ignoring case) returns it,
-    // otherwise throws NoSuchFolderFoundException
-    public Folder getSubfolder(String name) throws NoSuchFolderFoundException {
-        for (Folder folder : subfolders) {
-            if (folder.isNamed(name)) {
-                return folder;
-            }
-        }
-        throw new NoSuchFolderFoundException();
-    }
-
     // MODIFIES: this
     // EFFECTS creates a new file named name with path path that is within this folder
-    // throws NameIsEmptyException if name is empty
     // throws NameIsTakenException if this contains a file named name (ignores case)
-    public void makeSubfile(String name, String path) throws NameIsEmptyException, NameIsTakenException {
-        if (name.isEmpty()) {
-            throw new NameIsEmptyException();
-        }
+    // throws NameIsBlankException if name is blank
+    public void makeSubfile(String name, String path) throws NameIsTakenException {
         try {
-            throw new NameIsTakenException(getSubfile(name).name);
+            throw new NameIsTakenException(getSubfile(name).getName());
         } catch (NoSuchFileFoundException e) {
             File newFile = new File(name, path, this);
             subfiles.add(newFile);
@@ -106,8 +114,13 @@ public class Folder extends NamedObject {
 
     // MODIFIES: this
     // EFFECTS: adds a pre-existing subfile
-    public void addExistingSubfile(File file) {
-        subfiles.add(file);
+    // throws NameIsTakenException if this already contains a subfile named file.getName()
+    public void addExistingSubfile(File file) throws NameIsTakenException {
+        try {
+            throw new NameIsTakenException(getSubfile(file.getName()).getName());
+        } catch (NoSuchFileFoundException e) {
+            subfiles.add(file);
+        }
     }
     
     // MODIFIES: this
@@ -125,16 +138,5 @@ public class Folder extends NamedObject {
         } catch (NoSuchFileFoundException e) {
             return false;
         }
-    }
-
-    // EFFECTS: returns file with given name
-    // throws NoSuchFileExistsException if this folder does not contain a file named fileName (ignoring case)
-    public File getSubfile(String name) throws NoSuchFileFoundException {
-        for (File file : subfiles) {
-            if (file.isNamed(name)) {
-                return file;
-            }
-        }
-        throw new NoSuchFileFoundException();
     }
 }

@@ -7,7 +7,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import model.exceptions.NameIsEmptyException;
+import model.exceptions.NameIsBlankException;
 
 public class TestLabel extends TestNamedObject {
     Folder rootFolder;
@@ -32,7 +32,7 @@ public class TestLabel extends TestNamedObject {
             happinessFile = new File("Happiness", "C:\\Haha\\Yes", rootFolder);
             homeyFile = new File("Homey", "C:\\110", rootFolder);
             happyFile = new File("Happy", "C:\\yeah", rootFolder);
-        } catch (NameIsEmptyException e) {
+        } catch (NameIsBlankException e) {
             fail("NameIsEmptyException thrown when name was not empty");
         }
     }
@@ -44,10 +44,19 @@ public class TestLabel extends TestNamedObject {
 
         assertEquals("Adjective", adjectiveLabel.getName());
         assertTrue(adjectiveLabel.getLabelledFiles().isEmpty());
+
+        Label label = null;
+        try {
+            label = new Label("");
+            fail("NameIsEmptyException not thrown for empty name");
+        } catch (NameIsBlankException e) {
+            // Expected
+            assertNull(label);
+        }
     }
 
     @Test
-    void testlabelFileOneFile() {
+    void testLabelFileOneFile() {
         assertFalse(houseFile.isLabelled(nounLabel));
 
 
@@ -62,7 +71,7 @@ public class TestLabel extends TestNamedObject {
     }
 
     @Test
-    void testlabelFileTwoFilesOneLabel() {
+    void testLabelFileTwoFilesOneLabel() {
         assertFalse(homeyFile.isLabelled(adjectiveLabel));
         assertFalse(happyFile.isLabelled(adjectiveLabel));
 
@@ -83,7 +92,7 @@ public class TestLabel extends TestNamedObject {
     }
 
     @Test
-    void testlabelFileMultipleFilesMultipleLabels() {
+    void testLabelFileMultipleFilesMultipleLabels() {
         assertFalse(happinessFile.isLabelled(nounLabel));
         assertFalse(homeyFile.isLabelled(adjectiveLabel));
         assertFalse(happyFile.isLabelled(adjectiveLabel));
@@ -111,7 +120,7 @@ public class TestLabel extends TestNamedObject {
     }
 
     @Test
-    void testlabelFileTwoFilesDuplicateLabels() {
+    void testLabelFileTwoFilesDuplicateLabels() {
         assertFalse(homeyFile.isLabelled(adjectiveLabel));
         assertFalse(happyFile.isLabelled(adjectiveLabel));
 
@@ -138,7 +147,7 @@ public class TestLabel extends TestNamedObject {
     }
 
     @Test
-    void testunlabelFileOneFile() {
+    void testUnlabelFileOneFile() {
         nounLabel.labelFile(houseFile);
 
         nounLabel.unlabelFile(houseFile);
@@ -151,7 +160,7 @@ public class TestLabel extends TestNamedObject {
     }
 
     @Test
-    void testunlabelFileMultipleFilesMultipleLabels() {
+    void testUnlabelFileMultipleFilesMultipleLabels() {
         nounLabel.labelFile(houseFile);
         nounLabel.labelFile(happinessFile);
         adjectiveLabel.labelFile(homeyFile);
@@ -176,5 +185,72 @@ public class TestLabel extends TestNamedObject {
         
         assertTrue(filesLabelledAdjective.contains(homeyFile));
         assertTrue(homeyFile.isLabelled(adjectiveLabel));
+    }
+
+    @Test
+    void testUnlabelAllFilesNoFilesLabelled() {
+        Label nothingLabel;
+        try {
+            nothingLabel = new Label("nothing");
+        } catch (NameIsBlankException e) {
+            fail("NameIsEmptyException thrown when constructing a label with a non-empty name");
+            return;
+        }
+
+        nothingLabel.unlabelAllFiles();
+
+        assertTrue(nothingLabel.getLabelledFiles().isEmpty());
+        assertFalse(houseFile.isLabelled(nothingLabel));
+        assertFalse(happinessFile.isLabelled(nothingLabel));
+        assertFalse(homeyFile.isLabelled(nothingLabel));
+        assertFalse(happyFile.isLabelled(nothingLabel));
+    }
+
+    @Test
+    void testUnlabelAllFilesOneFileLabelled() {
+        Label objectLabel;
+        try {
+            objectLabel = new Label("Object");
+        } catch (NameIsBlankException e) {
+            fail("NameIsEmptyException thrown when constructing a label with a non-empty name");
+            return;
+        }
+        objectLabel.labelFile(houseFile);
+
+        objectLabel.unlabelAllFiles();
+
+        assertTrue(objectLabel.getLabelledFiles().isEmpty());
+        assertFalse(houseFile.isLabelled(objectLabel));
+        assertFalse(happinessFile.isLabelled(objectLabel));
+        assertFalse(homeyFile.isLabelled(objectLabel));
+        assertFalse(happyFile.isLabelled(objectLabel));
+    }
+
+    @Test
+    void testUnlabelAllFilesMultipleFilesLabelled() {
+        nounLabel.unlabelAllFiles();
+
+        assertTrue(nounLabel.getLabelledFiles().isEmpty());
+        assertFalse(houseFile.isLabelled(nounLabel));
+        assertFalse(happinessFile.isLabelled(nounLabel));
+        assertFalse(homeyFile.isLabelled(nounLabel));
+        assertFalse(happyFile.isLabelled(nounLabel));
+    }
+
+    @Test
+    void testUnlabelAllFilesMultipleLabelsMultipleFilesLabelled() {
+        nounLabel.unlabelAllFiles();
+        adjectiveLabel.unlabelAllFiles();
+
+        assertTrue(nounLabel.getLabelledFiles().isEmpty());
+        assertFalse(houseFile.isLabelled(nounLabel));
+        assertFalse(happinessFile.isLabelled(nounLabel));
+        assertFalse(homeyFile.isLabelled(nounLabel));
+        assertFalse(happyFile.isLabelled(nounLabel));
+        assertTrue(adjectiveLabel.getLabelledFiles().isEmpty());
+        assertFalse(houseFile.isLabelled(adjectiveLabel));
+        assertFalse(happinessFile.isLabelled(adjectiveLabel));
+        assertFalse(homeyFile.isLabelled(adjectiveLabel));
+        assertFalse(happyFile.isLabelled(adjectiveLabel));
     }
 }

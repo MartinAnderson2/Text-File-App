@@ -1,6 +1,4 @@
-package model.exceptions;
-
-import ui.exceptions.UserChangedTheirMindException;
+package ui.exceptions;
 
 public class UserNoLongerWantsToCreateFolderException extends UserChangedTheirMindException {
 }

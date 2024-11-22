@@ -11,6 +11,8 @@ import java.util.List;
 // Represents an application that allows users to add .txt files from their computer to the program and sort and
 // browse through them. Structure design based on [TellerApp](https://github.students.cs.ubc.ca/CPSC210/TellerApp)
 public class TextFileApp {
+    public static final String appName = "Pine";
+
     private Scanner scanner;
 
     FileSystem fileSystem;
@@ -51,10 +53,10 @@ public class TextFileApp {
         System.out.println("Would you like to:");
         System.out.println("  \"a\": Add a file, folder, or label to the current folder");
         System.out.println("  \"e\": Edit a file, folder, or label in the current directory");
-        System.out.println("  \"l\": Load a saved file directory from disk");
+        System.out.println("  \"l\": Load a saved file system from disk");
         System.out.println("  \"n\": Navigate the file system");
         System.out.println("  \"o\": Open a file or folder, open all files with a given label");
-        System.out.println("  \"s\": Save current file directory to disk");
+        System.out.println("  \"s\": Save current file system to disk");
         System.out.println("  \"q\": Quit the application");
     }
 
@@ -96,12 +98,12 @@ public class TextFileApp {
     // EFFECTS: sends the user a welcome message
     private void welcome() {
         System.out.println();
-        System.out.println("Welcome to the Text File application!");
+        System.out.println("Welcome to " + appName + "!");
     }
 
     // EFFECTS: sends the user a farewell message
     private void goodbye() {
-        System.out.println("Thank you for using the Text File application!");
+        System.out.println("Thank you for using " + appName + "!");
     }
 
 
@@ -179,7 +181,7 @@ public class TextFileApp {
         }
     }
 
-    // REQUIRES: actualFileName.isEmpty() is false and fileSystem.fileWithNameAlreadyExists(actualFileName) is false
+    // REQUIRES: actualFileName.isBlank() is false and fileSystem.fileWithNameAlreadyExists(actualFileName) is false
     // MODIFIES: this
     // EFFECTS: lets the user choose a custom file name or use the file's actual name, creates the file in fileSystem,
     // and enables the user to add labels as desired, if any exist
@@ -189,7 +191,7 @@ public class TextFileApp {
         
         try {
             fileSystem.createFile(fileName, path);
-        } catch (NameIsEmptyException | NameIsTakenException e) {
+        } catch (NameIsTakenException e) {
             // Not possible via REQUIRES clause
             throw new RequiresClauseNotMetRuntimeException();
         }
@@ -208,15 +210,15 @@ public class TextFileApp {
     // EFFECTS: enables the user to create a custom name for the file they are in the process of creating
     // or use the name of the file on their computer
     private String chooseFileName(String actualFileName) {
-        if (fileSystem.fileWithNameAlreadyExists(actualFileName)) {
+        if (fileSystem.containsFile(actualFileName)) {
             // Force the user to use a custom name if there already exists a file with the actual file's name in the
             // current folder
             return chooseAndConfirmCustomFileNameNoGoBack();
-        } else if (!actualFileName.isEmpty()) {
+        } else if (!actualFileName.isBlank()) {
             while (true) {
                 System.out.println();
                 System.out.println("Would you like to use the actual file's name: \"" + actualFileName
-                        + "\" or create a custom name? Please enter actual or custom");
+                        + "\" or create a custom name? Please enter \"a\" or \"c\"");
 
                 String input = getUserInputTrim();
 
@@ -293,9 +295,9 @@ public class TextFileApp {
 
             String input = getUserInputTrim();
 
-            if (input.isEmpty()) {
+            if (input.isBlank()) {
                 System.out.println("Custom file name was not valid");
-            } else if (fileSystem.fileWithNameAlreadyExists(input)) {
+            } else if (fileSystem.containsFile(input)) {
                 tellUserFileWithNameAlreadyExists(input);
             } else {
                 return input;
@@ -315,7 +317,7 @@ public class TextFileApp {
             if (input.equalsIgnoreCase("p") || input.equalsIgnoreCase("prev") || input.equalsIgnoreCase("previous")) {
                 throw new UserNoLongerWantsNameBException();
             } else if (input.equalsIgnoreCase("b") || input.equalsIgnoreCase("namefileb")) {
-                if (fileSystem.fileWithNameAlreadyExists(input)) {
+                if (fileSystem.containsFile(input)) {
                     tellUserFileWithNameAlreadyExists(input);
                 } else {
                     return input;
@@ -331,8 +333,7 @@ public class TextFileApp {
     // EFFECTS: tells the user
     private void tellUserFileWithNameAlreadyExists(String input) {
         String fileAlreadyNamedInputWithCorrectCase = fileSystem.getCapitalizationOfFile(input);
-        System.out.println(fileSystem.getCurrentFolderName() + " (current folder) already contains "
-                + "a file named " + fileAlreadyNamedInputWithCorrectCase);
+        tellUserThisFolder("already contains a file named " + fileAlreadyNamedInputWithCorrectCase);
     }
 
     // MODIFIES: this
@@ -364,15 +365,14 @@ public class TextFileApp {
                 if (input.equalsIgnoreCase("n") || input.equalsIgnoreCase("no")) {
                     break;
                 } else if (input.equalsIgnoreCase("y") || input.equalsIgnoreCase("yes")) {
-                    fileSystem.labelFileWithTheOnlyLabel(fileName);
+                    fileSystem.labelFile(fileName, theOnlyCurrentLabelName);
                     System.out.println(fileName + " is now labelled " + theOnlyCurrentLabelName);
                     break;
                 } else {
                     System.out.println("Your input was not recognized as either of: y or n");
                 }
             }
-        } catch (ThereExistsMoreThanOneLabelException | SetIsEmptyAndShouldNotBeException
-                | NoSuchFileFoundException e) {
+        } catch (NoSuchFileFoundException | NoSuchLabelFoundException e) {
             // Shouldn't happen
             throw new RequiresClauseNotMetRuntimeException();
         }
@@ -419,11 +419,10 @@ public class TextFileApp {
                     System.out.println("Created folder named \"" + chosenName + "\" in current folder ("
                             + fileSystem.getCurrentFolderName() + ")");
                     break;
-                } catch (NameIsEmptyException e) {
+                } catch (NameIsBlankException e) {
                     System.out.println("Folder name was not valid");
                 } catch (NameIsTakenException e) {
-                    System.out.println(fileSystem.getCurrentFolderName() + " (current folder) already contains "
-                            + "a folder named " + e.getCapitalizationOfTakenName());
+                    tellUserThisFolder("already contains a folder named " + e.getCapitalizationOfTakenName());
                 }
             }
         }
@@ -468,10 +467,9 @@ public class TextFileApp {
             if (input.equalsIgnoreCase("p") || input.equalsIgnoreCase("prev") || input.equalsIgnoreCase("previous")) {
                 throw new UserNoLongerWantsNameBException();
             } else if (input.equalsIgnoreCase("b") || input.equalsIgnoreCase("namefolderb")) {
-                if (fileSystem.folderWithNameAlreadyExists(input)) {
+                if (fileSystem.containsFolder(input)) {
                     String folderAlreadyNamedInputWithCorrectCase = fileSystem.getCapitalizationOfFolder(input);
-                    System.out.println(fileSystem.getCurrentFolderName() + " (current folder) already contains "
-                            + "a folder named " + folderAlreadyNamedInputWithCorrectCase);
+                    tellUserThisFolder("already contains a folder named " + folderAlreadyNamedInputWithCorrectCase);
                 } else {
                     return input;
                 }
@@ -501,7 +499,7 @@ public class TextFileApp {
                     System.out.println("Created label named \"" + chosenName);
                     break;
                 }
-            } catch (NameIsEmptyException e) {
+            } catch (NameIsBlankException e) {
                 System.out.println("Label name was not valid");
             } catch (NameIsTakenException e) {
                 System.out.println("A label already exists named  " + e.getCapitalizationOfTakenName());
@@ -592,15 +590,27 @@ public class TextFileApp {
     }
 
     // MODIFIES: this
-    // EFFECTS: handles the edit menu input and calls the appropriate submenus as
-    // needed. Tells user if their input wsas invalid
+    // EFFECTS: handles the edit menu input and calls the appropriate submenus as needed, so long as the user would
+    // actually be able to do anything when using those menus. Tells user if their input wsas invalid
     private void handleEditMenuInput(String input) {
         if (input.equalsIgnoreCase("fi") || input.equalsIgnoreCase("file")) {
-            editFileMenu();
+            if (fileSystem.getNamesOfSubfiles().size() == 0) {
+                tellUserThisFolder("does not contain any files");
+            } else {
+                editFileMenu();
+            }
         } else if (input.equalsIgnoreCase("fo") || input.equalsIgnoreCase("folder")) {
-            editFolderMenu();
+            if (fileSystem.getNamesOfSubfolders().size() == 0) {
+                tellUserThisFolder("does not contain any subfolders");
+            } else {
+                editFolderMenu();
+            }
         } else if (input.equalsIgnoreCase("l") || input.equalsIgnoreCase("label")) {
-            editLabelMenu();
+            if (!fileSystem.anyLabelsExist()) {
+                System.out.println("You have not created any labels");
+            } else {
+                editLabelMenu();
+            }
         } else {
             System.out.println("Your input was not recognized as any of: fi, fo, l, or b");
         }
@@ -622,11 +632,11 @@ public class TextFileApp {
                 // Returns to the edit menu
             } else if (input.equalsIgnoreCase("l") || input.equalsIgnoreCase("list")) {
                 try {
-                    listStringsAlphabetically(fileSystem.getNamesOfAllSubfiles());
+                    listStringsAlphabetically(fileSystem.getNamesOfSubfiles());
                 } catch (ListEmptyException e) {
                     System.out.println("There are no files in this folder");
                 }
-            } else if (fileSystem.fileWithNameAlreadyExists(input)) {
+            } else if (fileSystem.containsFile(input)) {
                 editFile(input);
                 break;
             } else {
@@ -655,6 +665,8 @@ public class TextFileApp {
                 } catch (NoSuchFileFoundException e) {
                     System.out.println("No file named " + fileName + ". Going back to previous menu");
                     break;
+                } catch (NameChangedException e) {
+                    fileName = e.getNewName();
                 }
             }
         }
@@ -667,7 +679,7 @@ public class TextFileApp {
         System.out.println("  \"o\": Open the file in your default text editor");
         System.out.println("  \"e\": Edit the file's name or add/remove labels");
         System.out.println("  \"d\": Delete the file");
-        System.out.println("  \"b\": Back to the main menu");
+        System.out.println("  \"b\": Back to the previous menu");
     }
 
     // MODIFIES: this
@@ -675,7 +687,7 @@ public class TextFileApp {
     // throws CurrentObjectDeletedException if file was deleted
     // throws NoSuchFileFoundException if fileSystem does not find a File named fileName
     private void handleEditFileMenuInput(String input, String fileName)
-            throws CurrentObjectDeletedException, NoSuchFileFoundException {
+            throws CurrentObjectDeletedException, NoSuchFileFoundException, NameChangedException {
         if (input.equalsIgnoreCase("o") || input.equalsIgnoreCase("open")) {
             openFile(fileName);
         } else if (input.equalsIgnoreCase("e") || input.equalsIgnoreCase("edit")) {
@@ -710,7 +722,7 @@ public class TextFileApp {
     // EFFECTS: shows the user the options to edit their file name, labels, or to go back, handles going back case,
     // and hands off remaining cases to handleEditFileNameAndLabelsMenuInput
     // throws NoSuchFileFoundException if fileSystem does not find a File named fileName
-    private void editFileNameAndLabelsMenu(String fileName) throws NoSuchFileFoundException {
+    private void editFileNameAndLabelsMenu(String fileName) throws NoSuchFileFoundException, NameChangedException {
         while (true) {
             displayEditFileNameAndLabelsOptions(fileName);
 
@@ -740,29 +752,48 @@ public class TextFileApp {
     // EFFECTS: calls appropriate functions for changing the name of the file, adding a label to the file
     // removing a label from the file, and removing all labels from the file
     // throws NoSuchFileFoundException if fileSystem does not find a File named fileName
-    private void handleEditFileNameAndLabelsMenuInput(String input, String fileName) throws NoSuchFileFoundException {
+    private void handleEditFileNameAndLabelsMenuInput(String input, String fileName)
+            throws NoSuchFileFoundException, NameChangedException {
         if (input.equalsIgnoreCase("n") || input.equalsIgnoreCase("name")) {
-            changeFileName(input, fileName);
+            changeFileName(fileName);
         } else if (input.equalsIgnoreCase("a") || input.equalsIgnoreCase("add")) {
             addAsManyLabelsAsDesiredOrPossible(fileName);
         } else if (input.equalsIgnoreCase("r") || input.equalsIgnoreCase("remove")) {
             removeAsManyLabelsAsDesiredOrPossible(fileName);
         } else if (input.equalsIgnoreCase("ra") || input.equalsIgnoreCase("remove all")) {
-            confirmRemoveAllLables(fileName);
+            confirmThenRemoveAllLabelsFromFileIfAny(fileName);
         } else {
             System.out.println("Your input was not recognized as any of: n, a, r, ra, or b");
         }
     }
 
-    private void changeFileName(String fileNewName, String fileName) throws NoSuchFileFoundException {
+    // MODIFIES: this
+    // EFFECTS: gets user input: returns if they input b, returns if their input is already the name of a file in this
+    // folder, returns if their input is not a valid name, if it is a valid name then changes the file's name to
+    // what they inputted
+    // throws NoSuchFileFoundException if fileName is not a file in the current directory
+    // throws NameChangedException if the file's name was succesfully changed
+    private void changeFileName(String fileName) throws NoSuchFileFoundException, NameChangedException {
         try {
-            fileSystem.setFileName(fileName, chooseAndConfirmCustomFileName());
+            String newName = chooseAndConfirmCustomFileName();
+            fileSystem.setFileName(fileName, newName);
+            throw new NameChangedException(newName);
         } catch (UserNoLongerWantsCustomNameException e) {
             System.out.println("Name has not been changed and will remain " + fileName);
         } catch (NameIsTakenException e) {
-            tellUserFileWithNameAlreadyExists(fileNewName);
-        } catch (NameIsEmptyException e) {
+            tellUserFileWithNameAlreadyExists(e.getCapitalizationOfTakenName());
+        } catch (NameIsBlankException e) {
             System.out.println("Custom file name was not valid");
+        }
+    }
+
+    private void confirmThenRemoveAllLabelsFromFileIfAny(String fileName) throws NoSuchFileFoundException {
+        if (!fileSystem.anyLabelsExist()) {
+            System.out.println("You have not made any labels");
+        } else if (fileSystem.getNumLabelsOnFile(fileName) == 0) {
+            System.out.println(fileName + " is not labelled with any labels");
+        } else {
+            confirmRemoveAllLabels(fileName);
         }
     }
 
@@ -770,7 +801,7 @@ public class TextFileApp {
     // EFFECTS: confirms that the user wishes to remove all labels from File named fileName, if they do,
     // removes all labels from it, otherwise does nothing
     // throws NoSuchFileFoundException if fileSystem does not find a File named fileName
-    private void confirmRemoveAllLables(String fileName) throws NoSuchFileFoundException {
+    private void confirmRemoveAllLabels(String fileName) throws NoSuchFileFoundException {
         if (confirmCompleteAction("remove all labels from " + fileName)) {
             fileSystem.removeAllLabels(fileName);
             System.out.println("All labels removed");
@@ -805,11 +836,11 @@ public class TextFileApp {
                 // Returns to the edit menu
             } else if (input.equalsIgnoreCase("l") || input.equalsIgnoreCase("list")) {
                 try {
-                    listStringsAlphabetically(fileSystem.getNamesOfAllSubfolders());
+                    listStringsAlphabetically(fileSystem.getNamesOfSubfolders());
                 } catch (ListEmptyException e) {
                     System.out.println("This folder doesn't have any subfolders");
                 }
-            } else if (fileSystem.folderWithNameAlreadyExists(input)) {
+            } else if (fileSystem.containsFolder(input)) {
                 editFolder(input);
                 break;
             } else {
@@ -902,25 +933,18 @@ public class TextFileApp {
 
     // MODIFIES: this
     // EFFECTS: sets the name of Folder named folderName to newName and returns true or returns false and tells user
-    // why this failed if the name is taken or if their input was empty
+    // why this failed if the name is taken or if their input was blank (empty or whitespace)
     // throws NoSuchFolderFoundException if fileSystem does not find a folder named folderName
     private boolean setFolderName(String folderName, String newName) throws NoSuchFolderFoundException {
         try {
             fileSystem.setFolderName(folderName, newName);
             return true;
         } catch (NameIsTakenException e) {
-            tellUserCurrentFolderContainsFolderNamed(newName);
-        } catch (NameIsEmptyException e) {
+            tellUserThisFolder("already contains a folder named " + e.getCapitalizationOfTakenName());
+        } catch (NameIsBlankException e) {
             System.out.println("Folder name was not valid");
         }
         return false;
-    }
-
-    // REQUIRES: fileSystem.folderWithNameAlreadyExists(folderName)
-    // EFFECTS: tells the user that the name that they entered is in use
-    private void tellUserCurrentFolderContainsFolderNamed(String folderName) {
-        System.out.println(fileSystem.getCurrentFolderName() + " (current folder) already contains a folder named "
-                + fileSystem.getCapitalizationOfFolder(folderName));
     }
 
     // MODIFIES: this
@@ -952,7 +976,7 @@ public class TextFileApp {
                 // Returns to the edit menu
             } else if (input.equalsIgnoreCase("l") || input.equalsIgnoreCase("list")) {
                 try {
-                    listStringsAlphabetically(fileSystem.getNamesOfAllLabels());
+                    listStringsAlphabetically(fileSystem.getNamesOfLabels());
                 } catch (ListEmptyException e) {
                     System.out.println("You have not created any labels");
                 }
@@ -981,7 +1005,7 @@ public class TextFileApp {
                     handleEditLabelMenuInput(input, labelName);
                 } catch (NewFolderOpenedException | CurrentObjectDeletedException e) {
                     break;
-                } catch (NoSuchLabelFoundException | NameIsEmptyException e) {
+                } catch (NoSuchLabelFoundException e) {
                     System.out.println("No label with name " + labelName + " was found. Returning to previous menu");
                     break;
                 }
@@ -1007,9 +1031,8 @@ public class TextFileApp {
     // throws CurrentObjectDeletedException if the user decided to delete the selected folder in order to go back
     // mulitple menus
     // throws NoSuchLabelFoundException if fileSystem does not find a Label named labelName
-    // throws NameIsEmptyException if labelName is empty
     private void handleEditLabelMenuInput(String input, String labelName) throws NewFolderOpenedException,
-            CurrentObjectDeletedException, NoSuchLabelFoundException, NameIsEmptyException {
+            CurrentObjectDeletedException, NoSuchLabelFoundException {
         if (input.equalsIgnoreCase("o") || input.equalsIgnoreCase("open")) {
             fileSystem.openLabel(labelName);
             System.out.println("Current directory is every file labelled " + labelName);
@@ -1029,35 +1052,56 @@ public class TextFileApp {
     // throws NoSuchLabelFoundException if fileSystem does not find a Label named labelName
     private void editLabelNameMenu(String labelName) throws NoSuchLabelFoundException {
         while (true) {
-            System.out.println();
-            System.out.println("Please enter the new label name or b to go back (if you wish "
-                    + "to rename your label to b or B, enter namelabelb)");
+            printEditLabelNameMenu();
 
             String input = getUserInputTrim();
 
             if (input.equalsIgnoreCase("b") || input.equalsIgnoreCase("back")) {
                 break;
-            } else if (input.equalsIgnoreCase("namelabelb")) {
-                try {
-                    fileSystem.setLabelName(labelName, nameLabelB());
-                    break;
-                } catch (UserNoLongerWantsNameBException e) {
-                    // Continue the loop so they can rename the label something else
-                }
-            } else if (input.isEmpty()) {
-                System.out.println("Label name was not valid");
-            } else if (fileSystem.labelExists(input)) {
-                tellUserLabelAlreadyExistsWithName(input);
             } else {
-                fileSystem.setLabelName(labelName, input);
-                break;
+                if (renameLabelIfNameValid(input, labelName)) {
+                    break;
+                }
             }
         }
     }
 
-    // EFFECTS: thells the user that there is already a Label named input
-    private void tellUserLabelAlreadyExistsWithName(String input) {
-        System.out.println("A label already exists with name " + fileSystem.getCapitalizationOfLabel(input));
+    // EFFECTS: if input is "namelabelb", gets new input from the user to determing if they want to name their label
+    // "b", "B", or "namelabelb" (and any of its case variants). If they leave that menu without choosing a name then
+    // returns false. If the name they chose is already taken, prints that and returns false, otherwise renames it
+    // otherwise if input.isBlank() is true, returns false or if there is already a label named input tells the user
+    // that and returns false. If neither of those are true then renames it to input
+    private boolean renameLabelIfNameValid(String input, String labelName) throws NoSuchLabelFoundException {
+        if (input.equalsIgnoreCase("namelabelb")) {
+            try {
+                String newLabelName = nameLabelB();
+                fileSystem.setLabelName(labelName, newLabelName);
+                System.out.println("Label renamed to " + newLabelName);
+                return true;
+            } catch (UserNoLongerWantsNameBException e) {
+                // Continue the loop so they can rename the label something else
+            } catch (NameIsTakenException e) {
+                System.out.println("A label already exists with name " + e.getCapitalizationOfTakenName());
+            }
+        } else {
+            try {
+                fileSystem.setLabelName(labelName, input);
+                System.out.println("Label renamed to " + input);
+                return true;
+            } catch (NameIsBlankException e) {
+                System.out.println("Label name was not valid");
+            } catch (NameIsTakenException e) {
+                System.out.println("A label already exists with name " + e.getCapitalizationOfTakenName());
+            }
+        }
+        return false;
+    }
+
+    // EFFECTS: prints out what the edit label name menu options
+    private void printEditLabelNameMenu() {
+        System.out.println();
+        System.out.println("Please enter the new label name or b to go back (if you wish "
+                + "to rename your label to b or B, enter namelabelb)");
     }
 
     // MODIFIES: this
@@ -1067,6 +1111,7 @@ public class TextFileApp {
     private void deleteLabelMenu(String labelName) throws CurrentObjectDeletedException, NoSuchLabelFoundException {
         if (confirmCompleteAction("delete " + labelName)) {
             fileSystem.deleteLabel(labelName);
+            System.out.println(labelName + " has been deleted");
             throw new CurrentObjectDeletedException();
         }
     }
@@ -1077,7 +1122,7 @@ public class TextFileApp {
     // MODIFIES: this
     // EFFECTS: TODO: load state from file
     private void loadMenu() {
-        System.out.print("Not implemented...");
+        System.out.println("Not implemented...");
     }
 
 
@@ -1115,7 +1160,9 @@ public class TextFileApp {
         } catch (NoSuchFolderFoundException e) {
             // Continue, just without showing this option
         }
-        System.out.println("  \"o\": Open a folder in this folder (" + fileSystem.getCurrentFolderName() + ")");
+        if (!fileSystem.getNamesOfSubfolders().isEmpty()) {
+            System.out.println("  \"o\": Open a folder in this folder (" + fileSystem.getCurrentFolderName() + ")");
+        }
         System.out.println("  \"b\": Back to the main menu");
     }
 
@@ -1137,7 +1184,8 @@ public class TextFileApp {
             }
             System.out.println(fileSystem.getCurrentFolderName() + " opened");
             throw new NewFolderOpenedException();
-        } else if (input.equalsIgnoreCase("o") || input.equalsIgnoreCase("open")) {
+        } else if (!fileSystem.getNamesOfSubfolders().isEmpty()
+                && input.equalsIgnoreCase("o") || input.equalsIgnoreCase("open")) {
             getInputToOpenFolder();
         } else {
             System.out.println("Your input was not recognized as any of: r, "
@@ -1189,11 +1237,23 @@ public class TextFileApp {
     private void handleOpenMenuInput(String input)
             throws NewFolderOpenedException, NoSuchFileFoundException, NoSuchFolderFoundException {
         if (input.equalsIgnoreCase("fi") || input.equalsIgnoreCase("file")) {
-            getInputToOpenFile();
+            if (fileSystem.getNamesOfSubfiles().size() == 0) {
+                tellUserThisFolder("does not contain any files");
+            } else {
+                getInputToOpenFile();
+            }
         } else if (input.equalsIgnoreCase("fo") || input.equalsIgnoreCase("folder")) {
-            getInputToOpenFolder();
+            if (fileSystem.getNamesOfSubfolders().size() == 0) {
+                tellUserThisFolder("does not contain any subfolders");
+            } else {
+                getInputToOpenFolder();
+            }
         } else if (input.equalsIgnoreCase("lf") || input.equalsIgnoreCase("labelled files")) {
-            getInputToOpenLabel();
+            if (!fileSystem.anyLabelsExist()) {
+                System.out.println("You have not created any labels");
+            } else {
+                getInputToOpenLabel();
+            }
         } else if (input.equalsIgnoreCase("r") || input.equalsIgnoreCase("recent")) {
             openRecentMenu();
         } else {
@@ -1215,19 +1275,18 @@ public class TextFileApp {
                 break;
             } else if (input.equalsIgnoreCase("l") || input.equalsIgnoreCase("list")) {
                 listFilesAlphabeticallyTellUserIfNone();
-            } else if (input.isEmpty()) {
-                System.out.println("Files name was not valid");
-            } else if (fileSystem.fileWithNameAlreadyExists(input)) {
+            } else if (input.isBlank()) {
+                System.out.println("File name was not valid");
+            } else if (fileSystem.containsFile(input)) {
                 try {
                     fileSystem.openFile(input);
-                    System.out.println(fileSystem.getCurrentFolderName() + " opened");
+                    System.out.println(fileSystem.getCapitalizationOfFile(input) + " opened");
                     break;
                 } catch (FilePathNoLongerValidException e) {
                     System.out.println("File was moved or deleted");
                 }
             } else {
-                System.out.println("This folder (" + fileSystem.getCurrentFolderName()
-                        + ") does not contain a file named " + input);
+                tellUserThisFolder("does not contain a file named " + input);
             }
         }
     }
@@ -1254,7 +1313,7 @@ public class TextFileApp {
         System.out.println();
         System.out.println("  \"fi\": Open a recently-opened file");
         System.out.println("  \"fo\": Open a recently-opened folder");
-        System.out.println("  \"l\": Show all files labelled with a recently-viewed label");
+        System.out.println("  \"lf\": Show all files labelled with a recently-viewed label");
         System.out.println("  \"b\": Back to the open menu");
     }
 
@@ -1265,7 +1324,7 @@ public class TextFileApp {
             getInputToOpenRecentFile();
         } else if (input.equalsIgnoreCase("fo") || input.equalsIgnoreCase("folder")) {
             getInputToOpenRecentFolder();
-        } else if (input.equalsIgnoreCase("l") || input.equalsIgnoreCase("label")) {
+        } else if (input.equalsIgnoreCase("lf") || input.equalsIgnoreCase("labelled files")) {
             getInputToOpenRecentLabel();
         } else {
             System.out.println("Your input was not recognized as any of: fi, fo, l, or b");
@@ -1355,7 +1414,7 @@ public class TextFileApp {
     private void getInputToOpenRecentLabel() throws NewFolderOpenedException {
         while (true) {
             System.out.println();
-            System.out.println("Please input the name of the label for which you have recently viewed files labled"
+            System.out.println("Please input the name of the label for which you have recently viewed files labelled"
                     + " with it or b to go back");
             try {
                 List<String> recentlyOpenedLabelNames = fileSystem.getNamesOfRecentlyOpenedLabels();
@@ -1413,12 +1472,11 @@ public class TextFileApp {
                 break;
             } else if (input.equalsIgnoreCase("l") || input.equalsIgnoreCase("list")) {
                 try {
-                    listStringsAlphabetically(fileSystem.getNamesOfAllSubfolders());
+                    listStringsAlphabetically(fileSystem.getNamesOfSubfolders());
                 } catch (ListEmptyException e) {
-                    System.out.println(fileSystem.getCurrentFolderName()
-                                + " (current folder) does not contain any subfolders");
+                    tellUserThisFolder("does not contain any subfolders");
                 }
-            } else if (input.isEmpty()) {
+            } else if (input.isBlank()) {
                 System.out.println("Folder name was not valid");
             } else {
                 openFolder(input);
@@ -1441,8 +1499,7 @@ public class TextFileApp {
 
     // EFFECTS: tells the user the current Folder does not contain a Folder named input
     private void tellUserThisFolderDoesNotContainFolderNamed(String input) {
-        System.out.println("This folder (" + fileSystem.getCurrentFolderName()
-                + ") does not contain a subfolder named " + input);
+        tellUserThisFolder("does not contain a subfolder named " + input);
     }
 
     // MODIFIES: fileSystem
@@ -1459,11 +1516,11 @@ public class TextFileApp {
                 break;
             } else if (input.equalsIgnoreCase("l") || input.equalsIgnoreCase("list")) {
                 try {
-                    listStringsAlphabetically(fileSystem.getNamesOfAllLabels());
+                    listStringsAlphabetically(fileSystem.getNamesOfLabels());
                 } catch (ListEmptyException e) {
                     System.out.println("You have not made any labels");
                 }
-            } else if (input.isEmpty()) {
+            } else if (input.isBlank()) {
                 System.out.println("Label name was not valid");
             } else {
                 openLabel(input);
@@ -1479,7 +1536,7 @@ public class TextFileApp {
             fileSystem.openLabel(labelName);
             System.out.println(fileSystem.getCurrentFolderName() + " opened");
             throw new NewFolderOpenedException();
-        } catch (NoSuchLabelFoundException | NameIsEmptyException e) {
+        } catch (NoSuchLabelFoundException e) {
             System.out.println("There is no label named \"" + labelName + "\"");
         }
     }
@@ -1488,7 +1545,7 @@ public class TextFileApp {
     // EFFECTS: returns true if the user confirms that they want to complete action,
     // returns false if they confirm they do not want to
     /**
-     * Prints out: "Are you sure you want to $action? Please enter yes or no"
+     * Prints out: "Are you sure you want to {action}? Please enter yes or no"
      */
     private boolean confirmCompleteAction(String action) {
         while (true) {
@@ -1502,7 +1559,7 @@ public class TextFileApp {
             } else if (input.equalsIgnoreCase("no")) {
                 return false;
             } else {
-                System.out.println("Your input was not recognized as either of: yes or no");
+                System.out.println("Your input was not recognized as either of: \"yes\" or \"no\"");
             }
         }
     }
@@ -1554,7 +1611,7 @@ public class TextFileApp {
                 System.out.println("No label named that exists");
             }
         } else {
-            System.out.println(fileName + " already has every label");
+            explainWhyNoLabelsCanBeAdded(fileName);
         }
     }
 
@@ -1576,7 +1633,7 @@ public class TextFileApp {
                 throw new UserNoLongWantsToChangeLabelsException();
             } else if (input.equalsIgnoreCase("l") || input.equalsIgnoreCase("list")) {
                 try {
-                    listStringsAlphabetically(fileSystem.getNamesOfAllLabelsNotOnFile(fileName));
+                    listStringsAlphabetically(fileSystem.getNamesOfLabelsNotOnFile(fileName));
                 } catch (ListEmptyException e) {
                     // Not going to happen since it has size > 1
                 }
@@ -1611,22 +1668,33 @@ public class TextFileApp {
     // throws NoSuchLabelFoundException if fileSystem does not find the appropriate Label
     private void addLastRemainingLabel(String fileName)
             throws UserNoLongWantsToChangeLabelsException, NoSuchFileFoundException, NoSuchLabelFoundException {
+        String onlyLabel = fileSystem.getNamesOfLabelsNotOnFile(fileName).get(0);
         while (true) {
             System.out.println();
-            System.out.println("Would you like to label the file \""
-                    + fileSystem.getNamesOfAllLabelsNotOnFile(fileName).get(0)
-                    + "\"? (This is the only label not on this file) y or n");
+            System.out.println("Would you like to label the file \"" + onlyLabel
+                    + "\"? (This is the only label not on this file) y or n or " + onlyLabel);
 
             String input = getUserInputTrim();
 
             if (input.equalsIgnoreCase("n") || input.equalsIgnoreCase("no")) {
                 throw new UserNoLongWantsToChangeLabelsException();
-            } else if (input.equalsIgnoreCase("y") || input.equalsIgnoreCase("yes")) {
-                addLabelToFile(fileName, fileSystem.getNamesOfAllLabelsNotOnFile(fileName).get(0));
+            } else if (input.equalsIgnoreCase("y") || input.equalsIgnoreCase("yes")
+                    || input.equalsIgnoreCase(onlyLabel)) {
+                addLabelToFile(fileName, fileSystem.getNamesOfLabelsNotOnFile(fileName).get(0));
                 break;
             } else {
-                System.out.println("Your input was not recognized as a y or n");
+                System.out.println("Your input was not recognized as \"y\" or \"n\"");
             }
+        }
+    }
+
+    // EFFECTS: if the user has created any labels then tells the user that fileName already has every label
+    // if the user has not created any labels then tells them that
+    private void explainWhyNoLabelsCanBeAdded(String fileName) {
+        if (fileSystem.getNumLabels() > 0) {
+            System.out.println(fileName + " already has every label");
+        } else {
+            System.out.println("You have not made any labels");
         }
     }
 
@@ -1678,7 +1746,7 @@ public class TextFileApp {
                 throw new UserNoLongWantsToChangeLabelsException();
             } else if (input.equalsIgnoreCase("l") || input.equalsIgnoreCase("list")) {
                 try {
-                    listStringsAlphabetically(fileSystem.getNamesOfAllLabelsOnFile(fileName));
+                    listStringsAlphabetically(fileSystem.getNamesOfLabelsOnFile(fileName));
                 } catch (ListEmptyException e) {
                     // Not going to happen since it has size > 1
                 }
@@ -1714,7 +1782,7 @@ public class TextFileApp {
     // throws NoSuchLabelFoundException if fileSystem does not find an appropriate Label
     private void removeOnlyLabel(String fileName)
             throws UserNoLongWantsToChangeLabelsException, NoSuchFileFoundException, NoSuchLabelFoundException {
-        String labelName = fileSystem.getNamesOfAllLabelsOnFile(fileName).get(0);
+        String labelName = fileSystem.getNamesOfLabelsOnFile(fileName).get(0);
         while (true) {
             System.out.println();
             System.out.println("Would you like to remove the label " + labelName + " from the file \""
@@ -1734,6 +1802,11 @@ public class TextFileApp {
         }
     }
 
+    
+    /* 
+    *  General helpers:
+    */
+
     // User Input:
     // EFFECTS: gets input from the user and trims it
     private String getUserInputTrim() {
@@ -1743,9 +1816,11 @@ public class TextFileApp {
         return input;
     }
 
-    /* 
-     *  Listing:
-     */
+    // EFFECTS: prints "This folder (folderName) + message"
+    private void tellUserThisFolder(String message) {
+        System.out.println("This folder (" + fileSystem.getCurrentFolderName() + ") " + message);
+    }
+
     // EFFECTS: prints it out separated by commas (with no comma after the last element)
     private void listStringsInOrder(List<String> strings) throws ListEmptyException {
         if (strings.isEmpty()) {
@@ -1769,7 +1844,7 @@ public class TextFileApp {
             throw new ListEmptyException();
         }
 
-        // Code taken from [Stack Overflow]
+        // Code taken from Stack Overflow:
         // https://stackoverflow.com/questions/8432581/how-to-sort-a-listobject-alphabetically-using-object-name-field
         strings.sort(Comparator.comparing(String::toLowerCase));
 
@@ -1779,7 +1854,7 @@ public class TextFileApp {
     // EFFECTS: lists out all of the files in this folder or a message if there are none
     private void listFilesAlphabeticallyTellUserIfNone() {
         try {
-            listStringsAlphabetically(fileSystem.getNamesOfAllSubfiles());
+            listStringsAlphabetically(fileSystem.getNamesOfSubfiles());
         } catch (ListEmptyException e) {
             System.out.println("This folder does not contain any files");
         }    
