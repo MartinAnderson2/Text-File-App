@@ -1,13 +1,13 @@
 package model;
 
+import model.exceptions.NameIsBlankException;
+import model.exceptions.NameIsTakenException;
+import model.exceptions.NoSuchFolderFoundException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import model.exceptions.NameIsBlankException;
-import model.exceptions.NameIsTakenException;
-import model.exceptions.NoSuchFolderFoundException;
 
 public class TestFile extends TestNamedObject {
     Folder rootFolder;

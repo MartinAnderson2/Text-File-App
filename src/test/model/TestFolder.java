@@ -13,7 +13,7 @@ import model.exceptions.NoSuchFolderFoundException;
 import java.util.*;
 
 public class TestFolder extends TestNamedObject {
-    Folder empty;
+    Folder emptyFolder;
     Folder educationFolder;
     Folder cpscTwoTenFolder;
     Folder mathTwoHundredFolder;
@@ -34,7 +34,7 @@ public class TestFolder extends TestNamedObject {
         try {
             namedObject = new Folder("name");
 
-            empty = new Folder("Empty");
+            emptyFolder = new Folder("Empty");
             educationFolder = new Folder("Education");
             educationFolder.makeSubfolder("CPSC 210");
             cpscTwoTenFolder = educationFolder.getSubfolder("CPSC 210");
@@ -134,7 +134,7 @@ public class TestFolder extends TestNamedObject {
 
     @Test
     void testSubfoldersEmpty() {
-        assertTrue(empty.getSubfolders().isEmpty());
+        assertTrue(emptyFolder.getSubfolders().isEmpty());
     }
     
     @Test
@@ -156,7 +156,7 @@ public class TestFolder extends TestNamedObject {
 
     @Test
     void testSubfilesEmpty() {
-        assertTrue(empty.getSubfiles().isEmpty());
+        assertTrue(emptyFolder.getSubfiles().isEmpty());
     }
     
     @Test
@@ -282,7 +282,7 @@ public class TestFolder extends TestNamedObject {
     @Test
     void testGetSubfileFailEmptyAndOtherFiles() {
         try {
-            empty.getSubfile("name");
+            emptyFolder.getSubfile("name");
             fail("Parent folder did not throw NoSuchFileFoundException when returning a file that doesn't exist");
         } catch (NoSuchFileFoundException e) {
             // expected
@@ -314,8 +314,8 @@ public class TestFolder extends TestNamedObject {
     void testMakeSubfolderIsEmpty() {
         Folder newFolder;
         try {
-            empty.makeSubfolder("no longer empty");
-            newFolder = empty.getSubfolder("no longer empty");
+            emptyFolder.makeSubfolder("no longer empty");
+            newFolder = emptyFolder.getSubfolder("no longer empty");
         } catch (NoSuchFolderFoundException e) {
             fail("Subfolder just created not found");
             // So compiler doesn't complain about newFolder not being assigned a value
@@ -330,13 +330,13 @@ public class TestFolder extends TestNamedObject {
             return;
         }
 
-        Set<Folder> foldersInEmpty = empty.getSubfolders();
+        Set<Folder> foldersInEmpty = emptyFolder.getSubfolders();
         
         assertEquals(1, foldersInEmpty.size());
         assertTrue(foldersInEmpty.contains(newFolder));
         assertEquals("no longer empty", newFolder.getName());
         try {
-            assertEquals(empty, newFolder.getParentFolder());
+            assertEquals(emptyFolder, newFolder.getParentFolder());
         } catch (NoSuchFolderFoundException e) {
             fail("Subfolder does not have a parent");
         }
@@ -535,7 +535,7 @@ public class TestFolder extends TestNamedObject {
     @Test
     void testRemoveSubfolderIsEmpty() {
         try {
-            empty.makeSubfolder("no longer empty");
+            emptyFolder.makeSubfolder("no longer empty");
         } catch (NameIsTakenException e) {
             fail("NameIsTakenException thrown when name was not taken");
             // So compiler doesn't complain about newFolder not being assigned a value
@@ -545,11 +545,11 @@ public class TestFolder extends TestNamedObject {
             // So compiler doesn't complain about newFolder not being assigned a value
             return;
         }
-        Folder newFolder = getSubfolderJustCreated(empty, "no longer empty");
+        Folder newFolder = getSubfolderJustCreated(emptyFolder, "no longer empty");
         
-        removeSubfolderJustCreated(empty, newFolder.getName());
+        removeSubfolderJustCreated(emptyFolder, newFolder.getName());
 
-        Set<Folder> foldersInEmpty = empty.getSubfolders();
+        Set<Folder> foldersInEmpty = emptyFolder.getSubfolders();
         assertTrue(foldersInEmpty.isEmpty());
     }
 
@@ -691,7 +691,7 @@ public class TestFolder extends TestNamedObject {
     @SuppressWarnings("methodlength")
     void testMakeSubfileEmptyName() {
         try {
-            empty.makeSubfile("", "C:\\Users\\User\\Documents\\");
+            emptyFolder.makeSubfile("", "C:\\Users\\User\\Documents\\");
             fail("No exception thrown when creating subfile with empty name");
         } catch (NameIsBlankException e) {
             // expected
@@ -699,7 +699,7 @@ public class TestFolder extends TestNamedObject {
             fail("NameIsTakenException thrown when attempting to create subfile with empty name");
         }
 
-        assertEquals(0, empty.getSubfiles().size());
+        assertEquals(0, emptyFolder.getSubfiles().size());
 
 
         try {
@@ -864,12 +864,12 @@ public class TestFolder extends TestNamedObject {
     @Test
     void testRemoveSubfileFail() {
         try {
-            empty.removeSubfile("Test");
+            emptyFolder.removeSubfile("Test");
             fail("No exception thrown when trying to remove File that doesn't exist");
         } catch (NoSuchFileFoundException e) {
             // expected
         }
-        assertEquals(0, empty.getSubfiles().size());
+        assertEquals(0, emptyFolder.getSubfiles().size());
         
         
         try {
@@ -899,12 +899,12 @@ public class TestFolder extends TestNamedObject {
 
     @Test
     void testHasSubfileFail() {
-        assertFalse(empty.hasSubfile("Goals"));
+        assertFalse(emptyFolder.hasSubfile("Goals"));
         assertFalse(educationFolder.hasSubfile(ceeZeroOneQuestionsFile.getName()));
         assertFalse(mathTwoHundredFolder.hasSubfile(ceeZeroOneQuestionsFile.getName()));
     }
 
-    // Helper methods (for dealing with exceptions that shouldn't reasonable be thrown)
+    // Helper methods (for dealing with exceptions that shouldn't reasonably be thrown)
 
     // EFFECTS: returns folder named name from parent, fails if none exist
     private Folder getSubfolderJustCreated(Folder parent, String name) {
