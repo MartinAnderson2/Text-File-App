@@ -12,7 +12,7 @@ import java.util.List;
 
 public class TestFileSystem {
     // A file that is valid on your computer in order to be able to test the open file and related functions
-    private static final String VALID_FILE_PATH = "File for testing.txt";
+    private static final String VALID_FILE_PATH = "data\\test\\File for testing.txt";
 
     FileSystem emptyFileSystem;
     FileSystem fileSystem;
