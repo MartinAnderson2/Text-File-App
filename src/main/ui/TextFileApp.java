@@ -1008,6 +1008,8 @@ public class TextFileApp {
                 } catch (NoSuchLabelFoundException e) {
                     System.out.println("No label with name " + labelName + " was found. Returning to previous menu");
                     break;
+                } catch (NameChangedException e) {
+                    labelName = e.getNewName();
                 }
             }
         }
@@ -1032,7 +1034,7 @@ public class TextFileApp {
     // mulitple menus
     // throws NoSuchLabelFoundException if fileSystem does not find a Label named labelName
     private void handleEditLabelMenuInput(String input, String labelName) throws NewFolderOpenedException,
-            CurrentObjectDeletedException, NoSuchLabelFoundException {
+            CurrentObjectDeletedException, NoSuchLabelFoundException, NameChangedException {
         if (input.equalsIgnoreCase("o") || input.equalsIgnoreCase("open")) {
             fileSystem.openLabel(labelName);
             System.out.println("Current directory is every file labelled " + labelName);
@@ -1050,7 +1052,8 @@ public class TextFileApp {
     // EFFECTS: tells the user to enter new label name, checks if they want to go back or name it b or namelabelb and
     // Label named labelName's name to chosen name
     // throws NoSuchLabelFoundException if fileSystem does not find a Label named labelName
-    private void editLabelNameMenu(String labelName) throws NoSuchLabelFoundException {
+    // throws NameChangedException if the name of the label originally named labelName was changed
+    private void editLabelNameMenu(String labelName) throws NoSuchLabelFoundException, NameChangedException {
         while (true) {
             printEditLabelNameMenu();
 
@@ -1059,9 +1062,7 @@ public class TextFileApp {
             if (input.equalsIgnoreCase("b") || input.equalsIgnoreCase("back")) {
                 break;
             } else {
-                if (renameLabelIfNameValid(input, labelName)) {
-                    break;
-                }
+                renameLabelIfNameValid(input, labelName);
             }
         }
     }
@@ -1071,13 +1072,17 @@ public class TextFileApp {
     // returns false. If the name they chose is already taken, prints that and returns false, otherwise renames it
     // otherwise if input.isBlank() is true, returns false or if there is already a label named input tells the user
     // that and returns false. If neither of those are true then renames it to input
-    private boolean renameLabelIfNameValid(String input, String labelName) throws NoSuchLabelFoundException {
+    // throws NoSuchLabelFoundException if there is no label named labelName
+    // throws NameChangedException if/when the user succesesfully changes the name of the label
+    private void renameLabelIfNameValid(String input, String labelName)
+            throws NoSuchLabelFoundException, NameChangedException {
         if (input.equalsIgnoreCase("namelabelb")) {
             try {
                 String newLabelName = nameLabelB();
                 fileSystem.setLabelName(labelName, newLabelName);
                 System.out.println("Label renamed to " + newLabelName);
-                return true;
+                updateCurrentFolderNameIfItIsALabelThatWasRenamed(labelName, newLabelName);
+                throw new NameChangedException(newLabelName);
             } catch (UserNoLongerWantsNameBException e) {
                 // Continue the loop so they can rename the label something else
             } catch (NameIsTakenException e) {
@@ -1087,14 +1092,28 @@ public class TextFileApp {
             try {
                 fileSystem.setLabelName(labelName, input);
                 System.out.println("Label renamed to " + input);
-                return true;
+                updateCurrentFolderNameIfItIsALabelThatWasRenamed(labelName, input);
+                throw new NameChangedException(input);
             } catch (NameIsBlankException e) {
                 System.out.println("Label name was not valid");
             } catch (NameIsTakenException e) {
                 System.out.println("A label already exists with name " + e.getCapitalizationOfTakenName());
             }
         }
-        return false;
+    }
+
+    // EFFECTS: if current folder is a label (determined by checking if it has no parent) named originalName then
+    // renames it to newName to match the fact that the label was renamed
+    // throws NoSuchLabelFoundException if no label named newName exists
+    private void updateCurrentFolderNameIfItIsALabelThatWasRenamed(String originalName, String newName)
+            throws NoSuchLabelFoundException {
+        if (fileSystem.currentFolderHasParent()) {
+            return;
+        }
+
+        if (fileSystem.getCurrentFolderName().equals(originalName)) {
+            fileSystem.openLabel(newName);
+        }
     }
 
     // EFFECTS: prints out what the edit label name menu options
