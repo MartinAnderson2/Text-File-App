@@ -2,10 +2,12 @@ package model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import model.exceptions.*;
+import persistence.JsonReader;
 
 import java.io.IOException;
 import java.util.List;
@@ -3240,6 +3242,77 @@ public class TestFileSystem {
         } catch (NoSuchLabelFoundException e) {
             // expected
         }
+    }
+
+
+    /* 
+     *  Tests for Persistence-related Methods:
+     */
+    @Test
+    void testAutoSave() {
+        emptyFileSystem.autoSave();
+
+        JsonReader emptyFileSystemJsonReader = new JsonReader(FileSystem.AUTOSAVE_FILE_PATH);
+        try {
+            emptyFileSystem = emptyFileSystemJsonReader.read();
+        } catch (IOException e) {
+            fail();
+        }
+        testEmptyFileSystemConstruction();
+
+        fileSystem.autoSave();
+
+        JsonReader fileSystemJsonReader = new JsonReader(FileSystem.AUTOSAVE_FILE_PATH);
+        try {
+            fileSystem = fileSystemJsonReader.read();
+        } catch (IOException e) {
+            fail();
+        }
+        testFileSystemConstruction();
+    }
+
+    @Test
+    void testManuallySave() {
+        emptyFileSystem.manuallySave("data\\customSave.json");
+        JsonReader emptyFileSystemJsonReader = new JsonReader(FileSystem.AUTOSAVE_FILE_PATH);
+        try {
+            emptyFileSystem = emptyFileSystemJsonReader.read();
+        } catch (IOException e) {
+            fail();
+        }
+        testEmptyFileSystemConstruction();
+
+
+        fileSystem.manuallySave("data\\customSave2.json");
+        JsonReader fileSystemJsonReader = new JsonReader(FileSystem.AUTOSAVE_FILE_PATH);
+        try {
+            fileSystem = fileSystemJsonReader.read();
+        } catch (IOException e) {
+            fail();
+        }
+        testFileSystemConstruction();
+    }
+
+    @Test
+    void testAutoLoad() {
+        emptyFileSystem.autoSave();;
+        emptyFileSystem = FileSystem.autoLoad();
+        testEmptyFileSystemConstruction();
+
+        fileSystem.autoSave();;
+        fileSystem = FileSystem.autoLoad();
+        testFileSystemConstruction();
+    }
+
+    @Test
+    void testManuallyLoad() {
+        emptyFileSystem.manuallySave("data\\customSave.json");
+        emptyFileSystem = FileSystem.manuallyLoad("data\\customSave.json");
+        testEmptyFileSystemConstruction();
+
+        fileSystem.manuallySave("data\\customSave2.json");
+        fileSystem = FileSystem.manuallyLoad("data\\customSave2.json");
+        testFileSystemConstruction();
     }
 
 

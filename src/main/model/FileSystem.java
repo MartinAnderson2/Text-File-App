@@ -18,7 +18,7 @@ import java.awt.Desktop;
 // the user's default text editor. Folders can be opened to access their contents. It is possible to list all Files
 // labelled with a given Label.
 public class FileSystem implements Writable {
-    public static final String AUTOSAVE_FILE_PATH = "Data\\Autosave.json";
+    public static final String AUTOSAVE_FILE_PATH = "data\\Autosave.json";
     public static final String EXAMPLE_FILE_PATH = "C:\\Users\\User\\Documents\\Note Name.txt";
     private static final int MAX_NUM_RECENTLY_OPENED_STORED = 10;
 

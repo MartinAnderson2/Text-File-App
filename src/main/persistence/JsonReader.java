@@ -2,6 +2,8 @@ package persistence;
 
 import model.FileSystem;
 
+import java.io.IOException;
+
 // Represents a reader for reading all of the labels, files, and folders of the file system from a file, in JSON format
 // Based on [JsonSerializationDemo](https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo) 
 public class JsonReader {
@@ -12,7 +14,7 @@ public class JsonReader {
     }
 
     // EFFECTS: reads file at filePath and parses the JSON representation into a FileSystem
-    public FileSystem read() {
+    public FileSystem read() throws IOException {
         return new FileSystem(); // stub
     }
 }
