@@ -50,7 +50,9 @@ public class JsonReader {
     private FileSystem parseFileSystem(JSONObject json) {
         FileSystem fileSystem = new FileSystem();
         addLabels(fileSystem, json);
+        fileSystem.stopKeepingTrackOfRecents();
         addFoldersAndFiles(fileSystem, json);
+        fileSystem.startKeepingTrackOfRecents();
         return fileSystem;
     }
 

@@ -82,6 +82,7 @@ public class TestJsonReader {
         }
 
         List<String> recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedFolders().isEmpty());
         // assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
         // assertEquals(2, recentlyOpenedFolders.size());
         // assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
