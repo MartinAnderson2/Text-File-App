@@ -14,6 +14,8 @@ import model.exceptions.NameIsTakenException;
 // Represents a folder with a name that holds files as well as other folders
 // and has a parent folder unless it is the root folder
 public class Folder extends NamedObject {
+    public static char FOLDER_SEPERATOR = '\\';
+
     private Set<Folder> subfolders;
     private Set<File> subfiles;
     private Folder parentFolder;
@@ -41,7 +43,7 @@ public class Folder extends NamedObject {
     // EFFECTS: returns the name of this folder plus a backslash
     // in order to represent it in a path for this file system
     private String getNameAsPath() {
-        return getName() + "\\";
+        return getName() + FOLDER_SEPERATOR;
     }
 
     // EFFECTS: returns a reference to the set of folders within this folder

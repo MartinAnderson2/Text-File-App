@@ -4,6 +4,7 @@ import model.exceptions.*;
 import persistence.JsonReader;
 import persistence.JsonWriter;
 import persistence.Writable;
+import persistence.exceptions.InvalidJsonException;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,8 +23,8 @@ import java.awt.Desktop;
 // the user's default text editor. Folders can be opened to access their contents. It is possible to list all Files
 // labelled with a given Label.
 public class FileSystem implements Writable {
-    public static final String AUTOSAVE_FILE_PATH = "data\\Autosave.json";
-    public static final String EXAMPLE_FILE_PATH = "C:\\Users\\User\\Documents\\Note Name.txt";
+    public static final String AUTOSAVE_FILE_PATH = "data/Autosave.json";
+    public static final String EXAMPLE_FILE_PATH = "C:/Users/User/Documents/Note Name.txt";
     private static final int MAX_NUM_RECENTLY_OPENED_STORED = 10;
 
     private static JsonReader autoLoadJsonReader = new JsonReader(AUTOSAVE_FILE_PATH);
@@ -659,13 +660,17 @@ public class FileSystem implements Writable {
     }
 
     // EFFECTS: loads a JSON representation of a file system
-    public static FileSystem autoLoad() throws IOException {
+    // throws IOException if there is a problem with the file
+    // throws InvalidJsonException if there was a problem making the file system the JSON represents
+    public static FileSystem autoLoad() throws IOException, InvalidJsonException {
         FileSystem fileSystem = autoLoadJsonReader.read();
         return fileSystem;
     }
 
     // EFFECTS: loads a JSON representation of a file system from filePath
-    public static FileSystem manuallyLoad(String filePath) throws IOException {
+    // throws IOException if there is a problem with the file
+    // throws InvalidJsonException if there was a problem making the file system the JSON represents
+    public static FileSystem manuallyLoad(String filePath) throws IOException, InvalidJsonException {
         JsonReader jsonReader = new JsonReader(filePath);
         FileSystem fileSystem = jsonReader.read();
         return fileSystem;

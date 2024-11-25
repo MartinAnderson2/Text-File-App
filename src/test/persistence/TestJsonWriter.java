@@ -5,6 +5,7 @@ import model.exceptions.NameIsTakenException;
 import model.exceptions.NoSuchFileFoundException;
 import model.exceptions.NoSuchFolderFoundException;
 import model.exceptions.NoSuchLabelFoundException;
+import persistence.exceptions.InvalidJsonException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,7 @@ public class TestJsonWriter {
             assertTrue(loadedFileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
             assertTrue(loadedFileSystem.getNamesOfRecentlyOpenedFolders().isEmpty());
             assertTrue(loadedFileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
-        } catch (IOException e) {
+        } catch (IOException | InvalidJsonException e) {
             fail();
         }
     }
@@ -74,7 +75,7 @@ public class TestJsonWriter {
 
             FileSystem loadedFileSystem = jsonReader.read();
             testIsRegularFileSystem(loadedFileSystem);
-        } catch (IOException e) {
+        } catch (IOException | InvalidJsonException e) {
             fail();
         }
     }
@@ -124,12 +125,12 @@ public class TestJsonWriter {
             fail();
         }
 
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
         List<String> recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
-        // assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
-        // assertEquals(2, recentlyOpenedFolders.size());
-        // assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
-        // assertEquals("Education", recentlyOpenedFolders.get(1));
-        // assertTrue(fileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
+        assertEquals(2, recentlyOpenedFolders.size());
+        assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
+        assertEquals("Education", recentlyOpenedFolders.get(1));
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
 
 
         try {

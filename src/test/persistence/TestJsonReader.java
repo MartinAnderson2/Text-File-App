@@ -4,6 +4,7 @@ import model.FileSystem;
 import model.exceptions.NoSuchFileFoundException;
 import model.exceptions.NoSuchFolderFoundException;
 import model.exceptions.NoSuchLabelFoundException;
+import persistence.exceptions.InvalidJsonException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
@@ -22,17 +23,21 @@ public class TestJsonReader {
             fail("IOException not thrown when reading a file that shouldn't exist");
         } catch (IOException e) {
             // expected
+        } catch (InvalidJsonException e) {
+            fail("IOException not thrown when reading a file that shouldn't exist");
         }
 
-        // This violates the requires clause but it is useful to know about
+        // This violates the requires clause but it is useful to know about the exception
         jsonReader = new JsonReader("data\\test\\invalid ?:$@! file path \0.json");
         try {
             jsonReader.read();
-            fail("IOException not thrown when reading a file that shouldn't exist");
+            fail("InvalidPathException not thrown when file path was invalid");
         } catch (IOException e) {
             fail("IOException thrown when file path was invalid");
         } catch (InvalidPathException e) {
             // expected
+        } catch (InvalidJsonException e) {
+            fail("IOException not thrown when reading a file that shouldn't exist");
         }
     }
 
@@ -49,7 +54,7 @@ public class TestJsonReader {
             assertTrue(loadedFileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
             assertTrue(loadedFileSystem.getNamesOfRecentlyOpenedFolders().isEmpty());
             assertTrue(loadedFileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
-        } catch (IOException e) {
+        } catch (IOException | InvalidJsonException e) {
             fail("Read of premade JSON file failed");
         }
     }
@@ -61,7 +66,7 @@ public class TestJsonReader {
         try {
             FileSystem loadedFileSystem = jsonReader.read();
             testIsRegularFileSystem(loadedFileSystem);
-        } catch (IOException e) {
+        } catch (IOException | InvalidJsonException e) {
             fail("Read of premade JSON file failed");
         }
     }
@@ -81,13 +86,12 @@ public class TestJsonReader {
             fail();
         }
 
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
         List<String> recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
-        assertTrue(fileSystem.getNamesOfRecentlyOpenedFolders().isEmpty());
-        // assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
-        // assertEquals(2, recentlyOpenedFolders.size());
-        // assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
-        // assertEquals("Education", recentlyOpenedFolders.get(1));
-        // assertTrue(fileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
+        assertEquals(2, recentlyOpenedFolders.size());
+        assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
+        assertEquals("Education", recentlyOpenedFolders.get(1));
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
 
 
         try {

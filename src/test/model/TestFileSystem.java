@@ -5,8 +5,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import model.exceptions.*;
+import model.exceptions.NameIsBlankException;
+import model.exceptions.NameIsTakenException;
+import model.exceptions.NoSuchFileFoundException;
+import model.exceptions.NoSuchFolderFoundException;
+import model.exceptions.NoSuchLabelFoundException;
+import model.exceptions.FilePathNoLongerValidException;
+import model.exceptions.RequiresClauseNotMetRuntimeException;
 import persistence.JsonReader;
+import persistence.exceptions.InvalidJsonException;
 
 import java.io.IOException;
 import java.util.List;
@@ -3893,7 +3900,7 @@ public class TestFileSystem {
             emptyFileSystem.autoSave();
             JsonReader emptyFileSystemJsonReader = new JsonReader(FileSystem.AUTOSAVE_FILE_PATH);
             emptyFileSystem = emptyFileSystemJsonReader.read();
-        } catch (IOException e) {
+        } catch (IOException | InvalidJsonException e) {
             fail();
         }
         testEmptyFileSystemConstruction();
@@ -3902,7 +3909,7 @@ public class TestFileSystem {
             fileSystem.autoSave();
             JsonReader fileSystemJsonReader = new JsonReader(FileSystem.AUTOSAVE_FILE_PATH);
             fileSystem = fileSystemJsonReader.read();
-        } catch (IOException e) {
+        } catch (IOException | InvalidJsonException e) {
             fail();
         }
         testFileSystemConstructionIgnoreRecent();
@@ -3914,7 +3921,7 @@ public class TestFileSystem {
             emptyFileSystem.manuallySave("data\\customSave.json");
             JsonReader emptyFileSystemJsonReader = new JsonReader("data\\customSave.json");
             emptyFileSystem = emptyFileSystemJsonReader.read();
-        } catch (IOException e) {
+        } catch (IOException | InvalidJsonException e) {
             fail();
         }
         testEmptyFileSystemConstruction();
@@ -3924,7 +3931,7 @@ public class TestFileSystem {
             fileSystem.manuallySave("data\\customSave2.json");
             JsonReader fileSystemJsonReader = new JsonReader("data\\customSave2.json");
             fileSystem = fileSystemJsonReader.read();
-        } catch (IOException e) {
+        } catch (IOException | InvalidJsonException e) {
             fail();
         }
         testFileSystemConstructionIgnoreRecent();
@@ -3936,7 +3943,7 @@ public class TestFileSystem {
             emptyFileSystem.autoSave();;
             emptyFileSystem = FileSystem.autoLoad();
             testEmptyFileSystemConstruction();
-        } catch (IOException e) {
+        } catch (IOException | InvalidJsonException e) {
             fail();
         }
 
@@ -3944,7 +3951,7 @@ public class TestFileSystem {
             fileSystem.autoSave();;
             fileSystem = FileSystem.autoLoad();
             testFileSystemConstructionIgnoreRecent();
-        } catch (IOException e) {
+        } catch (IOException | InvalidJsonException e) {
             fail();
         }
     }
@@ -3955,14 +3962,14 @@ public class TestFileSystem {
             emptyFileSystem.manuallySave("data\\customSave.json");
             emptyFileSystem = FileSystem.manuallyLoad("data\\customSave.json");
             testEmptyFileSystemConstruction();
-        } catch (IOException e) {
+        } catch (IOException | InvalidJsonException e) {
             fail();
         }
 
         try {
             fileSystem.manuallySave("data\\customSave2.json");
             fileSystem = FileSystem.manuallyLoad("data\\customSave2.json");
-        } catch (IOException e) {
+        } catch (IOException | InvalidJsonException e) {
             fail();
         }
         testFileSystemConstructionIgnoreRecent();
