@@ -133,6 +133,14 @@ public class TestFolder extends TestNamedObject {
     }
 
     @Test
+    void testGetPathInThisFileSystem() {
+        assertEquals("Empty\\", emptyFolder.getPathInThisFileSystem());
+        assertEquals("Education\\", educationFolder.getPathInThisFileSystem());
+        assertEquals("Education\\CPSC 210\\", cpscTwoTenFolder.getPathInThisFileSystem());
+        assertEquals("Education\\MATH 200\\", mathTwoHundredFolder.getPathInThisFileSystem());
+    }
+
+    @Test
     void testSubfoldersEmpty() {
         assertTrue(emptyFolder.getSubfolders().isEmpty());
     }

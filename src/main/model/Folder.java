@@ -29,6 +29,21 @@ public class Folder extends NamedObject {
         parentFolder = null;
     }
 
+    // EFFECTS: returns a string representing the path of this file in the file system it is part of
+    public String getPathInThisFileSystem() {
+        if (parentFolder == null) {
+            return getNameAsPath();
+        } else {
+            return parentFolder.getPathInThisFileSystem() + getNameAsPath();
+        }
+    }
+
+    // EFFECTS: returns the name of this folder plus a backslash
+    // in order to represent it in a path for this file system
+    private String getNameAsPath() {
+        return getName() + "\\";
+    }
+
     // EFFECTS: returns a reference to the set of folders within this folder
     public Set<Folder> getSubfolders() {
         return subfolders;

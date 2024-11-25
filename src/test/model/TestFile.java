@@ -83,6 +83,14 @@ public class TestFile extends TestNamedObject {
     }
 
     @Test
+    void testGetPathInThisFileSystem() {
+        assertEquals("root\\Education\\C#", ceeSharpFile.getPathInThisFileSystem());
+        assertEquals("root\\Education\\BSL", beeSLFile.getPathInThisFileSystem());
+        assertEquals("root\\Education\\Java", javaFile.getPathInThisFileSystem());
+        assertEquals("root\\Rust Language", rustFile.getPathInThisFileSystem());
+    }
+
+    @Test
     void testAddLabelOneLabel() {
         ceeSharpFile.addLabel(programmingLanguageLabel);
 

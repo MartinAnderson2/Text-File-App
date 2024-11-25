@@ -31,6 +31,11 @@ public class File extends NamedObject {
         this.filePath = filePath;
     }
 
+    // EFFECTS: returns a string representing the path of this file in the file system it is part of
+    public String getPathInThisFileSystem() {
+        return parentFolder.getPathInThisFileSystem() + getName();
+    }
+
     public Folder getParentFolder() {
         return parentFolder;
     }
