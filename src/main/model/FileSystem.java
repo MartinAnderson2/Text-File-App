@@ -1,7 +1,9 @@
 package model;
 
 import model.exceptions.*;
-import persistence.*;
+import persistence.JsonReader;
+import persistence.JsonWriter;
+import persistence.Writable;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -98,24 +100,36 @@ public class FileSystem implements Writable {
         currentFolder.makeSubfile(name, path);
     }
 
+    // EFFECTS: does not open File named fileName in user's default text editor. Adds File named fileName to list of
+    // recently-opened Files
+    // throws FilePathNoLongerValidException if the File no longer exists on their computer
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    public void openFileButNotOnComputer(String fileName) throws NoSuchFileFoundException,
+            FilePathNoLongerValidException {
+        openFile(currentFolder.getSubfile(fileName), false);
+    }
+
     // EFFECTS: opens File named fileName in user's default text editor. Adds File named fileName to list of
     // recently-opened Files
     // throws FilePathNoLongerValidException if the File no longer exists on their computer
     // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
     public void openFile(String fileName) throws NoSuchFileFoundException, FilePathNoLongerValidException {
-        openFile(currentFolder.getSubfile(fileName));
+        openFile(currentFolder.getSubfile(fileName), true);
     }
 
     // EFFECTS: opens file in user's default text editor. Adds File named fileName to list of recently-opened Files
     // throws FilePathNoLongerValidException if the File no longer exists on their computer
     // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
-    private void openFile(File file) throws NoSuchFileFoundException, FilePathNoLongerValidException {
+    private void openFile(File file, boolean openOnComputer) throws NoSuchFileFoundException,
+            FilePathNoLongerValidException {
         if (!FileSystem.isFilePathValid(file.getFilePath())) {
             throw new FilePathNoLongerValidException();
         }
 
         try {
-            Desktop.getDesktop().open(new java.io.File(file.getFilePath()));
+            if (openOnComputer) {
+                Desktop.getDesktop().open(new java.io.File(file.getFilePath()));
+            }
             addRecentlyOpenedFile(file);
         } catch (IOException e) {
             throw new FilePathNoLongerValidException();
@@ -210,7 +224,7 @@ public class FileSystem implements Writable {
             throws NoSuchFileFoundException, FilePathNoLongerValidException {
         for (File file : recentlyOpenedFiles) {
             if (file.isNamed(fileName)) {
-                openFile(file);
+                openFile(file, true);
                 return;
             }
         }
@@ -571,7 +585,11 @@ public class FileSystem implements Writable {
     @Override
     public JSONObject toJson() {
         JSONObject json = new JSONObject();
+        json.put("currentFolderPath", currentFolder.getPathInThisFileSystem());
         json.put("labels", labelsToJson());
+        json.put("recentlyOpenedFilePaths", recentFilePathsToJson());
+        json.put("recentlyOpenedFolderPaths", recentFolderPathsToJson());
+        json.put("recentlyOpenedLabels", recentLabelsToJson());
         json.put("rootFolder", rootFolder.toJson());
         return json;
     }
@@ -584,6 +602,33 @@ public class FileSystem implements Writable {
             jsonArray.put(label.toJson());
         }
         
+        return jsonArray;
+    }
+
+    // EFFECTS: returns a JSON representation of the paths of the recently-opened files
+    private JSONArray recentFilePathsToJson() {
+        JSONArray jsonArray = new JSONArray();
+        for (File file : recentlyOpenedFiles) {
+            jsonArray.put(file.getPathInThisFileSystem());
+        }
+        return jsonArray;
+    }
+
+    // EFFECTS: returns a JSON representation of the paths of the recently-opened folders
+    private JSONArray recentFolderPathsToJson() {
+        JSONArray jsonArray = new JSONArray();
+        for (Folder folder : recentlyOpenedFolders) {
+            jsonArray.put(folder.getPathInThisFileSystem());
+        }
+        return jsonArray;
+    }
+
+    // EFFECTS: returns a JSON representation of the names of the recently-opened labels
+    private JSONArray recentLabelsToJson() {
+        JSONArray jsonArray = new JSONArray();
+        for (Label label : recentlyOpenedLabels) {
+            jsonArray.put(label.toJson());
+        }
         return jsonArray;
     }
 

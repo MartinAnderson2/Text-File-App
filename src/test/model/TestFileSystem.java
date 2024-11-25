@@ -311,12 +311,28 @@ public class TestFileSystem {
     }
 
     @Test
+    void testOpenFileActuallyOpen() {
+        try {
+            fileSystem.createFile("F", VALID_FILE_PATH);
+            fileSystem.openFile("F");
+        } catch (NameIsTakenException | NoSuchFileFoundException e) {
+            fail();
+        } catch (FilePathNoLongerValidException e) {
+            fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");
+        }
+        List<String> recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
+        assertEquals(1, recentlyOpenedFiles.size());
+        assertTrue(recentlyOpenedFiles.contains("F"));
+        // File should also have opened in computer's default .txt editor
+    }
+
+    @Test
     @SuppressWarnings("methodlength")
     void testOpenFilePathValid() {
         try {
             fileSystem.createFile("F", VALID_FILE_PATH);
-            fileSystem.openFile("f");
-            fileSystem.openFile("F");
+            fileSystem.openFileButNotOnComputer("f");
+            fileSystem.openFileButNotOnComputer("F");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -330,7 +346,7 @@ public class TestFileSystem {
 
         try {
             fileSystem.createFile("Albatross", VALID_FILE_PATH);
-            fileSystem.openFile("Albatross");
+            fileSystem.openFileButNotOnComputer("Albatross");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -343,7 +359,7 @@ public class TestFileSystem {
 
         try {
             fileSystem.createFile("F", VALID_FILE_PATH);
-            fileSystem.openFile("F");
+            fileSystem.openFileButNotOnComputer("F");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -354,7 +370,6 @@ public class TestFileSystem {
         assertEquals("F", recentlyOpenedFiles.get(0));
         assertEquals("Albatross", recentlyOpenedFiles.get(1));
         assertEquals("F", recentlyOpenedFiles.get(2));
-        // File should also have opened in computer's default .txt editor (only once in total, thankfully)
     }
 
     @Test
@@ -369,17 +384,17 @@ public class TestFileSystem {
         assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
 
         try {
-            fileSystem.openFile("1");
-            fileSystem.openFile("2");
-            fileSystem.openFile("3");
-            fileSystem.openFile("4");
-            fileSystem.openFile("5");
-            fileSystem.openFile("6");
-            fileSystem.openFile("7");
-            fileSystem.openFile("8");
-            fileSystem.openFile("9");
-            fileSystem.openFile("10");
-            fileSystem.openFile("11");
+            fileSystem.openFileButNotOnComputer("1");
+            fileSystem.openFileButNotOnComputer("2");
+            fileSystem.openFileButNotOnComputer("3");
+            fileSystem.openFileButNotOnComputer("4");
+            fileSystem.openFileButNotOnComputer("5");
+            fileSystem.openFileButNotOnComputer("6");
+            fileSystem.openFileButNotOnComputer("7");
+            fileSystem.openFileButNotOnComputer("8");
+            fileSystem.openFileButNotOnComputer("9");
+            fileSystem.openFileButNotOnComputer("10");
+            fileSystem.openFileButNotOnComputer("11");
         } catch (NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -404,7 +419,7 @@ public class TestFileSystem {
     void testOpenFilePathInvalid() {
         try {
             fileSystem.openFolder("Education");
-            fileSystem.openFile("test");
+            fileSystem.openFileButNotOnComputer("test");
             fail("Trying to open file with invalid path not throwing exception");
         } catch (NoSuchFolderFoundException | NoSuchFileFoundException e) {
             fail();
@@ -416,7 +431,7 @@ public class TestFileSystem {
 
     @Test
     @SuppressWarnings("methodlength")
-    void testOpenFilePathInitiallyValidButInvalidWhenOpening() {
+    void testOpenFilePathIOExceptionInternallyInsteadOfFilePathInvalid() {
         String extensionWithNoDefaultApplication = ".386";
         java.io.File newFile = new java.io.File("File for testing IO Exception" + extensionWithNoDefaultApplication);
         try {
@@ -452,7 +467,7 @@ public class TestFileSystem {
     @Test
     void testOpenFileNoFileWithThatName() {
         try {
-            fileSystem.openFile("F");
+            fileSystem.openFileButNotOnComputer("F");
             fail("Trying to open non-existent File not throwing exception");
         } catch (NoSuchFileFoundException e) {
             // expected
@@ -462,7 +477,7 @@ public class TestFileSystem {
 
         try {
             fileSystem.openFolder("Education");
-            fileSystem.openFile("File");
+            fileSystem.openFileButNotOnComputer("File");
             fail("Trying to open non-existent File not throwing exception");
         } catch (NoSuchFileFoundException e) {
             // expected
@@ -478,8 +493,8 @@ public class TestFileSystem {
     void testOpenFilePathValidSomeRecents() {
         try {
             fileSystem.createFile("F", VALID_FILE_PATH);
-            fileSystem.openFile("f");
-            fileSystem.openFile("F");
+            fileSystem.openFileButNotOnComputer("f");
+            fileSystem.openFileButNotOnComputer("F");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -493,7 +508,7 @@ public class TestFileSystem {
         openFolderFailIfFailed("Hobbies");
         try {
             fileSystem.createFile("Albatross", VALID_FILE_PATH);
-            fileSystem.openFile("Albatross");
+            fileSystem.openFileButNotOnComputer("Albatross");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -507,7 +522,7 @@ public class TestFileSystem {
 
         try {
             fileSystem.createFile("F", VALID_FILE_PATH);
-            fileSystem.openFile("F");
+            fileSystem.openFileButNotOnComputer("F");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -526,8 +541,8 @@ public class TestFileSystem {
         fileSystem.stopKeepingTrackOfRecents();
         try {
             fileSystem.createFile("F", VALID_FILE_PATH);
-            fileSystem.openFile("f");
-            fileSystem.openFile("F");
+            fileSystem.openFileButNotOnComputer("f");
+            fileSystem.openFileButNotOnComputer("F");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -538,7 +553,7 @@ public class TestFileSystem {
         openFolderFailIfFailed("Hobbies");
         try {
             fileSystem.createFile("Albatross", VALID_FILE_PATH);
-            fileSystem.openFile("Albatross");
+            fileSystem.openFileButNotOnComputer("Albatross");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -549,7 +564,7 @@ public class TestFileSystem {
 
         try {
             fileSystem.createFile("F", VALID_FILE_PATH);
-            fileSystem.openFile("F");
+            fileSystem.openFileButNotOnComputer("F");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -573,17 +588,17 @@ public class TestFileSystem {
         assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
 
         try {
-            fileSystem.openFile("1");
-            fileSystem.openFile("2");
-            fileSystem.openFile("3");
-            fileSystem.openFile("4");
-            fileSystem.openFile("5");
-            fileSystem.openFile("6");
-            fileSystem.openFile("7");
-            fileSystem.openFile("8");
-            fileSystem.openFile("9");
-            fileSystem.openFile("10");
-            fileSystem.openFile("11");
+            fileSystem.openFileButNotOnComputer("1");
+            fileSystem.openFileButNotOnComputer("2");
+            fileSystem.openFileButNotOnComputer("3");
+            fileSystem.openFileButNotOnComputer("4");
+            fileSystem.openFileButNotOnComputer("5");
+            fileSystem.openFileButNotOnComputer("6");
+            fileSystem.openFileButNotOnComputer("7");
+            fileSystem.openFileButNotOnComputer("8");
+            fileSystem.openFileButNotOnComputer("9");
+            fileSystem.openFileButNotOnComputer("10");
+            fileSystem.openFileButNotOnComputer("11");
         } catch (NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -1033,7 +1048,7 @@ public class TestFileSystem {
     @SuppressWarnings("methodlength")
     void testGetNamesOfRecentlyOpenedFiles() {
         try {
-            fileSystem.openFile("Hello World!");
+            fileSystem.openFileButNotOnComputer("Hello World!");
             fail();
         } catch (NoSuchFileFoundException e) {
             // expected
@@ -1043,7 +1058,7 @@ public class TestFileSystem {
 
         openFolderFailIfFailed("Education");
         try {
-            fileSystem.openFile("test");
+            fileSystem.openFileButNotOnComputer("test");
             fail();
         } catch (NoSuchFileFoundException e) {
             fail();
@@ -1054,7 +1069,7 @@ public class TestFileSystem {
 
         try {
             fileSystem.createFile("File", VALID_FILE_PATH);
-            fileSystem.openFile("File");
+            fileSystem.openFileButNotOnComputer("File");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -1068,8 +1083,8 @@ public class TestFileSystem {
         fileSystem.openRootFolder();
         try {
             fileSystem.createFile("This is a great news story", VALID_FILE_PATH);
-            fileSystem.openFile("This is a great news story");
-            fileSystem.openFile("This is a great news story");
+            fileSystem.openFileButNotOnComputer("This is a great news story");
+            fileSystem.openFileButNotOnComputer("This is a great news story");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -1084,7 +1099,7 @@ public class TestFileSystem {
 
         openFolderFailIfFailed("Education");
         try {
-            fileSystem.openFile("File");
+            fileSystem.openFileButNotOnComputer("File");
         } catch (NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -1099,7 +1114,7 @@ public class TestFileSystem {
         fileSystem.openRootFolder();
         try {
             fileSystem.createFile("We really need more files", VALID_FILE_PATH);
-            fileSystem.openFile("We really need more files");
+            fileSystem.openFileButNotOnComputer("We really need more files");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -1113,7 +1128,7 @@ public class TestFileSystem {
         assertEquals("This is a great news story", recentlyOpenedFiles.get(2));
 
         try {
-            fileSystem.openFile("This is a great news story");
+            fileSystem.openFileButNotOnComputer("This is a great news story");
         } catch (NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -1127,7 +1142,7 @@ public class TestFileSystem {
         assertEquals("File", recentlyOpenedFiles.get(2));
 
         try {
-            fileSystem.openFile("We really need more files");
+            fileSystem.openFileButNotOnComputer("We really need more files");
         } catch (NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -1144,7 +1159,7 @@ public class TestFileSystem {
         openFolderFailIfFailed("CPSC 210");
         try {
             fileSystem.createFile("File", VALID_FILE_PATH);
-            fileSystem.openFile("File");
+            fileSystem.openFileButNotOnComputer("File");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -1200,7 +1215,7 @@ public class TestFileSystem {
     // its first element is fileName
     private void openFileAndCheck(String fileName, int listSize)
             throws NoSuchFileFoundException, FilePathNoLongerValidException {
-        fileSystem.openFile(fileName);
+        fileSystem.openFileButNotOnComputer(fileName);
         List<String> recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
         assertEquals(listSize, recentlyOpenedFiles.size());
         assertEquals(fileName, recentlyOpenedFiles.get(0));
@@ -1213,7 +1228,7 @@ public class TestFileSystem {
         openFolderFailIfFailed("Education");
         try {
             fileSystem.createFile("File", VALID_FILE_PATH);
-            fileSystem.openFile("File");
+            fileSystem.openFileButNotOnComputer("File");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -1227,8 +1242,8 @@ public class TestFileSystem {
         fileSystem.openRootFolder();
         try {
             fileSystem.createFile("This is a great news story", VALID_FILE_PATH);
-            fileSystem.openFile("This is a great news story");
-            fileSystem.openFile("This is a great news story");
+            fileSystem.openFileButNotOnComputer("This is a great news story");
+            fileSystem.openFileButNotOnComputer("This is a great news story");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -1242,7 +1257,7 @@ public class TestFileSystem {
         fileSystem.openRootFolder();
         try {
             fileSystem.createFile("We really need more files", VALID_FILE_PATH);
-            fileSystem.openFile("We really need more files");
+            fileSystem.openFileButNotOnComputer("We really need more files");
         } catch (NameIsTakenException | NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -1264,17 +1279,17 @@ public class TestFileSystem {
         }
 
         try {
-            fileSystem.openFile("1");
-            fileSystem.openFile("2");
-            fileSystem.openFile("3");
-            fileSystem.openFile("4");
-            fileSystem.openFile("5");
-            fileSystem.openFile("6");
-            fileSystem.openFile("7");
-            fileSystem.openFile("8");
-            fileSystem.openFile("9");
-            fileSystem.openFile("10");
-            fileSystem.openFile("11");
+            fileSystem.openFileButNotOnComputer("1");
+            fileSystem.openFileButNotOnComputer("2");
+            fileSystem.openFileButNotOnComputer("3");
+            fileSystem.openFileButNotOnComputer("4");
+            fileSystem.openFileButNotOnComputer("5");
+            fileSystem.openFileButNotOnComputer("6");
+            fileSystem.openFileButNotOnComputer("7");
+            fileSystem.openFileButNotOnComputer("8");
+            fileSystem.openFileButNotOnComputer("9");
+            fileSystem.openFileButNotOnComputer("10");
+            fileSystem.openFileButNotOnComputer("11");
         } catch (NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
@@ -1321,25 +1336,25 @@ public class TestFileSystem {
         }
 
         try {
-            fileSystem.openFile("1");
+            fileSystem.openFileButNotOnComputer("1");
 
             fileSystem.stopKeepingTrackOfRecents();
-            fileSystem.openFile("2");
-            fileSystem.openFile("3");
-            fileSystem.openFile("4");
+            fileSystem.openFileButNotOnComputer("2");
+            fileSystem.openFileButNotOnComputer("3");
+            fileSystem.openFileButNotOnComputer("4");
             fileSystem.startKeepingTrackOfRecents();
 
-            fileSystem.openFile("5");
-            fileSystem.openFile("6");
-            fileSystem.openFile("7");
-            fileSystem.openFile("8");
+            fileSystem.openFileButNotOnComputer("5");
+            fileSystem.openFileButNotOnComputer("6");
+            fileSystem.openFileButNotOnComputer("7");
+            fileSystem.openFileButNotOnComputer("8");
 
             fileSystem.stopKeepingTrackOfRecents();
-            fileSystem.openFile("9");
-            fileSystem.openFile("10");
+            fileSystem.openFileButNotOnComputer("9");
+            fileSystem.openFileButNotOnComputer("10");
             fileSystem.startKeepingTrackOfRecents();
 
-            fileSystem.openFile("11");
+            fileSystem.openFileButNotOnComputer("11");
         } catch (NoSuchFileFoundException e) {
             fail();
         } catch (FilePathNoLongerValidException e) {
