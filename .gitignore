@@ -1,1 +1,6 @@
 *.class
+data/Autosave.json
+data/customSave.json
+data/customSave2.json
+data/test/testWriterEmptyFileSystem.json
+data/test/testWriterRegularFileSystem.json
