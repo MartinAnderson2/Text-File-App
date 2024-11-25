@@ -318,11 +318,19 @@ public class JsonReader {
     // throws InvalidJsonException if the folder path saved for currentFolderPath was invalid
     private void openCurrentFolder(FileSystem fileSystem, JSONObject jsonObject) throws InvalidJsonException {
         String folderPath = jsonObject.getString("currentFolderPath");
-        fileSystem.openRootFolder();
-        try {
-            openFoldersFromPath(fileSystem, getFoldersFromFileFilePathMinusFirst(folderPath));
-        } catch (NoSuchFolderFoundException e) {
-            throw new InvalidJsonException();
+        if (getFirstFolderFromFilePath(folderPath).equals("root")) {
+            fileSystem.openRootFolder();
+            try {
+                openFoldersFromPath(fileSystem, getFoldersFromFileFilePathMinusFirst(folderPath));
+            } catch (NoSuchFolderFoundException e) {
+                throw new InvalidJsonException();
+            }
+        } else {
+            try {
+                fileSystem.openLabel(getFirstFolderFromFilePath(folderPath));
+            } catch (NoSuchLabelFoundException e) {
+                throw new InvalidJsonException();
+            }
         }
     }
 
