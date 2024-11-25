@@ -100,6 +100,7 @@ public class FileSystem implements Writable {
         currentFolder.makeSubfile(name, path);
     }
 
+    // MODIFIES: this
     // EFFECTS: does not open File named fileName in user's default text editor. Adds File named fileName to list of
     // recently-opened Files
     // throws FilePathNoLongerValidException if the File no longer exists on their computer
@@ -109,6 +110,15 @@ public class FileSystem implements Writable {
         openFile(currentFolder.getSubfile(fileName), false);
     }
 
+    // MODIFIES: this
+    // EFFECTS: does not open File named fileName in user's default text editor. Adds File named fileName to list of
+    // recently-opened Files
+    // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder
+    public void openFileButNotOnComputerEvenIfNoLongerValid(String fileName) throws NoSuchFileFoundException {
+        addRecentlyOpenedFile(currentFolder.getSubfile(fileName));
+    }
+
+    // MODIFIES: this
     // EFFECTS: opens File named fileName in user's default text editor. Adds File named fileName to list of
     // recently-opened Files
     // throws FilePathNoLongerValidException if the File no longer exists on their computer
@@ -117,6 +127,7 @@ public class FileSystem implements Writable {
         openFile(currentFolder.getSubfile(fileName), true);
     }
 
+    // MODIFIES: this
     // EFFECTS: opens file in user's default text editor. Adds File named fileName to list of recently-opened Files
     // throws FilePathNoLongerValidException if the File no longer exists on their computer
     // throws NoSuchFileFoundException if there are no Files named fileName in currentFolder

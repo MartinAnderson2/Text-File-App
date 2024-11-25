@@ -311,6 +311,31 @@ public class TestFileSystem {
     }
 
     @Test
+    void testOpenFileEvenIfFilePathInvalid() {
+        try {
+            fileSystem.createFile("F", VALID_FILE_PATH);
+            fileSystem.openFileButNotOnComputerEvenIfNoLongerValid("f");
+            fileSystem.openFileButNotOnComputerEvenIfNoLongerValid("F");
+        } catch (NameIsTakenException | NoSuchFileFoundException e) {
+            fail();
+        }
+        List<String> recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
+        assertEquals(1, recentlyOpenedFiles.size());
+        assertTrue(recentlyOpenedFiles.contains("F"));
+
+        try {
+            fileSystem.openFolder("Education");
+            fileSystem.openFileButNotOnComputerEvenIfNoLongerValid("test");
+        } catch (NoSuchFolderFoundException | NoSuchFileFoundException e) {
+            fail();
+        }
+        recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
+        assertEquals(2, recentlyOpenedFiles.size());
+        assertEquals("test", recentlyOpenedFiles.get(0));
+        assertEquals("F", recentlyOpenedFiles.get(1));
+    }
+
+    @Test
     void testOpenFileActuallyOpen() {
         try {
             fileSystem.createFile("F", VALID_FILE_PATH);
@@ -343,7 +368,6 @@ public class TestFileSystem {
         assertTrue(recentlyOpenedFiles.contains("F"));
 
         openFolderFailIfFailed("Hobbies");
-
         try {
             fileSystem.createFile("Albatross", VALID_FILE_PATH);
             fileSystem.openFileButNotOnComputer("Albatross");
