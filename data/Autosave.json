@@ -1,0 +1,48 @@
+{
+    "rootFolder": {
+        "name": "root",
+        "subfolders": [
+            {
+                "name": "Hobbies",
+                "subfolders": [],
+                "subfiles": []
+            },
+            {
+                "name": "Education",
+                "subfolders": [{
+                    "name": "CPSC 210",
+                    "subfolders": [],
+                    "subfiles": [
+                        {
+                            "filePath": "D:\\Users\\User\\Documents\\Personal Project Ideas.txt",
+                            "name": "Personal Project Ideas",
+                            "labels": [
+                                {"name": "School"},
+                                {"name": "Personal Project"}
+                            ]
+                        },
+                        {
+                            "filePath": "A, eh",
+                            "name": "A",
+                            "labels": [{"name": "School"}]
+                        }
+                    ]
+                }],
+                "subfiles": [{
+                    "filePath": "invalid path",
+                    "name": "test",
+                    "labels": [{"name": "School"}]
+                }]
+            }
+        ],
+        "subfiles": [{
+            "filePath": "C:\\",
+            "name": "File",
+            "labels": []
+        }]
+    },
+    "labels": [
+        {"name": "School"},
+        {"name": "Personal Project"}
+    ]
+}

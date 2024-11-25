@@ -2,7 +2,6 @@ package model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -3250,32 +3249,30 @@ public class TestFileSystem {
      */
     @Test
     void testAutoSave() {
-        emptyFileSystem.autoSave();
-
-        JsonReader emptyFileSystemJsonReader = new JsonReader(FileSystem.AUTOSAVE_FILE_PATH);
         try {
+            emptyFileSystem.autoSave();
+            JsonReader emptyFileSystemJsonReader = new JsonReader(FileSystem.AUTOSAVE_FILE_PATH);
             emptyFileSystem = emptyFileSystemJsonReader.read();
         } catch (IOException e) {
             fail();
         }
         testEmptyFileSystemConstruction();
 
-        fileSystem.autoSave();
-
-        JsonReader fileSystemJsonReader = new JsonReader(FileSystem.AUTOSAVE_FILE_PATH);
         try {
+            fileSystem.autoSave();
+            JsonReader fileSystemJsonReader = new JsonReader(FileSystem.AUTOSAVE_FILE_PATH);
             fileSystem = fileSystemJsonReader.read();
         } catch (IOException e) {
             fail();
         }
-        testFileSystemConstruction();
+        testFileSystemConstructionIgnoreRecent();
     }
 
     @Test
     void testManuallySave() {
-        emptyFileSystem.manuallySave("data\\customSave.json");
-        JsonReader emptyFileSystemJsonReader = new JsonReader(FileSystem.AUTOSAVE_FILE_PATH);
         try {
+            emptyFileSystem.manuallySave("data\\customSave.json");
+            JsonReader emptyFileSystemJsonReader = new JsonReader("data\\customSave.json");
             emptyFileSystem = emptyFileSystemJsonReader.read();
         } catch (IOException e) {
             fail();
@@ -3283,36 +3280,109 @@ public class TestFileSystem {
         testEmptyFileSystemConstruction();
 
 
-        fileSystem.manuallySave("data\\customSave2.json");
-        JsonReader fileSystemJsonReader = new JsonReader(FileSystem.AUTOSAVE_FILE_PATH);
         try {
+            fileSystem.manuallySave("data\\customSave2.json");
+            JsonReader fileSystemJsonReader = new JsonReader("data\\customSave2.json");
             fileSystem = fileSystemJsonReader.read();
         } catch (IOException e) {
             fail();
         }
-        testFileSystemConstruction();
+        testFileSystemConstructionIgnoreRecent();
     }
 
     @Test
     void testAutoLoad() {
-        emptyFileSystem.autoSave();;
-        emptyFileSystem = FileSystem.autoLoad();
-        testEmptyFileSystemConstruction();
+        try {
+            emptyFileSystem.autoSave();;
+            emptyFileSystem = FileSystem.autoLoad();
+            testEmptyFileSystemConstruction();
+        } catch (IOException e) {
+            fail();
+        }
 
-        fileSystem.autoSave();;
-        fileSystem = FileSystem.autoLoad();
-        testFileSystemConstruction();
+        try {
+            fileSystem.autoSave();;
+            fileSystem = FileSystem.autoLoad();
+            testFileSystemConstructionIgnoreRecent();
+        } catch (IOException e) {
+            fail();
+        }
     }
 
     @Test
     void testManuallyLoad() {
-        emptyFileSystem.manuallySave("data\\customSave.json");
-        emptyFileSystem = FileSystem.manuallyLoad("data\\customSave.json");
-        testEmptyFileSystemConstruction();
+        try {
+            emptyFileSystem.manuallySave("data\\customSave.json");
+            emptyFileSystem = FileSystem.manuallyLoad("data\\customSave.json");
+            testEmptyFileSystemConstruction();
+        } catch (IOException e) {
+            fail();
+        }
 
-        fileSystem.manuallySave("data\\customSave2.json");
-        fileSystem = FileSystem.manuallyLoad("data\\customSave2.json");
-        testFileSystemConstruction();
+        try {
+            fileSystem.manuallySave("data\\customSave2.json");
+            fileSystem = FileSystem.manuallyLoad("data\\customSave2.json");
+        } catch (IOException e) {
+            fail();
+        }
+        testFileSystemConstructionIgnoreRecent();
+    }
+
+    @SuppressWarnings("methodlength")
+    private void testFileSystemConstructionIgnoreRecent() {
+        assertEquals("root", fileSystem.getCurrentFolderName());
+        assertFalse(fileSystem.currentFolderHasParent());
+
+        assertTrue(fileSystem.anyLabelsExist());
+        assertEquals(2, fileSystem.getNumLabels());
+
+        try {
+            assertEquals(0, fileSystem.getNumLabelsOnFile("File"));
+        } catch (NoSuchFileFoundException e) {
+            fail();
+        }
+
+        List<String> recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+        // assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
+        // assertEquals(2, recentlyOpenedFolders.size());
+        // assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
+        // assertEquals("Education", recentlyOpenedFolders.get(1));
+        // assertTrue(fileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
+
+
+        openFolderFailIfFailed("Education");
+        assertEquals("Education", fileSystem.getCurrentFolderName());
+        assertTrue(fileSystem.currentFolderHasParent());
+        try {
+            assertEquals(1, fileSystem.getNumLabelsOnFile("test"));
+            assertTrue(fileSystem.fileLabelled("test", "School"));
+        } catch (NoSuchFileFoundException | NoSuchLabelFoundException e) {
+            fail();
+        }
+
+        openFolderFailIfFailed("CPSC 210");
+        assertEquals("CPSC 210", fileSystem.getCurrentFolderName());
+        assertTrue(fileSystem.currentFolderHasParent());
+        try {
+            assertEquals(2, fileSystem.getNumLabelsOnFile("Personal Project Ideas"));
+            assertTrue(fileSystem.fileLabelled("Personal Project Ideas", "School"));
+            assertTrue(fileSystem.fileLabelled("Personal Project Ideas", "Personal Project"));
+            assertEquals(1, fileSystem.getNumLabelsOnFile("A"));
+            assertTrue(fileSystem.fileLabelled("A", "School"));
+        } catch (NoSuchFileFoundException | NoSuchLabelFoundException e) {
+            fail();
+        }
+
+        fileSystem.openRootFolder();
+        openFolderFailIfFailed("Hobbies");
+        assertEquals("Hobbies", fileSystem.getCurrentFolderName());
+        assertTrue(fileSystem.currentFolderHasParent());
+
+        recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+        assertEquals(3, recentlyOpenedFolders.size());
+        assertEquals("Hobbies", recentlyOpenedFolders.get(0));
+        assertEquals("CPSC 210", recentlyOpenedFolders.get(1));
+        assertEquals("Education", recentlyOpenedFolders.get(2));
     }
 
 

@@ -3,12 +3,14 @@ package model;
 import model.exceptions.*;
 import persistence.*;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.awt.Desktop;
 
@@ -21,6 +23,9 @@ public class FileSystem implements Writable {
     public static final String AUTOSAVE_FILE_PATH = "data\\Autosave.json";
     public static final String EXAMPLE_FILE_PATH = "C:\\Users\\User\\Documents\\Note Name.txt";
     private static final int MAX_NUM_RECENTLY_OPENED_STORED = 10;
+
+    private static JsonReader autoLoadJsonReader = new JsonReader(AUTOSAVE_FILE_PATH);
+    private JsonWriter autoSaveJsonWriter;
 
     private Folder rootFolder;
     private Folder currentFolder;
@@ -41,6 +46,8 @@ public class FileSystem implements Writable {
     // recentlyOpenedFolder: stores the MAX_RECENTLY_OPENED_STORED most recently-opened Folders
     // recentlyOpenedLabel: stores the MAX_RECENTLY_OPENED_STORED most recently-opened Label
     public FileSystem() {
+        autoSaveJsonWriter = new JsonWriter(AUTOSAVE_FILE_PATH);
+
         rootFolder = new Folder("root");
         currentFolder = rootFolder;
 
@@ -549,27 +556,49 @@ public class FileSystem implements Writable {
     // EFFECTS: returns a JSON representation of this file system
     @Override
     public JSONObject toJson() {
-        return new JSONObject(); // stub
+        JSONObject json = new JSONObject();
+        json.put("labels", labelsToJson());
+        json.put("rootFolder", rootFolder.toJson());
+        return json;
+    }
+
+    // EFFECTS: returns a JSON representation of all created labels
+    private JSONArray labelsToJson() {
+        JSONArray jsonArray = new JSONArray();
+
+        for (Label label : labels) {
+            jsonArray.put(label.toJson());
+        }
+        
+        return jsonArray;
     }
 
     // EFFECTS: saves a JSON representation of this file system to AUTOSAVE_FILE_PATH
-    public void autoSave() {
-
+    public void autoSave() throws FileNotFoundException {
+        autoSaveJsonWriter.open();
+        autoSaveJsonWriter.write(this);
+        autoSaveJsonWriter.close();
     }
 
     // EFFECTS: saves a jSON representation of this file system to filePath
-    public void manuallySave(String filePath) {
-
+    public void manuallySave(String filePath) throws FileNotFoundException {
+        JsonWriter jsonWriter = new JsonWriter(filePath);
+        jsonWriter.open();
+        jsonWriter.write(this);
+        jsonWriter.close();
     }
 
     // EFFECTS: loads a JSON representation of a file system
-    public static FileSystem autoLoad() {
-        return new FileSystem(); // stub
+    public static FileSystem autoLoad() throws IOException {
+        FileSystem fileSystem = autoLoadJsonReader.read();
+        return fileSystem;
     }
 
     // EFFECTS: loads a JSON representation of a file system from filePath
-    public static FileSystem manuallyLoad(String filePath) {
-        return new FileSystem(); // stub
+    public static FileSystem manuallyLoad(String filePath) throws IOException {
+        JsonReader jsonReader = new JsonReader(filePath);
+        FileSystem fileSystem = jsonReader.read();
+        return fileSystem;
     }
 
 

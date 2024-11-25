@@ -2,17 +2,18 @@ package model;
 
 import java.util.Set;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.HashSet;
 
-import model.exceptions.*;
-import persistence.Writable;
-
+import model.exceptions.NoSuchFileFoundException;
+import model.exceptions.NoSuchFolderFoundException;
+import model.exceptions.NameIsTakenException;
 
 // Represents a folder with a name that holds files as well as other folders
 // and has a parent folder unless it is the root folder
-public class Folder extends NamedObject implements Writable {
+public class Folder extends NamedObject {
     private Set<Folder> subfolders;
     private Set<File> subfiles;
     private Folder parentFolder;
@@ -147,6 +148,31 @@ public class Folder extends NamedObject implements Writable {
     // EFFECTS: returns a JSON representation of this file (including its subfolders and files)
     @Override
     public JSONObject toJson() {
-        return new JSONObject(); // stub
+        JSONObject json = super.toJson();
+        json.put("subfiles", subfilesToJson());
+        json.put("subfolders", subfoldersToJson());
+        return json;
+    }
+
+    // EFFECTS: returns a JSONArray of JSON representations of the subfiles in this folder
+    private JSONArray subfilesToJson() {
+        JSONArray jsonArray = new JSONArray();
+
+        for (File file : subfiles) {
+            jsonArray.put(file.toJson());
+        }
+
+        return jsonArray;
+    }
+
+    // EFFECTS: returns a JSONArray of JSON representations of the subfolders in this folder
+    private JSONArray subfoldersToJson() {
+        JSONArray jsonArray = new JSONArray();
+        
+        for (Folder folder : subfolders) {
+            jsonArray.put(folder.toJson());
+        }
+
+        return jsonArray;
     }
 }

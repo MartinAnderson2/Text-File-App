@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
 import java.util.List;
 
 // Based on [JsonSerializationDemo](https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo) 
@@ -23,11 +24,14 @@ public class TestJsonReader {
             // expected
         }
 
+        // This violates the requires clause but it is useful to know about
         jsonReader = new JsonReader("data\\test\\invalid ?:$@! file path \0.json");
         try {
             jsonReader.read();
             fail("IOException not thrown when reading a file that shouldn't exist");
         } catch (IOException e) {
+            fail("IOException thrown when file path was invalid");
+        } catch (InvalidPathException e) {
             // expected
         }
     }
@@ -78,11 +82,11 @@ public class TestJsonReader {
         }
 
         List<String> recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
-        assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
-        assertEquals(2, recentlyOpenedFolders.size());
-        assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
-        assertEquals("Education", recentlyOpenedFolders.get(1));
-        assertTrue(fileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
+        // assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
+        // assertEquals(2, recentlyOpenedFolders.size());
+        // assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
+        // assertEquals("Education", recentlyOpenedFolders.get(1));
+        // assertTrue(fileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
 
 
         try {

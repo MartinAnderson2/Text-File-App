@@ -51,6 +51,8 @@ public abstract class NamedObject implements Writable {
     // EFFECTS: returns a JSON representation of this named object
     @Override
     public JSONObject toJson() {
-        return new JSONObject(); // stub
+        JSONObject json = new JSONObject();
+        json.put("name", name);
+        return json;
     }
 }

@@ -1,14 +1,13 @@
 package model;
 
-import persistence.Writable;
-
 import java.util.*;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 // Represents a file having a name, a file path where it is stored on the user's computer,
 // and a set of labels that it is labelled with
-public class File extends NamedObject implements Writable {
+public class File extends NamedObject {
     private String filePath;
     private Folder parentFolder;
     private Set<Label> labels;
@@ -78,7 +77,24 @@ public class File extends NamedObject implements Writable {
     // EFFECTS: returns a JSON representation of this file
     @Override
     public JSONObject toJson() {
-        return new JSONObject(); // stub
+        JSONObject json = super.toJson();
+        json.put("filePath", filePath);
+        json.put("labels", labelsToJson());
+        return json;
+    }
+
+    // EFFECTS: returns a JSON representation of the labels on this file
+    // This will effectively just be a list of their names such that the labels (that will already have been made) can
+    // be added to this file. The labels also have a list of the files that are labelled with them, but this is not
+    // saved in their JSON representations
+    private JSONArray labelsToJson() {
+        JSONArray jsonArray = new JSONArray();
+
+        for (Label label : labels) {
+            jsonArray.put(label.toJson());
+        }
+
+        return jsonArray;
     }
 
 
