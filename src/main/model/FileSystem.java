@@ -35,6 +35,7 @@ public class FileSystem implements Writable {
     private List<File> recentlyOpenedFiles;
     private List<Folder> recentlyOpenedFolders;
     private List<Label> recentlyOpenedLabels;
+    private boolean keepTrackOfRecents;
 
     // EFFECTS: initializes the variables needed for the file system:
     // rootFolder: for the Folder that contains the initial Folders and Files, and indirectly contains every Folder and
@@ -55,6 +56,7 @@ public class FileSystem implements Writable {
         recentlyOpenedFiles = new LinkedList<File>();
         recentlyOpenedFolders = new LinkedList<Folder>();
         recentlyOpenedLabels = new LinkedList<Label>();
+        keepTrackOfRecents = true;
     }
 
     // EFFECTS: returns currentFolder's name
@@ -66,6 +68,18 @@ public class FileSystem implements Writable {
     // throws NoSuchFolderFoundException if currentFolder does not have a parent
     public String getParentFolderName() throws NoSuchFolderFoundException {
         return currentFolder.getParentFolder().getName();
+    }
+
+    // MODIFIES: this
+    // EFFECTS: stops (or continues not) keeping track of recently-opened files, folders, or labels
+    public void stopKeepingTrackOfRecents() {
+        keepTrackOfRecents = false;
+    }
+
+    // MODIFIES: this
+    // EFFECTS: starts (or keeps) keeping track of recently-opened files, folders, or labels
+    public void startKeepingTrackOfRecents() {
+        keepTrackOfRecents = true;
     }
 
 
@@ -636,6 +650,10 @@ public class FileSystem implements Writable {
     // Else (if recentlyOpenedFiles contains MAX_RECENTLY_OPENED_STORED Strings) removes the last element and adds
     // file to the front of the list.
     private void addRecentlyOpenedFile(File file) {
+        if (!keepTrackOfRecents) {
+            return;
+        }
+
         if (recentlyOpenedFiles.contains(file)) {
             recentlyOpenedFiles.remove(file);
         } else {
@@ -656,6 +674,10 @@ public class FileSystem implements Writable {
     // Else (if recentlyOpenedFolders contains MAX_RECENTLY_OPENED_STORED Strings) removes the last element and adds
     // folder to the front of the list.
     private void addRecentlyOpenedFolder(Folder folder) {
+        if (!keepTrackOfRecents) {
+            return;
+        }
+
         if (recentlyOpenedFolders.contains(folder)) {
             recentlyOpenedFolders.remove(folder);
         } else {
@@ -676,6 +698,10 @@ public class FileSystem implements Writable {
     // Else (if recentlyOpenedFolders contains MAX_RECENTLY_OPENED_STORED Strings) removes the last element and adds
     // label to the front of the list.
     private void addRecentlyOpenedLabel(Label label) {
+        if (!keepTrackOfRecents) {
+            return;
+        }
+        
         if (recentlyOpenedLabels.contains(label)) {
             recentlyOpenedLabels.remove(label);
         } else {

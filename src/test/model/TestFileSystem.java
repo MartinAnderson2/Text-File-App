@@ -255,8 +255,7 @@ public class TestFileSystem {
             fail("NameIsTakenException thrown when name was empty");
         }
 
-        List<String> subfileNames = emptyFileSystem.getNamesOfSubfiles();
-        assertEquals(0, subfileNames.size());
+        assertTrue(emptyFileSystem.getNamesOfSubfiles().isEmpty());
 
         try {
             fileSystem.createFile("", "");
@@ -267,7 +266,7 @@ public class TestFileSystem {
             fail("NameIsTakenException thrown when name was empty");
         }
 
-        subfileNames = fileSystem.getNamesOfSubfiles();
+        List<String> subfileNames = fileSystem.getNamesOfSubfiles();
         assertEquals(1, subfileNames.size());
         assertFalse(subfileNames.contains(""));
     }
@@ -359,6 +358,49 @@ public class TestFileSystem {
     }
 
     @Test
+    @SuppressWarnings("methodlength")
+    void testOpenFileMoreThanTenRecents() {
+        try {
+            createNumberedFiles();
+        } catch (NameIsTakenException e) {
+            fail();
+        }
+
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
+
+        try {
+            fileSystem.openFile("1");
+            fileSystem.openFile("2");
+            fileSystem.openFile("3");
+            fileSystem.openFile("4");
+            fileSystem.openFile("5");
+            fileSystem.openFile("6");
+            fileSystem.openFile("7");
+            fileSystem.openFile("8");
+            fileSystem.openFile("9");
+            fileSystem.openFile("10");
+            fileSystem.openFile("11");
+        } catch (NoSuchFileFoundException e) {
+            fail();
+        } catch (FilePathNoLongerValidException e) {
+            fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");
+        }
+
+        List<String> recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
+        assertEquals(10, recentlyOpenedFiles.size());
+        assertEquals("11", recentlyOpenedFiles.get(0));
+        assertEquals("10", recentlyOpenedFiles.get(1));
+        assertEquals("9", recentlyOpenedFiles.get(2));
+        assertEquals("8", recentlyOpenedFiles.get(3));
+        assertEquals("7", recentlyOpenedFiles.get(4));
+        assertEquals("6", recentlyOpenedFiles.get(5));
+        assertEquals("5", recentlyOpenedFiles.get(6));
+        assertEquals("4", recentlyOpenedFiles.get(7));
+        assertEquals("3", recentlyOpenedFiles.get(8));
+        assertEquals("2", recentlyOpenedFiles.get(9));
+    }
+
+    @Test
     void testOpenFilePathInvalid() {
         try {
             fileSystem.openFolder("Education");
@@ -369,8 +411,7 @@ public class TestFileSystem {
         } catch (FilePathNoLongerValidException e) {
             // expected
         }
-        List<String> recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
-        assertEquals(0, recentlyOpenedFiles.size());
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
     }
 
     @Test
@@ -401,6 +442,8 @@ public class TestFileSystem {
             } catch (FilePathNoLongerValidException e) {
                 // expected
             }
+
+            assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
         } finally {
             newFile.delete();
         }
@@ -427,21 +470,107 @@ public class TestFileSystem {
             fail();
         }
 
-        List<String> recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
-        assertEquals(0, recentlyOpenedFiles.size());
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
     }
 
     @Test
     @SuppressWarnings("methodlength")
-    void testOpenFileMoreThanTenRecents() {
+    void testOpenFilePathValidSomeRecents() {
+        try {
+            fileSystem.createFile("F", VALID_FILE_PATH);
+            fileSystem.openFile("f");
+            fileSystem.openFile("F");
+        } catch (NameIsTakenException | NoSuchFileFoundException e) {
+            fail();
+        } catch (FilePathNoLongerValidException e) {
+            fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");
+        }
+        List<String> recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
+        assertEquals(1, recentlyOpenedFiles.size());
+        assertTrue(recentlyOpenedFiles.contains("F"));
+
+        fileSystem.stopKeepingTrackOfRecents();
+        openFolderFailIfFailed("Hobbies");
+        try {
+            fileSystem.createFile("Albatross", VALID_FILE_PATH);
+            fileSystem.openFile("Albatross");
+        } catch (NameIsTakenException | NoSuchFileFoundException e) {
+            fail();
+        } catch (FilePathNoLongerValidException e) {
+            fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");
+        }
+        recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
+        assertEquals(1, recentlyOpenedFiles.size());
+        assertTrue(recentlyOpenedFiles.contains("F"));
+
+        fileSystem.startKeepingTrackOfRecents();
+
+        try {
+            fileSystem.createFile("F", VALID_FILE_PATH);
+            fileSystem.openFile("F");
+        } catch (NameIsTakenException | NoSuchFileFoundException e) {
+            fail();
+        } catch (FilePathNoLongerValidException e) {
+            fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");
+        }
+        recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
+        assertEquals(2, recentlyOpenedFiles.size());
+        assertEquals("F", recentlyOpenedFiles.get(0));
+        assertEquals("F", recentlyOpenedFiles.get(1));
+        // File should also have opened in computer's default .txt editor (only once in total, thankfully)
+    }
+
+    @Test
+    @SuppressWarnings("methodlength")
+    void testOpenFilePathValidNoRecents() {
+        fileSystem.stopKeepingTrackOfRecents();
+        try {
+            fileSystem.createFile("F", VALID_FILE_PATH);
+            fileSystem.openFile("f");
+            fileSystem.openFile("F");
+        } catch (NameIsTakenException | NoSuchFileFoundException e) {
+            fail();
+        } catch (FilePathNoLongerValidException e) {
+            fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");
+        }
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
+
+        openFolderFailIfFailed("Hobbies");
+        try {
+            fileSystem.createFile("Albatross", VALID_FILE_PATH);
+            fileSystem.openFile("Albatross");
+        } catch (NameIsTakenException | NoSuchFileFoundException e) {
+            fail();
+        } catch (FilePathNoLongerValidException e) {
+            fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");
+        }
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
+
+
+        try {
+            fileSystem.createFile("F", VALID_FILE_PATH);
+            fileSystem.openFile("F");
+        } catch (NameIsTakenException | NoSuchFileFoundException e) {
+            fail();
+        } catch (FilePathNoLongerValidException e) {
+            fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");
+        }
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
+
+        // File should also have opened in computer's default .txt editor (only once in total (unless closed part of
+        // the way through), thankfully)
+    }
+
+    @Test
+    @SuppressWarnings("methodlength")
+    void testOpenFileMoreThanTenRecentsNoRecents() {
+        fileSystem.stopKeepingTrackOfRecents();
         try {
             createNumberedFiles();
         } catch (NameIsTakenException e) {
             fail();
         }
-
-        List<String> recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
-        assertTrue(recentlyOpenedFiles.isEmpty());
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
 
         try {
             fileSystem.openFile("1");
@@ -460,19 +589,7 @@ public class TestFileSystem {
         } catch (FilePathNoLongerValidException e) {
             fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");
         }
-
-        recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
-        assertEquals(10, recentlyOpenedFiles.size());
-        assertEquals("11", recentlyOpenedFiles.get(0));
-        assertEquals("10", recentlyOpenedFiles.get(1));
-        assertEquals("9", recentlyOpenedFiles.get(2));
-        assertEquals("8", recentlyOpenedFiles.get(3));
-        assertEquals("7", recentlyOpenedFiles.get(4));
-        assertEquals("6", recentlyOpenedFiles.get(5));
-        assertEquals("5", recentlyOpenedFiles.get(6));
-        assertEquals("4", recentlyOpenedFiles.get(7));
-        assertEquals("3", recentlyOpenedFiles.get(8));
-        assertEquals("2", recentlyOpenedFiles.get(9));
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
     }
 
     @Test
@@ -482,7 +599,7 @@ public class TestFileSystem {
         } catch (NoSuchFileFoundException e) {
             fail("NoSuchFileFoundException when File exists");
         }
-        assertEquals(0, fileSystem.getNamesOfSubfiles().size());
+        assertTrue(fileSystem.getNamesOfSubfiles().isEmpty());
 
         openFolderFailIfFailed("Education");
         try {
@@ -490,7 +607,7 @@ public class TestFileSystem {
         } catch (NoSuchFileFoundException e) {
             fail("NoSuchFileFoundException when File exists");
         }
-        assertEquals(0, fileSystem.getNamesOfSubfiles().size());
+        assertTrue(fileSystem.getNamesOfSubfiles().isEmpty());
 
         openFolderFailIfFailed("CPSC 210");
         try {
@@ -519,7 +636,7 @@ public class TestFileSystem {
         fileSystem.openRootFolder();
 
         openFolderFailIfFailed("Education");
-        assertEquals(0, fileSystem.getNamesOfSubfiles().size());
+        assertTrue(fileSystem.getNamesOfSubfiles().isEmpty());
 
         openFolderFailIfFailed("CPSC 210");
         List<String> cpscTwoTenFileNames = fileSystem.getNamesOfSubfiles();
@@ -891,8 +1008,7 @@ public class TestFileSystem {
 
     @Test
     void testGetNamesOfSubfilesNone() {
-        List<String> subfiles = emptyFileSystem.getNamesOfSubfiles();
-        assertEquals(0, subfiles.size());
+        assertTrue(emptyFileSystem.getNamesOfSubfiles().isEmpty());
     }
 
     @Test
@@ -934,8 +1050,7 @@ public class TestFileSystem {
         } catch (FilePathNoLongerValidException e) {
             // expected
         }
-
-        assertEquals(0, fileSystem.getNamesOfRecentlyOpenedFiles().size());
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
 
         try {
             fileSystem.createFile("File", VALID_FILE_PATH);
@@ -1093,6 +1208,54 @@ public class TestFileSystem {
 
     @Test
     @SuppressWarnings("methodlength")
+    void testGetNamesOfRecentlyOpenedFilesStopTrackingRecents() {
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedFiles().isEmpty());
+        openFolderFailIfFailed("Education");
+        try {
+            fileSystem.createFile("File", VALID_FILE_PATH);
+            fileSystem.openFile("File");
+        } catch (NameIsTakenException | NoSuchFileFoundException e) {
+            fail();
+        } catch (FilePathNoLongerValidException e) {
+            fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");            
+        }
+        List<String> recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
+        assertEquals(1, recentlyOpenedFiles.size());
+        assertEquals("File", recentlyOpenedFiles.get(0));
+
+        fileSystem.stopKeepingTrackOfRecents();
+        fileSystem.openRootFolder();
+        try {
+            fileSystem.createFile("This is a great news story", VALID_FILE_PATH);
+            fileSystem.openFile("This is a great news story");
+            fileSystem.openFile("This is a great news story");
+        } catch (NameIsTakenException | NoSuchFileFoundException e) {
+            fail();
+        } catch (FilePathNoLongerValidException e) {
+            fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");            
+        }
+        recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
+        assertEquals(1, recentlyOpenedFiles.size());
+        assertEquals("File", recentlyOpenedFiles.get(0));
+
+        fileSystem.startKeepingTrackOfRecents();
+        fileSystem.openRootFolder();
+        try {
+            fileSystem.createFile("We really need more files", VALID_FILE_PATH);
+            fileSystem.openFile("We really need more files");
+        } catch (NameIsTakenException | NoSuchFileFoundException e) {
+            fail();
+        } catch (FilePathNoLongerValidException e) {
+            fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");            
+        }
+        recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
+        assertEquals(2, recentlyOpenedFiles.size());
+        assertEquals("We really need more files", recentlyOpenedFiles.get(0));
+        assertEquals("File", recentlyOpenedFiles.get(1));
+    }
+
+    @Test
+    @SuppressWarnings("methodlength")
     void testOpenRecentlyOpenedFile() {
         try {
             createNumberedFiles();
@@ -1146,6 +1309,60 @@ public class TestFileSystem {
         } catch (FilePathNoLongerValidException e) {
             fail();
         }
+    }
+
+    @Test
+    @SuppressWarnings("methodlength")
+    void testOpenRecentlyOpenedFileStopTrackingRecents() {
+        try {
+            createNumberedFiles();
+        } catch (NameIsTakenException e) {
+            fail();
+        }
+
+        try {
+            fileSystem.openFile("1");
+
+            fileSystem.stopKeepingTrackOfRecents();
+            fileSystem.openFile("2");
+            fileSystem.openFile("3");
+            fileSystem.openFile("4");
+            fileSystem.startKeepingTrackOfRecents();
+
+            fileSystem.openFile("5");
+            fileSystem.openFile("6");
+            fileSystem.openFile("7");
+            fileSystem.openFile("8");
+
+            fileSystem.stopKeepingTrackOfRecents();
+            fileSystem.openFile("9");
+            fileSystem.openFile("10");
+            fileSystem.startKeepingTrackOfRecents();
+
+            fileSystem.openFile("11");
+        } catch (NoSuchFileFoundException e) {
+            fail();
+        } catch (FilePathNoLongerValidException e) {
+            fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");
+        }
+        
+        try {
+            fileSystem.openRecentlyOpenedFile("1");
+            fileSystem.openRecentlyOpenedFile("6");
+            fileSystem.openRecentlyOpenedFile("8");
+            fileSystem.openRecentlyOpenedFile("11");
+        } catch (NoSuchFileFoundException e) {
+            fail();
+        } catch (FilePathNoLongerValidException e) {
+            fail("VALID_FILE_PATH is not valid, please change it (or implementation is wrong)");
+        }
+
+        assertThrows(NoSuchFileFoundException.class, () -> fileSystem.openRecentlyOpenedFile("2"));
+        assertThrows(NoSuchFileFoundException.class, () -> fileSystem.openRecentlyOpenedFile("3"));
+        assertThrows(NoSuchFileFoundException.class, () -> fileSystem.openRecentlyOpenedFile("4"));
+        assertThrows(NoSuchFileFoundException.class, () -> fileSystem.openRecentlyOpenedFile("9"));
+        assertThrows(NoSuchFileFoundException.class, () -> fileSystem.openRecentlyOpenedFile("10"));
+        assertThrows(NoSuchFileFoundException.class, () -> fileSystem.openRecentlyOpenedFile("15"));
     }
 
 
@@ -1343,6 +1560,106 @@ public class TestFileSystem {
     }
 
     @Test
+    @SuppressWarnings("methodlength")
+    void testOpenFolderValidSomeRecents() {
+        try {
+            fileSystem.openFolder("Education");
+        } catch (NoSuchFolderFoundException e) {
+            fail();
+        }
+        List<String> recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+        assertEquals(2, recentlyOpenedFolders.size());
+        assertEquals("Education", recentlyOpenedFolders.get(0));
+        assertEquals("CPSC 210", recentlyOpenedFolders.get(1));
+
+        fileSystem.stopKeepingTrackOfRecents();
+        try {
+            fileSystem.openFolder("CPSC 210");
+        } catch (NoSuchFolderFoundException e) {
+            fail();
+        }
+        recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+        assertEquals(2, recentlyOpenedFolders.size());
+        assertEquals("Education", recentlyOpenedFolders.get(0));
+        assertEquals("CPSC 210", recentlyOpenedFolders.get(1));
+
+        fileSystem.startKeepingTrackOfRecents();
+        try {
+            fileSystem.goUpOneDirectoryLevel();
+            fileSystem.openFolder("CPSC 210");
+        } catch (NoSuchFolderFoundException e) {
+            fail();
+        }
+        recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+        assertEquals(2, recentlyOpenedFolders.size());
+        assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
+        assertEquals("Education", recentlyOpenedFolders.get(1));
+    }
+
+    @Test
+    @SuppressWarnings("methodlength")
+    void testOpenFolderValidNoRecents() {
+        fileSystem.stopKeepingTrackOfRecents();
+        try {
+            fileSystem.openFolder("Education");
+        } catch (NoSuchFolderFoundException e) {
+            fail();
+        }
+        List<String> recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+        assertEquals(2, recentlyOpenedFolders.size());
+        assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
+        assertEquals("Education", recentlyOpenedFolders.get(1));
+    }
+
+    @Test
+    @SuppressWarnings("methodlength")
+    void testOpenFolderMoreThanTenRecentsNoRecents() {
+        fileSystem.stopKeepingTrackOfRecents();
+        try {
+            createNumberedFolders();
+        } catch (NameIsTakenException e) {
+            fail();
+        }
+
+        try {
+            fileSystem.openFolder("1");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("2");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("3");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("4");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("5");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("6");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("7");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("8");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("9");
+            fileSystem.openRootFolder();
+
+            List<String> recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+            assertEquals(2, recentlyOpenedFolders.size());
+            assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
+            assertEquals("Education", recentlyOpenedFolders.get(1));
+
+            fileSystem.openFolder("10");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("11");
+            fileSystem.openRootFolder();
+        } catch (NoSuchFolderFoundException e) {
+            fail();
+        }
+        List<String> recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+        assertEquals(2, recentlyOpenedFolders.size());
+        assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
+        assertEquals("Education", recentlyOpenedFolders.get(1));
+    }
+
+    @Test
     void testGoUpOneDirectoryLevelFailRoot() {
         try {
             fileSystem.goUpOneDirectoryLevel();
@@ -1455,7 +1772,7 @@ public class TestFileSystem {
         } catch (NoSuchFolderFoundException e) {
             fail("NoSuchFolderFoundException when Folder exists");
         }
-        assertEquals(0, fileSystem.getNamesOfSubfolders().size());
+        assertTrue(fileSystem.getNamesOfSubfolders().isEmpty());
         assertFalse(fileSystem.containsFolder("CPSC 210"));
 
         try {
@@ -1468,7 +1785,7 @@ public class TestFileSystem {
         } catch (NoSuchFolderFoundException e) {
             fail("NoSuchFolderFoundException when Folder exists");
         }
-        assertEquals(0, fileSystem.getNamesOfSubfolders().size());
+        assertTrue(fileSystem.getNamesOfSubfolders().isEmpty());
         assertFalse(fileSystem.containsFolder("TEST"));
     }
 
@@ -1534,8 +1851,7 @@ public class TestFileSystem {
         } catch (NameIsTakenException e) {
             fail();
         }
-        subfolderNames = fileSystem.getNamesOfSubfolders();
-        assertEquals(0, subfolderNames.size());
+        assertTrue(fileSystem.getNamesOfSubfolders().isEmpty());
     }
 
     @Test
@@ -1838,6 +2154,49 @@ public class TestFileSystem {
 
     @Test
     @SuppressWarnings("methodlength")
+    void testGetNamesOfRecentlyOpenedFoldersStopTrackingRecents() {
+        openFolderFailIfFailed("Hobbies");
+
+        List<String> recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+        assertEquals(3, recentlyOpenedFolders.size());
+        assertEquals("Hobbies", recentlyOpenedFolders.get(0));
+        assertEquals("CPSC 210", recentlyOpenedFolders.get(1));
+        assertEquals("Education", recentlyOpenedFolders.get(2));
+        
+        fileSystem.stopKeepingTrackOfRecents();
+        fileSystem.openRootFolder();
+        assertEquals(3, recentlyOpenedFolders.size());
+        openFolderFailIfFailed("Education");
+
+        recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+        assertEquals(3, recentlyOpenedFolders.size());
+        assertEquals("Hobbies", recentlyOpenedFolders.get(0));
+        assertEquals("CPSC 210", recentlyOpenedFolders.get(1));
+        assertEquals("Education", recentlyOpenedFolders.get(2));
+
+        fileSystem.startKeepingTrackOfRecents();
+        try {
+            fileSystem.openFolder("Hello World!");
+            fail();
+        } catch (NoSuchFolderFoundException e) {
+            // expected
+        }
+        recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+        assertEquals(3, recentlyOpenedFolders.size());
+        assertEquals("Hobbies", recentlyOpenedFolders.get(0));
+        assertEquals("CPSC 210", recentlyOpenedFolders.get(1));
+        assertEquals("Education", recentlyOpenedFolders.get(2));
+
+        openFolderFailIfFailed("CPSC 210");
+        recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+        assertEquals(3, recentlyOpenedFolders.size());
+        assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
+        assertEquals("Hobbies", recentlyOpenedFolders.get(1));
+        assertEquals("Education", recentlyOpenedFolders.get(2));
+    }
+
+    @Test
+    @SuppressWarnings("methodlength")
     void testOpenRecentlyOpenedFolder() {
         try {
             createNumberedFolders();
@@ -1894,6 +2253,67 @@ public class TestFileSystem {
         } catch (NoSuchFolderFoundException e) {
             // expected
         }
+    }
+
+    @Test
+    @SuppressWarnings("methodlength")
+    void testOpenRecentlyOpenedFolderStopTrackingRecents() {
+        try {
+            createNumberedFolders();
+        } catch (NameIsTakenException e) {
+            fail();
+        }
+
+        try {
+            fileSystem.openFolder("1");
+            fileSystem.openRootFolder();
+
+            fileSystem.stopKeepingTrackOfRecents();
+            fileSystem.openFolder("2");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("3");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("4");
+            fileSystem.openRootFolder();
+            fileSystem.startKeepingTrackOfRecents();
+
+            fileSystem.openFolder("5");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("6");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("7");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("8");
+            fileSystem.openRootFolder();
+
+            fileSystem.stopKeepingTrackOfRecents();
+            fileSystem.openFolder("9");
+            fileSystem.openRootFolder();
+            fileSystem.openFolder("10");
+            fileSystem.openRootFolder();
+            fileSystem.startKeepingTrackOfRecents();
+
+            fileSystem.openFolder("11");
+            fileSystem.openRootFolder();
+        } catch (NoSuchFolderFoundException e) {
+            fail();
+        }
+        
+        try {
+            fileSystem.openRecentlyOpenedFolder("1");
+            fileSystem.openRecentlyOpenedFolder("6");
+            fileSystem.openRecentlyOpenedFolder("8");
+            fileSystem.openRecentlyOpenedFolder("11");
+        } catch (NoSuchFolderFoundException e) {
+            fail();
+        }
+
+        assertThrows(NoSuchFolderFoundException.class, () -> fileSystem.openRecentlyOpenedFolder("2"));
+        assertThrows(NoSuchFolderFoundException.class, () -> fileSystem.openRecentlyOpenedFolder("3"));
+        assertThrows(NoSuchFolderFoundException.class, () -> fileSystem.openRecentlyOpenedFolder("4"));
+        assertThrows(NoSuchFolderFoundException.class, () -> fileSystem.openRecentlyOpenedFolder("9"));
+        assertThrows(NoSuchFolderFoundException.class, () -> fileSystem.openRecentlyOpenedFolder("10"));
+        assertThrows(NoSuchFolderFoundException.class, () -> fileSystem.openRecentlyOpenedFolder("15"));
     }
 
 
@@ -2189,6 +2609,102 @@ public class TestFileSystem {
         } catch (NoSuchLabelFoundException e) {
             // expected
         }
+    }
+
+    @Test
+    @SuppressWarnings("methodlength")
+    void testOpenLabelValidSomeRecents() {
+        try {
+            fileSystem.openLabel("School");
+        } catch (NoSuchLabelFoundException e) {
+            fail();
+        }
+
+        List<String> recentlyOpenedLabels = fileSystem.getNamesOfRecentlyOpenedLabels();
+        assertEquals(1, recentlyOpenedLabels.size());
+        assertEquals("School", recentlyOpenedLabels.get(0));
+
+        fileSystem.stopKeepingTrackOfRecents();
+        try {
+            fileSystem.openLabel("Personal Project");
+        } catch (NoSuchLabelFoundException e) {
+            fail();
+        }
+        recentlyOpenedLabels = fileSystem.getNamesOfRecentlyOpenedLabels();
+        assertEquals(1, recentlyOpenedLabels.size());
+        assertEquals("School", recentlyOpenedLabels.get(0));
+
+        fileSystem.startKeepingTrackOfRecents();
+        fileSystem.openRootFolder();
+        openFolderFailIfFailed("Education");
+        try {
+            fileSystem.openLabel("Personal Project");
+        } catch (NoSuchLabelFoundException e) {
+            fail();
+        }
+        recentlyOpenedLabels = fileSystem.getNamesOfRecentlyOpenedLabels();
+        assertEquals(2, recentlyOpenedLabels.size());
+        assertEquals("Personal Project", recentlyOpenedLabels.get(0));
+        assertEquals("School", recentlyOpenedLabels.get(1));
+    }
+
+    @Test
+    @SuppressWarnings("methodlength")
+    void testOpenLabelValidNoRecents() {
+        fileSystem.stopKeepingTrackOfRecents();
+        try {
+            fileSystem.openLabel("School");
+        } catch (NoSuchLabelFoundException e) {
+            fail();
+        }
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
+
+        try {
+            fileSystem.openLabel("Personal Project");
+        } catch (NoSuchLabelFoundException e) {
+            fail();
+        }
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
+
+        fileSystem.openRootFolder();
+        openFolderFailIfFailed("Education");
+        try {
+            fileSystem.openLabel("School");
+        } catch (NoSuchLabelFoundException e) {
+            fail();
+        }
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
+    }
+
+    @Test
+    @SuppressWarnings("methodlength")
+    void testOpenLabelMoreThanTenRecentsNoRecents() {
+        fileSystem.stopKeepingTrackOfRecents();
+        try {
+            createNumberedLabels();
+        } catch (NameIsTakenException e) {
+            fail();
+        }
+
+        try {
+            fileSystem.openLabel("1");
+            fileSystem.openLabel("2");
+            fileSystem.openLabel("3");
+            fileSystem.openLabel("4");
+            fileSystem.openLabel("5");
+            fileSystem.openLabel("6");
+            fileSystem.openLabel("7");
+            fileSystem.openLabel("8");
+            fileSystem.openLabel("9");
+
+            assertTrue(fileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
+
+            fileSystem.openLabel("10");
+            fileSystem.openLabel("11");
+        } catch (NoSuchLabelFoundException e) {
+            fail();
+        }
+        assertTrue(fileSystem.getNamesOfRecentlyOpenedLabels().isEmpty());
     }
 
     @Test
@@ -2912,7 +3428,7 @@ public class TestFileSystem {
 
     @Test
     void testGetNamesOfLabels() {
-        assertEquals(0, emptyFileSystem.getNamesOfLabels().size());
+        assertTrue(emptyFileSystem.getNamesOfLabels().isEmpty());
 
         List<String> labels = fileSystem.getNamesOfLabels();
         assertEquals(2, labels.size());
@@ -3196,6 +3712,41 @@ public class TestFileSystem {
 
     @Test
     @SuppressWarnings("methodlength")
+    void testGetNamesOfRecentlyOpenedLabelsStopTrackingRecents() {
+        try {
+            fileSystem.openLabel("School");
+        } catch (NoSuchLabelFoundException e) {
+            fail();
+        }
+        List<String> recentlyOpenedLabels = fileSystem.getNamesOfRecentlyOpenedLabels();
+        assertEquals(1, recentlyOpenedLabels.size());
+        assertEquals("School", recentlyOpenedLabels.get(0));
+        
+        fileSystem.stopKeepingTrackOfRecents();
+        try {
+            fileSystem.openLabel("Personal Project");
+        } catch (NoSuchLabelFoundException e) {
+            fail();
+        }
+        recentlyOpenedLabels = fileSystem.getNamesOfRecentlyOpenedLabels();
+        assertEquals(1, recentlyOpenedLabels.size());
+        assertEquals("School", recentlyOpenedLabels.get(0));
+
+        fileSystem.startKeepingTrackOfRecents();
+        try {
+            fileSystem.createLabel("New Label");
+            fileSystem.openLabel("New Label");
+        } catch (NoSuchLabelFoundException | NameIsTakenException e) {
+            fail();
+        }
+        recentlyOpenedLabels = fileSystem.getNamesOfRecentlyOpenedLabels();
+        assertEquals(2, recentlyOpenedLabels.size());
+        assertEquals("New Label", recentlyOpenedLabels.get(0));
+        assertEquals("School", recentlyOpenedLabels.get(1));
+    }
+
+    @Test
+    @SuppressWarnings("methodlength")
     void testOpenRecentlyOpenedLabels() {
         try {
             createNumberedLabels();
@@ -3241,6 +3792,56 @@ public class TestFileSystem {
         } catch (NoSuchLabelFoundException e) {
             // expected
         }
+    }
+
+    @Test
+    @SuppressWarnings("methodlength")
+    void testOpenRecentlyOpenedLabelsStopTrackingRecents() {
+        try {
+            createNumberedLabels();
+        } catch (NameIsTakenException e) {
+            fail();
+        }
+
+        try {
+            fileSystem.openLabel("1");
+
+            fileSystem.stopKeepingTrackOfRecents();
+            fileSystem.openLabel("2");
+            fileSystem.openLabel("3");
+            fileSystem.openLabel("4");
+            fileSystem.startKeepingTrackOfRecents();
+
+            fileSystem.openLabel("5");
+            fileSystem.openLabel("6");
+            fileSystem.openLabel("7");
+            fileSystem.openLabel("8");
+
+            fileSystem.stopKeepingTrackOfRecents();
+            fileSystem.openLabel("9");
+            fileSystem.openLabel("10");
+            fileSystem.startKeepingTrackOfRecents();
+
+            fileSystem.openLabel("11");
+        } catch (NoSuchLabelFoundException e) {
+            fail();
+        }
+        
+        try {
+            fileSystem.openRecentlyOpenedLabel("1");
+            fileSystem.openRecentlyOpenedLabel("6");
+            fileSystem.openRecentlyOpenedLabel("8");
+            fileSystem.openRecentlyOpenedLabel("11");
+        } catch (NoSuchLabelFoundException e) {
+            fail();
+        }
+
+        assertThrows(NoSuchLabelFoundException.class, () -> fileSystem.openRecentlyOpenedLabel("2"));
+        assertThrows(NoSuchLabelFoundException.class, () -> fileSystem.openRecentlyOpenedLabel("3"));
+        assertThrows(NoSuchLabelFoundException.class, () -> fileSystem.openRecentlyOpenedLabel("4"));
+        assertThrows(NoSuchLabelFoundException.class, () -> fileSystem.openRecentlyOpenedLabel("9"));
+        assertThrows(NoSuchLabelFoundException.class, () -> fileSystem.openRecentlyOpenedLabel("10"));
+        assertThrows(NoSuchLabelFoundException.class, () -> fileSystem.openRecentlyOpenedLabel("15"));
     }
 
 
