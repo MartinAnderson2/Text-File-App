@@ -1187,11 +1187,11 @@ public class TextFileApp {
         System.out.println("Would you like to:");
         System.out.println("  \"a\": Load the autosave (the file system that was automatically saved on last quit)");
         System.out.println("  \"c\": Load a save from a custom location");
-        System.out.println("  \"b\": Back to the main menu");
+        System.out.println("  \"b\": Go back to the main menu");
     }
 
     // MODIFIES: this
-    // EFFECTS: calls the submenu the user selected if their input was invalid, tell them that what they inputted was
+    // EFFECTS: calls the submenu the user selected. If their input was invalid, tell them that what they inputted was
     // not an option
     // throws NewFolderOpenedException if a new file system was loaded
     private void handleLoadMenuInput(String input) throws NewFolderOpenedException {
@@ -1215,7 +1215,7 @@ public class TextFileApp {
             System.out.println("File system successfully loaded from autosave!");
             throw new NewFolderOpenedException();
         } catch (IOException e) {
-            System.out.println("There was an issue with the location of the autosave");
+            System.out.println("There was an issue with the default save location");
         } catch (InvalidJsonException e) {
             System.out.println("The autosave did not represent a valid file system");
         }
@@ -1586,9 +1586,95 @@ public class TextFileApp {
     }
 
     // Save Menu:
-    // EFFECTS: TODO: Save current state to file
+    // EFFECTS: gives the user the option to save to the default save location, save to a custom location, or go back
+    // makes the given event happen depending on their input
     private void saveMenu() {
-        System.out.println("Not implemented...");
+        while (true) {
+            displaySaveMenuOptions();
+
+            String input = getUserInputTrim();
+
+            if (input.equalsIgnoreCase("b") || input.equalsIgnoreCase("back")) {
+                break;
+            } else {
+                try {
+                    handleSaveMenuInput(input);
+                } catch (Exception e) {
+                    break;
+                }
+            }
+        }
+    }
+
+    // EFFECTS: gives the user the option to save to the default save location, save to a custom location, or go back
+    private void displaySaveMenuOptions() {
+        System.out.println();
+        System.out.println("Would you like to:");
+        System.out.println("  \"d\": Save to the default save location");
+        System.out.println("  \"c\": Save to a custom location");
+        System.out.println("  \"b\": Go back to the main menu");
+    }
+
+    // EFFECTS: calls the submenu the user selected. If their input was invalid, tell them that what they inputted was
+    // not an option
+    private void handleSaveMenuInput(String input) {
+        if (input.equalsIgnoreCase("d") || input.equalsIgnoreCase("default")) {
+            saveDefaultLocation();
+        } else if (input.equalsIgnoreCase("c") || input.equalsIgnoreCase("custom")) {
+            saveCustomLocationMenu();
+        } else {
+            System.out.println("Your input was not recognized as any of: d, c, or b");
+        }
+    }
+
+    // EFFECTS: tries to save the current file system to the default location. Tells user if it was successful or not
+    private void saveDefaultLocation() {
+        try {
+            fileSystem.autoSave();
+            System.out.println("File system successfully saved to default save location!");
+        } catch (IOException e) {
+            System.out.println("There was an issue with the default save location");
+        }
+    }
+
+    // EFFECTS: asks the user for the path they would like to save to and then attempts to save the current file system
+    // there
+    private void saveCustomLocationMenu() {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the path you would like to save to or \"b\" to go back");
+            System.out.println("It should look like " + FileSystem.EXAMPLE_SAVE_PATH + " (writing .json is optional)");
+
+            String input = getUserInputTrim();
+            if (input.equalsIgnoreCase("b") || input.equalsIgnoreCase("back")) {
+                break;
+            }
+
+            String path = (input.endsWith(".json") ? input : input + ".json");
+            
+            if (saveManualLocation(path)) {
+                break;
+            }
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: attempts to save the current file system to path. Tells the user if it succeeded or failed and some
+    // idea of why. Returns true if user saved successfully otherwise returns false
+    private boolean saveManualLocation(String path) {
+        if (FileSystem.isFilePathValid(path)) {
+            System.out.println("The file path you inputted: \"" + path + "\" was taken");
+        } else {
+            try {
+                fileSystem.manuallySave(path);
+                System.out.println("File system successfully saved to " + path + "!");
+                return true;
+            } catch (IOException e) {
+                System.out.println("There was an issue with the location or file type when attempting to save to "
+                        + path);
+            }
+        }
+        return false;
     }
 
     /* 
