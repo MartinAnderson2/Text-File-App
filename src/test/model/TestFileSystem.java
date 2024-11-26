@@ -3918,8 +3918,8 @@ public class TestFileSystem {
     @Test
     void testManuallySave() {
         try {
-            emptyFileSystem.manuallySave("data\\customSave.json");
-            JsonReader emptyFileSystemJsonReader = new JsonReader("data\\customSave.json");
+            emptyFileSystem.manuallySave("data\\test\\customSave.json");
+            JsonReader emptyFileSystemJsonReader = new JsonReader("data\\test\\customSave.json");
             emptyFileSystem = emptyFileSystemJsonReader.read();
         } catch (IOException | InvalidJsonException e) {
             fail();
@@ -3928,8 +3928,8 @@ public class TestFileSystem {
 
 
         try {
-            fileSystem.manuallySave("data\\customSave2.json");
-            JsonReader fileSystemJsonReader = new JsonReader("data\\customSave2.json");
+            fileSystem.manuallySave("data\\test\\customSave2.json");
+            JsonReader fileSystemJsonReader = new JsonReader("data\\test\\customSave2.json");
             fileSystem = fileSystemJsonReader.read();
         } catch (IOException | InvalidJsonException e) {
             fail();
@@ -3951,8 +3951,8 @@ public class TestFileSystem {
         }
 
         try {
-            fileSystem.manuallySave("data\\customSave3.json");
-            JsonReader fileSystemJsonReader = new JsonReader("data\\customSave3.json");
+            fileSystem.manuallySave("data\\test\\customSave3.json");
+            JsonReader fileSystemJsonReader = new JsonReader("data\\test\\customSave3.json");
             fileSystem = fileSystemJsonReader.read();
         } catch (IOException | InvalidJsonException e) {
             fail();
@@ -3994,16 +3994,16 @@ public class TestFileSystem {
     @Test
     void testManuallyLoad() {
         try {
-            emptyFileSystem.manuallySave("data\\customSave.json");
-            emptyFileSystem = FileSystem.manuallyLoad("data\\customSave.json");
+            emptyFileSystem.manuallySave("data\\test\\customSave.json");
+            emptyFileSystem = FileSystem.manuallyLoad("data\\test\\customSave.json");
         } catch (IOException | InvalidJsonException e) {
             fail();
         }
         testEmptyFileSystemConstruction();
 
         try {
-            fileSystem.manuallySave("data\\customSave2.json");
-            fileSystem = FileSystem.manuallyLoad("data\\customSave2.json");
+            fileSystem.manuallySave("data\\test\\customSave2.json");
+            fileSystem = FileSystem.manuallyLoad("data\\test\\customSave2.json");
         } catch (IOException | InvalidJsonException e) {
             fail();
         }
