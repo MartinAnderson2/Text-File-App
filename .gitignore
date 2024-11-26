@@ -1,5 +1,6 @@
 *.class
 data/Autosave.json
+data/AutosaveBackup.json
 data/test/customSave.json
 data/test/customSave2.json
 data/test/customSave3.json

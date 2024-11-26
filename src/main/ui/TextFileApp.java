@@ -2,9 +2,12 @@ package ui;
 
 import model.*;
 import model.exceptions.*;
+import persistence.exceptions.InvalidJsonException;
 import ui.exceptions.*;
 
 import java.util.Scanner;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
@@ -43,6 +46,8 @@ public class TextFileApp {
         }
 
         goodbye();
+
+        quit();
     }
 
     // EFFECTS: displays the current directory and the main menu options (the first level of menu options that are
@@ -84,8 +89,16 @@ public class TextFileApp {
     // MODIFIES: this
     // EFFECTS: initializes the application: instantiates fileSystem and instantiates and sets settings for the scanner
     // in order to get user input correctly
+    // Additionally, attempts to load previous file system from disk in default location
     private void initialize() {
-        fileSystem = new FileSystem();
+        try {
+            System.out.println("Attempting to load previous file system");
+            fileSystem = FileSystem.autoLoad();
+            System.out.println("Loading succeeded!");
+        } catch (IOException | InvalidJsonException e) {
+            System.out.println("Loading previous file system failed. Creating new file system");
+            fileSystem = new FileSystem();
+        }
 
         scanner = new Scanner(System.in);
 
@@ -103,7 +116,20 @@ public class TextFileApp {
 
     // EFFECTS: sends the user a farewell message
     private void goodbye() {
+        System.out.println();
         System.out.println("Thank you for using " + appName + "!");
+    }
+
+    // EFFECTS: attempts to save current file system to disk in default location
+    private void quit() {
+        System.out.println();
+        try {
+            System.out.println("Attempting to save current file system");
+            fileSystem.autoSave();
+            System.out.println("Saving current file system succeeded!");
+        } catch (FileNotFoundException e) {
+            System.out.println("Saving current file system failed");
+        }
     }
 
 
