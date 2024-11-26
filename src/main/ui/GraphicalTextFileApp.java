@@ -114,10 +114,17 @@ public class GraphicalTextFileApp extends JFrame {
                     "What would you like to name the file?",
                     "Add File",
                     JOptionPane.QUESTION_MESSAGE);
+            if (fileName == null) {
+                return;
+            }
+
             String filePath = JOptionPane.showInputDialog(null,
                     "Please enter the path of the file",
                     "Add File",
                     JOptionPane.QUESTION_MESSAGE);
+            if (filePath == null) {
+                return;
+            }
 
             try {
                 fileSystem.createFile(fileName, filePath);
@@ -148,6 +155,9 @@ public class GraphicalTextFileApp extends JFrame {
                     "What would you like to name the folder?",
                     "Add Folder",
                     JOptionPane.QUESTION_MESSAGE);
+            if (folderName == null) {
+                return;
+            }
 
             try {
                 fileSystem.createFolder(folderName);
@@ -176,6 +186,9 @@ public class GraphicalTextFileApp extends JFrame {
                     "Which file would you like to open?",
                     "Open File",
                     JOptionPane.QUESTION_MESSAGE);
+            if (fileName == null) {
+                return;
+            }
 
             try {
                 fileSystem.openFile(fileName);
@@ -204,6 +217,9 @@ public class GraphicalTextFileApp extends JFrame {
                     "Which folder would you like to open?",
                     "Open Folder",
                     JOptionPane.QUESTION_MESSAGE);
+            if (folderName == null) {
+                return;
+            }
 
             try {
                 fileSystem.openFolder(folderName);
