@@ -13,8 +13,10 @@ import java.util.List;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 // Represents an application that allows users to add .txt files from their computer to the program and browse through
@@ -45,6 +47,7 @@ public class GraphicalTextFileApp extends JFrame {
 
         addMenu();
         addFoldersAndFiles();
+        addLogoInBottomRight();
 
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -52,6 +55,7 @@ public class GraphicalTextFileApp extends JFrame {
 		setVisible(true);
     }
 
+    // MODIFIES: this
     // EFFECTS: adds a bar of buttons to the top of the screen
     private void addMenu() {
 		JMenuBar menuBar = new JMenuBar();
@@ -82,6 +86,7 @@ public class GraphicalTextFileApp extends JFrame {
 		setJMenuBar(menuBar);
 	}
 
+    // MODIFIES: this
     // EFFECTS: adds item with event handler action to theMenu
     private void addMenuItem(JMenu theMenu, AbstractAction action) {
 		JMenuItem menuItem = new JMenuItem(action);
@@ -89,21 +94,24 @@ public class GraphicalTextFileApp extends JFrame {
 		theMenu.add(menuItem);
 	}
 
-    // Represents the action that should be taken when the user wants to addd a new file to the system
+    // Represents the action that should be taken when the user wants to add a new file to the system
     private class AddFileAction extends AbstractAction {
 
         AddFileAction() {
             super("Add File");
         }
         
+        // MODIFIES: this
+        // EFFECTS: gets the file name and file path from the user. If they are valid then creates a new file with that
+        // name and path. If it fails then tells the user why
         @Override
         public void actionPerformed(ActionEvent e) {
-            String filePath = JOptionPane.showInputDialog(null,
-            "Please enter the path of the file",
-            "Add File",
-            JOptionPane.QUESTION_MESSAGE);
             String fileName = JOptionPane.showInputDialog(null,
             "What would you like to name the file?",
+            "Add File",
+            JOptionPane.QUESTION_MESSAGE);
+            String filePath = JOptionPane.showInputDialog(null,
+            "Please enter the path of the file",
             "Add File",
             JOptionPane.QUESTION_MESSAGE);
 
@@ -127,6 +135,9 @@ public class GraphicalTextFileApp extends JFrame {
             super("Add Folder");
         }
         
+        // MODIFIES: this
+        // EFFECTS: gets the folder name from the user. If it is valid then creates a new folder with that name. If it
+        // fails then tells the user why
         @Override
         public void actionPerformed(ActionEvent e) {
             String folderName = JOptionPane.showInputDialog(null,
@@ -154,6 +165,7 @@ public class GraphicalTextFileApp extends JFrame {
             super("Open File");
         }
         
+        // EFFECTS: gets the file name from the user then opens that file. If it fails then tells the user why
         @Override
         public void actionPerformed(ActionEvent e) {
             String fileName = JOptionPane.showInputDialog(null,
@@ -180,6 +192,8 @@ public class GraphicalTextFileApp extends JFrame {
             super("Open Folder");
         }
         
+        // MODIFIES: this
+        // EFFECTS: gets the folder name from the user then opens that folder. If it fails then tells the user why
         @Override
         public void actionPerformed(ActionEvent e) {
             String folderName = JOptionPane.showInputDialog(null,
@@ -204,6 +218,9 @@ public class GraphicalTextFileApp extends JFrame {
             super("Open Parent Folder");
         }
         
+        // MODIFIES: this
+        // EFFECTS: opens the parent folder of the current folder. If this folder is the root folder then tells the
+        // user that it doesn't have a parent
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
@@ -223,11 +240,13 @@ public class GraphicalTextFileApp extends JFrame {
             super("Load File Sytem");
         }
         
+        // MODIFIES: this
+        // EFFECTS: attempts to load a file system from the default save location. Tells the user if it failed or if
+        // it suceeded
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
                 fileSystem = FileSystem.autoLoad();
-                remove(currentFolderPanel);
                 updateFoldersAndFiles();
                 JOptionPane.showMessageDialog(null, "Loading Succeeded!", "Load",
                 JOptionPane.INFORMATION_MESSAGE);
@@ -245,6 +264,8 @@ public class GraphicalTextFileApp extends JFrame {
             super("Save File System");
         }
         
+        // EFFECTS: attempts to save this file system to the default save location. Tells the user if it failed or if
+        // it suceeded
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
@@ -266,7 +287,7 @@ public class GraphicalTextFileApp extends JFrame {
         JPanel folderPanel = new JPanel();
         List<String> folderNames = fileSystem.getNamesOfSubfolders();
         sortListAlphabetically(folderNames);
-        
+
         for (String folderName : folderNames) {
             JButton jButton = new JButton(folderName);
             jButton.setBackground(Color.CYAN);
@@ -279,7 +300,7 @@ public class GraphicalTextFileApp extends JFrame {
         JPanel filePanel = new JPanel();
         List<String> fileNames = fileSystem.getNamesOfSubfiles();
         sortListAlphabetically(fileNames);
-        
+
         for (String fileName : fileNames) {
             JButton jButton = new JButton(fileName);
             jButton.setBackground(Color.YELLOW);
@@ -334,10 +355,23 @@ public class GraphicalTextFileApp extends JFrame {
     }
 
     // MODIFIES: list
-    // EFFECTS: sorts list alphabetically (A-Z)
+    // EFFECTS: sorts list alphabetically (from A-Z) ignoring case
     private void sortListAlphabetically(List<String> list) {
         // Code taken from Stack Overflow:
         // https://stackoverflow.com/questions/8432581/how-to-sort-a-listobject-alphabetically-using-object-name-field
         list.sort(Comparator.comparing(String::toLowerCase));
+    }
+
+    // MODIFIES: this
+    // EFFECTS: adds the logo of a small pine tree in the bottom right of the application window
+    private void addLogoInBottomRight() {
+        // Taken from [Stack Overflow](https://stackoverflow.com/a/2706730)
+        try {
+            BufferedImage myPicture = ImageIO.read(new java.io.File("path-to-file"));
+            JLabel picLabel = new JLabel(new ImageIcon(myPicture));
+            add(picLabel);
+        } catch (IOException e) {
+            // ignore (non-critical)
+        }
     }
 }
