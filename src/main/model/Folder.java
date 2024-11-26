@@ -14,7 +14,7 @@ import model.exceptions.NameIsTakenException;
 // Represents a folder with a name that holds files as well as other folders
 // and has a parent folder unless it is the root folder
 public class Folder extends NamedObject {
-    private static char FOLDER_SEPERATOR = '\\';
+    public static final char FOLDER_SEPERATOR = '\\';
 
     private Set<Folder> subfolders;
     private Set<File> subfiles;
