@@ -181,8 +181,7 @@ public class TextFileApp {
     // EFFECTS: allows the user to add a file from their computer to the program by
     // providing a path and optionally giving it a custom name and labels (if any have been made)
     private void addFileMenu() {
-        boolean fileCreated = false;
-        while (!fileCreated) {
+        while (true) {
             System.out.println();
             System.out.println("Please enter the .txt file's path or b to go back");
             System.out.println("It should look like " + FileSystem.EXAMPLE_FILE_PATH + " (writing .txt is optional)");
@@ -190,19 +189,16 @@ public class TextFileApp {
             String input = getUserInputTrim();
             if (input.equalsIgnoreCase("b") || input.equalsIgnoreCase("back")) {
                 break;
-                // Returns to the add menu
             }
 
             String path = (input.endsWith(".txt") ? input : input + ".txt");
             
             if (FileSystem.isFilePathValid(path)) {
                 String nameOfFileOnDisk = File.getNameOfFileOnDiskWithoutExtension(path);
-
                 chooseFileNameThenCreateFileAndAddLabels(nameOfFileOnDisk, path);
-
-                fileCreated = true;
+                break;
             } else {
-                System.out.println("The file path you inputted: \"" + path + "\" was incorrect");
+                System.out.println("The file path you inputted: \"" + path + "\" was invalid");
             }
         }
     }
@@ -1165,9 +1161,105 @@ public class TextFileApp {
     // Load Menu:
 
     // MODIFIES: this
-    // EFFECTS: TODO: load state from file
+    // EFFECTS: gives the user the option to load the autosave, load a save in a custom location, or go back
+    // makes the given event happen depending on their input
     private void loadMenu() {
-        System.out.println("Not implemented...");
+        while (true) {
+            displayLoadMenuOptions();
+
+            String input = getUserInputTrim();
+
+            if (input.equalsIgnoreCase("b") || input.equalsIgnoreCase("back")) {
+                break;
+            } else {
+                try {
+                    handleLoadMenuInput(input);
+                } catch (NewFolderOpenedException e) {
+                    break;
+                }
+            }
+        }
+    }
+
+    // EFFECTS: gives the user the option to load the autosave, load a save in a custom location, or go back
+    private void displayLoadMenuOptions() {
+        System.out.println();
+        System.out.println("Would you like to:");
+        System.out.println("  \"a\": Load the autosave (the file system that was automatically saved on last quit)");
+        System.out.println("  \"c\": Load a save from a custom location");
+        System.out.println("  \"b\": Back to the main menu");
+    }
+
+    // MODIFIES: this
+    // EFFECTS: calls the submenu the user selected if their input was invalid, tell them that what they inputted was
+    // not an option
+    // throws NewFolderOpenedException if a new file system was loaded
+    private void handleLoadMenuInput(String input) throws NewFolderOpenedException {
+        if (input.equalsIgnoreCase("a") || input.equalsIgnoreCase("autosave")) {
+            loadAutosave();
+        } else if (input.equalsIgnoreCase("c") || input.equalsIgnoreCase("custom")) {
+            loadCustomSaveMenu();
+        } else {
+            System.out.println("Your input was not recognized as any of: a, c, or b");
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: tries to load the autosave. If it was successful, replaces fileSystem with it, tells user, and throws
+    // NewFolderOpenedException
+    // If it was unsuccessful tells user
+    private void loadAutosave() throws NewFolderOpenedException {
+        try {
+            FileSystem loadedFileSystem = FileSystem.autoLoad();
+            this.fileSystem = loadedFileSystem;
+            System.out.println("File system successfully loaded from autosave!");
+            throw new NewFolderOpenedException();
+        } catch (IOException e) {
+            System.out.println("There was an issue with the location of the autosave");
+        } catch (InvalidJsonException e) {
+            System.out.println("The autosave did not represent a valid file system");
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: asks the user for the path of the save they would like to load then attempts to load it
+    // throws NewFolderOpenedException if a new file system was loaded
+    private void loadCustomSaveMenu() throws NewFolderOpenedException {
+        while (true) {
+            System.out.println();
+            System.out.println("Please enter the path of the save or \"b\" to go back");
+            System.out.println("It should look like " + FileSystem.EXAMPLE_SAVE_PATH + " (writing .json is optional)");
+
+            String input = getUserInputTrim();
+            if (input.equalsIgnoreCase("b") || input.equalsIgnoreCase("back")) {
+                break;
+            }
+
+            String path = (input.endsWith(".json") ? input : input + ".json");
+            
+            loadManualSave(path);
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: attempts to load save at path. Tells the user if it succeeded or failed and some idea of why
+    // throws NewFolderOpenedException if a new file system was loaded
+    private void loadManualSave(String path) throws NewFolderOpenedException {
+        if (!FileSystem.isFilePathValid(path)) {
+            System.out.println("The file path you inputted: \"" + path + "\" was invalid");
+            return;
+        } else {
+            try {
+                FileSystem loadedFileSystem = FileSystem.manuallyLoad(path);
+                this.fileSystem = loadedFileSystem;
+                System.out.println("File system successfully loaded from save file at " + path + "!");
+                throw new NewFolderOpenedException();
+            } catch (IOException e) {
+                System.out.println("There was an issue with the location or file type of the save file at " + path);
+            } catch (InvalidJsonException e) {
+                System.out.println("The save file at " + path + " did not represent a valid file system");
+            }
+        }
     }
 
 
