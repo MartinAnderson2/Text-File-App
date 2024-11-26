@@ -13,7 +13,8 @@ import java.util.List;
 
 // Represents an application that allows users to add .txt files from their computer to the program and sort and
 // browse through them. Structure design based on [TellerApp](https://github.students.cs.ubc.ca/CPSC210/TellerApp)
-public class TextFileApp {
+// This is the console version of the application in which the user interacts via text
+public class ConsoleTextFileApp {
     public static final String appName = "Pine";
 
     private Scanner scanner;
@@ -21,7 +22,7 @@ public class TextFileApp {
     FileSystem fileSystem;
 
     // EFFECTS: starts the Text File application
-    public TextFileApp() {
+    public ConsoleTextFileApp() {
         runTextFileApp();
     }
 
