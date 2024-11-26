@@ -8,9 +8,9 @@ import model.exceptions.NoSuchFileFoundException;
 import model.exceptions.NoSuchFolderFoundException;
 import persistence.exceptions.InvalidJsonException;
 
+import java.util.Comparator;
 import java.util.List;
 import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
@@ -265,6 +265,8 @@ public class GraphicalTextFileApp extends JFrame {
 
         JPanel folderPanel = new JPanel();
         List<String> folderNames = fileSystem.getNamesOfSubfolders();
+        sortListAlphabetically(folderNames);
+        
         for (String folderName : folderNames) {
             JButton jButton = new JButton(folderName);
             jButton.setBackground(Color.CYAN);
@@ -276,6 +278,8 @@ public class GraphicalTextFileApp extends JFrame {
 
         JPanel filePanel = new JPanel();
         List<String> fileNames = fileSystem.getNamesOfSubfiles();
+        sortListAlphabetically(fileNames);
+        
         for (String fileName : fileNames) {
             JButton jButton = new JButton(fileName);
             jButton.setBackground(Color.YELLOW);
@@ -299,6 +303,8 @@ public class GraphicalTextFileApp extends JFrame {
 
         JPanel folderPanel = new JPanel();
         List<String> folderNames = fileSystem.getNamesOfSubfolders();
+        sortListAlphabetically(folderNames);
+
         for (String folderName : folderNames) {
             JButton jButton = new JButton(folderName);
             jButton.setBackground(Color.CYAN);
@@ -310,6 +316,8 @@ public class GraphicalTextFileApp extends JFrame {
 
         JPanel filePanel = new JPanel();
         List<String> fileNames = fileSystem.getNamesOfSubfiles();
+        sortListAlphabetically(fileNames);
+
         for (String fileName : fileNames) {
             JButton jButton = new JButton(fileName);
             jButton.setBackground(Color.YELLOW);
@@ -323,5 +331,13 @@ public class GraphicalTextFileApp extends JFrame {
 
         revalidate();
         repaint();
+    }
+
+    // MODIFIES: list
+    // EFFECTS: sorts list alphabetically (A-Z)
+    private void sortListAlphabetically(List<String> list) {
+        // Code taken from Stack Overflow:
+        // https://stackoverflow.com/questions/8432581/how-to-sort-a-listobject-alphabetically-using-object-name-field
+        list.sort(Comparator.comparing(String::toLowerCase));
     }
 }
