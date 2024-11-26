@@ -3938,6 +3938,7 @@ public class TestFileSystem {
     }
 
     @Test
+    @SuppressWarnings("methodlength")
     void testSaveWithRecentFileAndLabel() {
         try {
             fileSystem.openFileButNotOnComputerEvenIfNoLongerValid("File");

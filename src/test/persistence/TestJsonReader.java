@@ -1,7 +1,6 @@
 package persistence;
 
 import model.FileSystem;
-import model.exceptions.FilePathNoLongerValidException;
 import model.exceptions.NoSuchFileFoundException;
 import model.exceptions.NoSuchFolderFoundException;
 import model.exceptions.NoSuchLabelFoundException;
@@ -10,9 +9,7 @@ import persistence.exceptions.InvalidJsonException;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.util.List;
 

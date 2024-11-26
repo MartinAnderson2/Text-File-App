@@ -112,6 +112,7 @@ public class TestJsonWriter {
 
     // EFFECTS: confirms that fileSystem is the default file system used for tests (i.e. it has the appropriate premade
     // files, folders, and labels)
+    @SuppressWarnings("methodlength")
     private void testIsRegularFileSystem(FileSystem fileSystem) {
         assertEquals("root", fileSystem.getCurrentFolderName());
         assertFalse(fileSystem.currentFolderHasParent());

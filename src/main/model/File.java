@@ -75,6 +75,12 @@ public class File extends NamedObject {
     public String getNameOfFileOnDisk() {
         return getCharactersAfterLastSlash(this.filePath);
     }
+
+    // EFFECTS: returns the name of a file on the user's computer given a string of its path.
+    // This is the contents of the string after the last backslash
+    public static String getNameOfFileOnDisk(String path) {
+        return getCharactersAfterLastSlash(path);
+    }
     
 
     // Persistence-Related Method:
@@ -104,12 +110,6 @@ public class File extends NamedObject {
 
 
     // Static Methods:
-
-    // EFFECTS: returns the name of a file on the user's computer given a string of its path.
-    // This is the contents of the string after the last backslash
-    public static String getNameOfFileOnDisk(String path) {
-        return getCharactersAfterLastSlash(path);
-    }
 
     // EFFECTS: returns the name of a file on the user's computer given a string of its path, without the file
     // extension. This is the contents of the string after the last backslash minus the text after (and including) the

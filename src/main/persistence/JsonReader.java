@@ -1,7 +1,6 @@
 package persistence;
 
 import model.FileSystem;
-import model.Folder;
 import model.exceptions.NameIsTakenException;
 import model.exceptions.NoSuchFileFoundException;
 import model.exceptions.NoSuchFolderFoundException;
@@ -15,7 +14,6 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 // Represents a reader for reading all of the labels, files, and folders of the file system from a file, in JSON format
