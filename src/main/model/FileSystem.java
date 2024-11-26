@@ -25,7 +25,7 @@ import java.awt.Desktop;
 public class FileSystem implements Writable {
     public static final String AUTOSAVE_FILE_PATH = "data/Autosave.json";
     public static final String EXAMPLE_FILE_PATH = "C:/Users/User/Documents/Note Name.txt";
-    public static final String EXAMPLE_SAVE_PATH = "Manual Save.json";
+    public static final String EXAMPLE_SAVE_PATH = "ManualSave.json";
     private static final int MAX_NUM_RECENTLY_OPENED_STORED = 10;
 
     private static JsonReader autoLoadJsonReader = new JsonReader(AUTOSAVE_FILE_PATH);
