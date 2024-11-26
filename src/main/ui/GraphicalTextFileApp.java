@@ -12,7 +12,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
@@ -26,11 +25,11 @@ import javax.swing.*;
 // This is the graphical version of the application in which the user interacts with a GUI
 public class GraphicalTextFileApp extends JFrame {
     private static final int WIDTH = 960;
-	private static final int HEIGHT = 600;
+    private static final int HEIGHT = 600;
 
     private FileSystem fileSystem;
 
-    private JDesktopPane desktop; 
+    private JDesktopPane desktop;
     private JPanel currentFolderPanel;
 
     // EFFECTS: sets up the main panel and the buttons on it and adds the folders and files
@@ -52,60 +51,62 @@ public class GraphicalTextFileApp extends JFrame {
         addMenu();
         addFoldersAndFiles();
 
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new GridLayout());
-		setVisible(true);
+        setVisible(true);
     }
 
     // MODIFIES: this
     // EFFECTS: adds a bar of buttons to the top of the screen
     private void addMenu() {
-		JMenuBar menuBar = new JMenuBar();
+        JMenuBar menuBar = new JMenuBar();
 
-		JMenu addMenu = new JMenu("Add");
-		addMenu.setMnemonic('A');
-		addMenuItem(addMenu, new AddFileAction());
-		addMenuItem(addMenu, new AddFolderAction());
-		menuBar.add(addMenu);
-		
-		JMenu openMenu = new JMenu("Open");
-		openMenu.setMnemonic('O');
-		addMenuItem(openMenu, new OpenFileAction());
-		addMenuItem(openMenu, new OpenFolderAction());
-		addMenuItem(openMenu, new OpenParentFolderAction());
-		menuBar.add(openMenu);
+        JMenu addMenu = new JMenu("Add");
+        addMenu.setMnemonic('A');
+        addMenuItem(addMenu, new AddFileAction());
+        addMenuItem(addMenu, new AddFolderAction());
+        menuBar.add(addMenu);
+
+        JMenu openMenu = new JMenu("Open");
+        openMenu.setMnemonic('O');
+        addMenuItem(openMenu, new OpenFileAction());
+        addMenuItem(openMenu, new OpenFolderAction());
+        addMenuItem(openMenu, new OpenParentFolderAction());
+        menuBar.add(openMenu);
 
         JMenu loadMenu = new JMenu("Load");
-		loadMenu.setMnemonic('L');
-		addMenuItem(loadMenu, new LoadAction());
-		menuBar.add(loadMenu);
+        loadMenu.setMnemonic('L');
+        addMenuItem(loadMenu, new LoadAction());
+        menuBar.add(loadMenu);
 
         JMenu saveMenu = new JMenu("Save");
-		saveMenu.setMnemonic('S');
-		addMenuItem(saveMenu, new SaveAction());
-		menuBar.add(saveMenu);
-		
-		setJMenuBar(menuBar);
-	}
+        saveMenu.setMnemonic('S');
+        addMenuItem(saveMenu, new SaveAction());
+        menuBar.add(saveMenu);
+
+        setJMenuBar(menuBar);
+    }
 
     // MODIFIES: this
     // EFFECTS: adds item with event handler action to theMenu
     private void addMenuItem(JMenu theMenu, AbstractAction action) {
-		JMenuItem menuItem = new JMenuItem(action);
-		menuItem.setMnemonic(menuItem.getText().charAt(0));
-		theMenu.add(menuItem);
-	}
+        JMenuItem menuItem = new JMenuItem(action);
+        menuItem.setMnemonic(menuItem.getText().charAt(0));
+        theMenu.add(menuItem);
+    }
 
-    // Represents the action that should be taken when the user wants to add a new file to the system
+    // Represents the action that should be taken when the user wants to add a new
+    // file to the system
     private class AddFileAction extends AbstractAction {
 
         AddFileAction() {
             super("Add File");
         }
-        
+
         // MODIFIES: this
-        // EFFECTS: gets the file name and file path from the user. If they are valid then creates a new file with that
+        // EFFECTS: gets the file name and file path from the user. If they are valid
+        // then creates a new file with that
         // name and path. If it fails then tells the user why
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -129,15 +130,17 @@ public class GraphicalTextFileApp extends JFrame {
         }
     }
 
-    // Represents the action that should be taken when the user wants to addd a new folder to the system
+    // Represents the action that should be taken when the user wants to addd a new
+    // folder to the system
     private class AddFolderAction extends AbstractAction {
 
         AddFolderAction() {
             super("Add Folder");
         }
-        
+
         // MODIFIES: this
-        // EFFECTS: gets the folder name from the user. If it is valid then creates a new folder with that name. If it
+        // EFFECTS: gets the folder name from the user. If it is valid then creates a
+        // new folder with that name. If it
         // fails then tells the user why
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -157,14 +160,16 @@ public class GraphicalTextFileApp extends JFrame {
         }
     }
 
-    // Represents the action that should be taken when the user wants to open a file in the current folder
+    // Represents the action that should be taken when the user wants to open a file
+    // in the current folder
     private class OpenFileAction extends AbstractAction {
 
         OpenFileAction() {
             super("Open File");
         }
-        
-        // EFFECTS: gets the file name from the user then opens that file. If it fails then tells the user why
+
+        // EFFECTS: gets the file name from the user then opens that file. If it fails
+        // then tells the user why
         @Override
         public void actionPerformed(ActionEvent e) {
             String fileName = JOptionPane.showInputDialog(null,
@@ -182,15 +187,17 @@ public class GraphicalTextFileApp extends JFrame {
         }
     }
 
-    // Represents the action that should be taken when the user wants to open a folder in the current folder
+    // Represents the action that should be taken when the user wants to open a
+    // folder in the current folder
     private class OpenFolderAction extends AbstractAction {
 
         OpenFolderAction() {
             super("Open Folder");
         }
-        
+
         // MODIFIES: this
-        // EFFECTS: gets the folder name from the user then opens that folder. If it fails then tells the user why
+        // EFFECTS: gets the folder name from the user then opens that folder. If it
+        // fails then tells the user why
         @Override
         public void actionPerformed(ActionEvent e) {
             String folderName = JOptionPane.showInputDialog(null,
@@ -207,15 +214,17 @@ public class GraphicalTextFileApp extends JFrame {
         }
     }
 
-    // Represents the action that should be taken when the user wants to go up one directory level
+    // Represents the action that should be taken when the user wants to go up one
+    // directory level
     private class OpenParentFolderAction extends AbstractAction {
 
         OpenParentFolderAction() {
             super("Open Parent Folder");
         }
-        
+
         // MODIFIES: this
-        // EFFECTS: opens the parent folder of the current folder. If this folder is the root folder then tells the
+        // EFFECTS: opens the parent folder of the current folder. If this folder is the
+        // root folder then tells the
         // user that it doesn't have a parent
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -228,15 +237,17 @@ public class GraphicalTextFileApp extends JFrame {
         }
     }
 
-    // Represents the action that should be taken when the user wants to go up one directory level
+    // Represents the action that should be taken when the user wants to go up one
+    // directory level
     private class LoadAction extends AbstractAction {
 
         LoadAction() {
             super("Load File Sytem");
         }
-        
+
         // MODIFIES: this
-        // EFFECTS: attempts to load a file system from the default save location. Tells the user if it failed or if
+        // EFFECTS: attempts to load a file system from the default save location. Tells
+        // the user if it failed or if
         // it suceeded
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -251,14 +262,16 @@ public class GraphicalTextFileApp extends JFrame {
         }
     }
 
-    // Represents the action that should be taken when the user wants to go up one directory level
+    // Represents the action that should be taken when the user wants to go up one
+    // directory level
     private class SaveAction extends AbstractAction {
 
         SaveAction() {
             super("Save File System");
         }
-        
-        // EFFECTS: attempts to save this file system to the default save location. Tells the user if it failed or if
+
+        // EFFECTS: attempts to save this file system to the default save location.
+        // Tells the user if it failed or if
         // it suceeded
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -279,7 +292,8 @@ public class GraphicalTextFileApp extends JFrame {
     }
 
     // MODIFIES: this
-    // EFFECTS: adds the folders and the files to new panels and adds them to the main window
+    // EFFECTS: adds the folders and the files to new panels and adds them to the
+    // main window
     private void addFoldersAndFiles() {
         currentFolderPanel = new JPanel();
 
@@ -293,7 +307,8 @@ public class GraphicalTextFileApp extends JFrame {
     }
 
     // MODIFIES: this
-    // EFFECTS: removes the old folders and files, adds the folders and the files to new panels and adds them to the
+    // EFFECTS: removes the old folders and files, adds the folders and the files to
+    // new panels and adds them to the
     // main window
     private void updateFoldersAndFiles() {
         remove(currentFolderPanel);
@@ -308,7 +323,8 @@ public class GraphicalTextFileApp extends JFrame {
         repaint();
     }
 
-    // EFFECTS: creates a new panel to which all of the names of the folders are added as disabled buttons
+    // EFFECTS: creates a new panel to which all of the names of the folders are
+    // added as disabled buttons
     private JPanel addFoldersToPanel() {
         JPanel folderPanel = new JPanel();
         List<String> folderNames = fileSystem.getNamesOfSubfolders();
@@ -325,8 +341,9 @@ public class GraphicalTextFileApp extends JFrame {
         return folderPanel;
     }
 
-    // EFFECTS: creates a new panel to which all of the names of the files are added as disabled buttons
-    private JPanel addFilesToPanel() {    
+    // EFFECTS: creates a new panel to which all of the names of the files are added
+    // as disabled buttons
+    private JPanel addFilesToPanel() {
         JPanel filePanel = new JPanel();
         List<String> fileNames = fileSystem.getNamesOfSubfiles();
         sortListAlphabetically(fileNames);
@@ -351,7 +368,8 @@ public class GraphicalTextFileApp extends JFrame {
     }
 
     // MODIFIES: this
-    // EFFECTS: adds the logo of a small pine tree in the bottom right of the application window
+    // EFFECTS: adds the logo of a small pine tree in the bottom right of the
+    // application window
     private void addLogoInBottomRight() {
         try {
             // Taken from [Stack Overflow](https://stackoverflow.com/a/2706730)
