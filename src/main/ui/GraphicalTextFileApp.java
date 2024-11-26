@@ -10,7 +10,9 @@ import persistence.exceptions.InvalidJsonException;
 
 import java.util.Comparator;
 import java.util.List;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
@@ -42,12 +44,13 @@ public class GraphicalTextFileApp extends JFrame {
         desktop = new JDesktopPane();
 
         setContentPane(desktop);
-        setTitle("Text File Application");
+        setTitle(ConsoleTextFileApp.appName);
         setSize(WIDTH, HEIGHT);
+        setLayout(new BorderLayout());
 
+        addLogoInBottomRight();
         addMenu();
         addFoldersAndFiles();
-        addLogoInBottomRight();
 
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -107,23 +110,21 @@ public class GraphicalTextFileApp extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             String fileName = JOptionPane.showInputDialog(null,
-            "What would you like to name the file?",
-            "Add File",
-            JOptionPane.QUESTION_MESSAGE);
+                    "What would you like to name the file?",
+                    "Add File",
+                    JOptionPane.QUESTION_MESSAGE);
             String filePath = JOptionPane.showInputDialog(null,
-            "Please enter the path of the file",
-            "Add File",
-            JOptionPane.QUESTION_MESSAGE);
+                    "Please enter the path of the file",
+                    "Add File",
+                    JOptionPane.QUESTION_MESSAGE);
 
             try {
                 fileSystem.createFile(fileName, filePath);
                 updateFoldersAndFiles();
             } catch (NameIsTakenException e1) {
-                JOptionPane.showMessageDialog(null, "Name is taken", "Error Adding",
-                JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("Name is taken", "Error Adding");
             } catch (NameIsBlankException e1) {
-                JOptionPane.showMessageDialog(null, "Name is invalid", "Error Adding",
-                JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("Name is invalid", "Error Adding");
             }
         }
     }
@@ -141,19 +142,17 @@ public class GraphicalTextFileApp extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             String folderName = JOptionPane.showInputDialog(null,
-            "What would you like to name the folder?",
-            "Add Folder",
-            JOptionPane.QUESTION_MESSAGE);
+                    "What would you like to name the folder?",
+                    "Add Folder",
+                    JOptionPane.QUESTION_MESSAGE);
 
             try {
                 fileSystem.createFolder(folderName);
                 updateFoldersAndFiles();
             } catch (NameIsTakenException e1) {
-                JOptionPane.showMessageDialog(null, "Name is taken", "Error Adding",
-                JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("Name is taken", "Error Adding");
             } catch (NameIsBlankException e1) {
-                JOptionPane.showMessageDialog(null, "Name is invalid", "Error Adding",
-                JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("Name is invalid", "Error Adding");
             }
         }
     }
@@ -169,18 +168,16 @@ public class GraphicalTextFileApp extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             String fileName = JOptionPane.showInputDialog(null,
-            "Which file would you like to open?",
-            "Open File",
-            JOptionPane.QUESTION_MESSAGE);
+                    "Which file would you like to open?",
+                    "Open File",
+                    JOptionPane.QUESTION_MESSAGE);
 
             try {
                 fileSystem.openFile(fileName);
             } catch (NoSuchFileFoundException e1) {
-                JOptionPane.showMessageDialog(null, "There is no file with that name in this folder", "Error Opening",
-                JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("There is no file with that name in this folder", "Error Opening");
             } catch (FilePathNoLongerValidException e1) {
-                JOptionPane.showMessageDialog(null, "There is no file at that location anymore", "Error Opening",
-                JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("There is no file at that location anymore", "Error Opening");
             }
         }
     }
@@ -197,16 +194,15 @@ public class GraphicalTextFileApp extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             String folderName = JOptionPane.showInputDialog(null,
-            "Which folder would you like to open?",
-            "Open Folder",
-            JOptionPane.QUESTION_MESSAGE);
+                    "Which folder would you like to open?",
+                    "Open Folder",
+                    JOptionPane.QUESTION_MESSAGE);
 
             try {
                 fileSystem.openFolder(folderName);
                 updateFoldersAndFiles();
             } catch (NoSuchFolderFoundException e1) {
-                JOptionPane.showMessageDialog(null, "There is no folder with that name in this folder", "Error Opening",
-                JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("There is no folder with that name in this folder", "Error Opening");
             }
         }
     }
@@ -227,8 +223,7 @@ public class GraphicalTextFileApp extends JFrame {
                 fileSystem.goUpOneDirectoryLevel();
                 updateFoldersAndFiles();
             } catch (NoSuchFolderFoundException e1) {
-                JOptionPane.showMessageDialog(null, "Current folder does not have a parent", "Error Opening",
-                JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("Current folder does not have a parent", "Error Opening");
             }
         }
     }
@@ -249,10 +244,9 @@ public class GraphicalTextFileApp extends JFrame {
                 fileSystem = FileSystem.autoLoad();
                 updateFoldersAndFiles();
                 JOptionPane.showMessageDialog(null, "Loading Succeeded!", "Load",
-                JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.INFORMATION_MESSAGE);
             } catch (IOException | InvalidJsonException e1) {
-                JOptionPane.showMessageDialog(null, "Loading Failed", "Load Error",
-						JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("Loading Failed", "Load Error");
             }
         }
     }
@@ -271,12 +265,17 @@ public class GraphicalTextFileApp extends JFrame {
             try {
                 fileSystem.autoSave();
                 JOptionPane.showMessageDialog(null, "Saving Succeeded!", "Save",
-                JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.INFORMATION_MESSAGE);
             } catch (IOException e1) {
-                JOptionPane.showMessageDialog(null, "Saving Failed", "Save Error",
-                JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("Saving Failed", "Save Error");
             }
         }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: shows an error popup with title tile and message message
+    private void showErrorMessage(String message, String title) {
+        JOptionPane.showMessageDialog(null, message, title, JOptionPane.ERROR_MESSAGE);
     }
 
     // MODIFIES: this
@@ -284,31 +283,8 @@ public class GraphicalTextFileApp extends JFrame {
     private void addFoldersAndFiles() {
         currentFolderPanel = new JPanel();
 
-        JPanel folderPanel = new JPanel();
-        List<String> folderNames = fileSystem.getNamesOfSubfolders();
-        sortListAlphabetically(folderNames);
-
-        for (String folderName : folderNames) {
-            JButton jButton = new JButton(folderName);
-            jButton.setBackground(Color.CYAN);
-            jButton.setEnabled(false);
-            folderPanel.add(jButton);
-        }
-        folderPanel.setVisible(true);
-        currentFolderPanel.add(folderPanel);
-
-        JPanel filePanel = new JPanel();
-        List<String> fileNames = fileSystem.getNamesOfSubfiles();
-        sortListAlphabetically(fileNames);
-
-        for (String fileName : fileNames) {
-            JButton jButton = new JButton(fileName);
-            jButton.setBackground(Color.YELLOW);
-            jButton.setEnabled(false);
-            folderPanel.add(jButton);
-        }
-        filePanel.setVisible(true);
-        currentFolderPanel.add(filePanel);
+        currentFolderPanel.add(addFoldersToPanel());
+        currentFolderPanel.add(addFilesToPanel());
 
         add(currentFolderPanel);
 
@@ -317,41 +293,53 @@ public class GraphicalTextFileApp extends JFrame {
     }
 
     // MODIFIES: this
-    // EFFECTS: removes the old folders and files, adds the folders and the files to new panels and adds them to the main window
+    // EFFECTS: removes the old folders and files, adds the folders and the files to new panels and adds them to the
+    // main window
     private void updateFoldersAndFiles() {
         remove(currentFolderPanel);
         currentFolderPanel = new JPanel();
 
-        JPanel folderPanel = new JPanel();
-        List<String> folderNames = fileSystem.getNamesOfSubfolders();
-        sortListAlphabetically(folderNames);
-
-        for (String folderName : folderNames) {
-            JButton jButton = new JButton(folderName);
-            jButton.setBackground(Color.CYAN);
-            jButton.setEnabled(false);
-            folderPanel.add(jButton);
-        }
-        folderPanel.setVisible(true);
-        currentFolderPanel.add(folderPanel);
-
-        JPanel filePanel = new JPanel();
-        List<String> fileNames = fileSystem.getNamesOfSubfiles();
-        sortListAlphabetically(fileNames);
-
-        for (String fileName : fileNames) {
-            JButton jButton = new JButton(fileName);
-            jButton.setBackground(Color.YELLOW);
-            jButton.setEnabled(false);
-            folderPanel.add(jButton);
-        }
-        filePanel.setVisible(true);
-        currentFolderPanel.add(filePanel);
+        currentFolderPanel.add(addFoldersToPanel());
+        currentFolderPanel.add(addFilesToPanel());
 
         add(currentFolderPanel);
 
         revalidate();
         repaint();
+    }
+
+    // EFFECTS: creates a new panel to which all of the names of the folders are added as disabled buttons
+    private JPanel addFoldersToPanel() {
+        JPanel folderPanel = new JPanel();
+        List<String> folderNames = fileSystem.getNamesOfSubfolders();
+        sortListAlphabetically(folderNames);
+
+        for (String folderName : folderNames) {
+            JButton jbutton = new JButton(folderName);
+            jbutton.setBackground(Color.CYAN);
+            jbutton.setEnabled(false);
+            folderPanel.add(jbutton);
+        }
+        folderPanel.setVisible(true);
+
+        return folderPanel;
+    }
+
+    // EFFECTS: creates a new panel to which all of the names of the files are added as disabled buttons
+    private JPanel addFilesToPanel() {    
+        JPanel filePanel = new JPanel();
+        List<String> fileNames = fileSystem.getNamesOfSubfiles();
+        sortListAlphabetically(fileNames);
+
+        for (String fileName : fileNames) {
+            JButton jbutton = new JButton(fileName);
+            jbutton.setBackground(Color.YELLOW);
+            jbutton.setEnabled(false);
+            filePanel.add(jbutton);
+        }
+        filePanel.setVisible(true);
+
+        return filePanel;
     }
 
     // MODIFIES: list
@@ -365,13 +353,15 @@ public class GraphicalTextFileApp extends JFrame {
     // MODIFIES: this
     // EFFECTS: adds the logo of a small pine tree in the bottom right of the application window
     private void addLogoInBottomRight() {
-        // Taken from [Stack Overflow](https://stackoverflow.com/a/2706730)
         try {
-            BufferedImage myPicture = ImageIO.read(new java.io.File("path-to-file"));
-            JLabel picLabel = new JLabel(new ImageIcon(myPicture));
-            add(picLabel);
+            // Taken from [Stack Overflow](https://stackoverflow.com/a/2706730)
+            BufferedImage logo = ImageIO.read(new java.io.File("data/images/pine-tree.png"));
+            JLabel logoLabel = new JLabel(new ImageIcon(logo));
+
+            logoLabel.setToolTipText("Joshua tree icons created by Pixel perfect - Flaticon");
+            add(logoLabel, BorderLayout.SOUTH);
         } catch (IOException e) {
-            // ignore (non-critical)
+            showErrorMessage("Image failed to load", "Resource Error");
         }
     }
 }
