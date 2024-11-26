@@ -1599,7 +1599,7 @@ public class TextFileApp {
             } else {
                 try {
                     handleSaveMenuInput(input);
-                } catch (Exception e) {
+                } catch (ActionCompletedSuccessfullyException e) {
                     break;
                 }
             }
@@ -1617,7 +1617,9 @@ public class TextFileApp {
 
     // EFFECTS: calls the submenu the user selected. If their input was invalid, tell them that what they inputted was
     // not an option
-    private void handleSaveMenuInput(String input) {
+    // throws ActionCompletedSuccessfullyException if the user successfully saved the current file system to the
+    // location of their choice
+    private void handleSaveMenuInput(String input) throws ActionCompletedSuccessfullyException {
         if (input.equalsIgnoreCase("d") || input.equalsIgnoreCase("default")) {
             saveDefaultLocation();
         } else if (input.equalsIgnoreCase("c") || input.equalsIgnoreCase("custom")) {
@@ -1628,10 +1630,13 @@ public class TextFileApp {
     }
 
     // EFFECTS: tries to save the current file system to the default location. Tells user if it was successful or not
-    private void saveDefaultLocation() {
+    // throws ActionCompletedSuccessfullyException if the user successfully saved the current file system to the
+    // default location
+    private void saveDefaultLocation() throws ActionCompletedSuccessfullyException {
         try {
             fileSystem.autoSave();
             System.out.println("File system successfully saved to default save location!");
+            throw new ActionCompletedSuccessfullyException();
         } catch (IOException e) {
             System.out.println("There was an issue with the default save location");
         }
@@ -1639,7 +1644,9 @@ public class TextFileApp {
 
     // EFFECTS: asks the user for the path they would like to save to and then attempts to save the current file system
     // there
-    private void saveCustomLocationMenu() {
+    // throws ActionCompletedSuccessfullyException if the user successfully saved the current file system to the
+    // location of their choice
+    private void saveCustomLocationMenu() throws ActionCompletedSuccessfullyException {
         while (true) {
             System.out.println();
             System.out.println("Please enter the path you would like to save to or \"b\" to go back");
@@ -1652,29 +1659,28 @@ public class TextFileApp {
 
             String path = (input.endsWith(".json") ? input : input + ".json");
             
-            if (saveManualLocation(path)) {
-                break;
-            }
+            saveManualLocation(path);
         }
     }
 
     // MODIFIES: this
     // EFFECTS: attempts to save the current file system to path. Tells the user if it succeeded or failed and some
     // idea of why. Returns true if user saved successfully otherwise returns false
-    private boolean saveManualLocation(String path) {
+    // throws ActionCompletedSuccessfullyException if the user successfully saved the current file system to the
+    // location of their choice
+    private void saveManualLocation(String path) throws ActionCompletedSuccessfullyException {
         if (FileSystem.isFilePathValid(path)) {
             System.out.println("The file path you inputted: \"" + path + "\" was taken");
         } else {
             try {
                 fileSystem.manuallySave(path);
                 System.out.println("File system successfully saved to " + path + "!");
-                return true;
+                throw new ActionCompletedSuccessfullyException();
             } catch (IOException e) {
                 System.out.println("There was an issue with the location or file type when attempting to save to "
                         + path);
             }
         }
-        return false;
     }
 
     /* 
