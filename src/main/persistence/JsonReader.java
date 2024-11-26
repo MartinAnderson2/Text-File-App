@@ -217,7 +217,9 @@ public class JsonReader {
     private void openFile(FileSystem fileSystem, String filePath) throws NoSuchFolderFoundException,
             NoSuchFileFoundException {
         fileSystem.openRootFolder();
-        openFoldersFromPath(fileSystem, getFoldersFromFileFilePath(filePath));
+        String folderPath = getFoldersFromFileFilePath(filePath);
+        String filePathWithoutRoot = getFoldersFromFileFilePathMinusFirst(folderPath);
+        openFoldersFromPath(fileSystem, filePathWithoutRoot);
         openFileAndTrack(fileSystem, getFileNameFromFilePath(filePath));
     }
 

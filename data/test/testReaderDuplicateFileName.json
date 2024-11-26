@@ -1,0 +1,23 @@
+{
+    "rootFolder": {
+        "name": "root",
+        "subfolders": [],
+        "subfiles": [{
+            "filePath": "A, eh",
+            "name": "A",
+            "labels": [{"name": "School"}]
+        },
+        {
+            "filePath": "dif. path",
+            "name": "A",
+            "labels": []
+        }]
+    },
+    "currentFolderPath": "root\\",
+    "recentlyOpenedFilePaths": [],
+    "recentlyOpenedFolderPaths": [],
+    "recentlyOpenedLabels": [],
+    "labels": [
+        {"name": "School"},
+        {"name": "Personal Project"}]
+}

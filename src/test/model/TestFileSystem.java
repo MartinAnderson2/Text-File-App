@@ -3912,7 +3912,7 @@ public class TestFileSystem {
         } catch (IOException | InvalidJsonException e) {
             fail();
         }
-        testFileSystemConstructionIgnoreRecent();
+        testFileSystemConstruction();
     }
 
     @Test
@@ -3934,6 +3934,40 @@ public class TestFileSystem {
         } catch (IOException | InvalidJsonException e) {
             fail();
         }
+        testFileSystemConstruction();
+    }
+
+    @Test
+    void testSaveWithRecentFileAndLabel() {
+        try {
+            fileSystem.openFileButNotOnComputerEvenIfNoLongerValid("File");
+            fileSystem.openLabel("School");
+            fileSystem.openFileButNotOnComputerEvenIfNoLongerValid("A");
+            fileSystem.openLabel("Personal Project");
+            fileSystem.openRootFolder();
+        } catch (NoSuchFileFoundException | NoSuchLabelFoundException e) {
+            fail();
+        }
+
+        try {
+            fileSystem.manuallySave("data\\customSave3.json");
+            JsonReader fileSystemJsonReader = new JsonReader("data\\customSave3.json");
+            fileSystem = fileSystemJsonReader.read();
+        } catch (IOException | InvalidJsonException e) {
+            fail();
+        }
+        List<String> recentlyOpenedFiles = fileSystem.getNamesOfRecentlyOpenedFiles();
+        assertEquals(2, recentlyOpenedFiles.size());
+        assertEquals("A", recentlyOpenedFiles.get(0));
+        assertEquals("File", recentlyOpenedFiles.get(1));
+        List<String> recentlyOpenedFolders = fileSystem.getNamesOfRecentlyOpenedFolders();
+        assertEquals(2, recentlyOpenedFolders.size());
+        assertEquals("CPSC 210", recentlyOpenedFolders.get(0));
+        assertEquals("Education", recentlyOpenedFolders.get(1));
+        List<String> recentlyOpenedLabels = fileSystem.getNamesOfRecentlyOpenedLabels();
+        assertEquals(2, recentlyOpenedLabels.size());
+        assertEquals("Personal Project", recentlyOpenedLabels.get(0));
+        assertEquals("School", recentlyOpenedLabels.get(1));
         testFileSystemConstructionIgnoreRecent();
     }
 
@@ -3942,18 +3976,18 @@ public class TestFileSystem {
         try {
             emptyFileSystem.autoSave();;
             emptyFileSystem = FileSystem.autoLoad();
-            testEmptyFileSystemConstruction();
         } catch (IOException | InvalidJsonException e) {
             fail();
         }
+        testEmptyFileSystemConstruction();
 
         try {
             fileSystem.autoSave();;
             fileSystem = FileSystem.autoLoad();
-            testFileSystemConstructionIgnoreRecent();
         } catch (IOException | InvalidJsonException e) {
             fail();
         }
+        testFileSystemConstruction();
     }
 
     @Test
@@ -3961,10 +3995,10 @@ public class TestFileSystem {
         try {
             emptyFileSystem.manuallySave("data\\customSave.json");
             emptyFileSystem = FileSystem.manuallyLoad("data\\customSave.json");
-            testEmptyFileSystemConstruction();
         } catch (IOException | InvalidJsonException e) {
             fail();
         }
+        testEmptyFileSystemConstruction();
 
         try {
             fileSystem.manuallySave("data\\customSave2.json");
@@ -3972,7 +4006,7 @@ public class TestFileSystem {
         } catch (IOException | InvalidJsonException e) {
             fail();
         }
-        testFileSystemConstructionIgnoreRecent();
+        testFileSystemConstruction();
     }
 
     @SuppressWarnings("methodlength")

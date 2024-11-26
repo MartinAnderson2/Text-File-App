@@ -8,5 +8,9 @@
     "recentlyOpenedFilePaths": [],
     "recentlyOpenedFolderPaths": [],
     "recentlyOpenedLabels": [],
-    "labels": []
+    "labels": [
+        {"name": "School"},
+        {"name": "School"},
+        {"name": "Personal Project"}
+    ]
 }

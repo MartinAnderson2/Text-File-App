@@ -1,0 +1,61 @@
+{
+    "recentlyOpenedFolderPaths": [
+        "root\\Education\\CPSC 210\\",
+        "root\\Education\\"
+    ],
+    "recentlyOpenedFilePaths": [
+        "root\\Education\\CPSC 210\\A",
+        "root\\File"
+    ],
+    "rootFolder": {
+        "name": "root",
+        "subfolders": [
+            {
+                "name": "Education",
+                "subfolders": [{
+                    "name": "CPSC 210",
+                    "subfolders": [],
+                    "subfiles": [
+                        {
+                            "filePath": "D:\\Users\\User\\Documents\\Personal Project Ideas.txt",
+                            "name": "Personal Project Ideas",
+                            "labels": [
+                                {"name": "School"},
+                                {"name": "Personal Project"}
+                            ]
+                        },
+                        {
+                            "filePath": "A, eh",
+                            "name": "A",
+                            "labels": [{"name": "School"}]
+                        }
+                    ]
+                }],
+                "subfiles": [{
+                    "filePath": "invalid path",
+                    "name": "test",
+                    "labels": [{"name": "School"}]
+                }]
+            },
+            {
+                "name": "Hobbies",
+                "subfolders": [],
+                "subfiles": []
+            }
+        ],
+        "subfiles": [{
+            "filePath": "C:\\",
+            "name": "File",
+            "labels": []
+        }]
+    },
+    "currentFolderPath": "root\\",
+    "recentlyOpenedLabels": [
+        {"name": "Personal Project"},
+        {"name": "School"}
+    ],
+    "labels": [
+        {"name": "School"},
+        {"name": "Personal Project"}
+    ]
+}
