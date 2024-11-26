@@ -1,4 +1,5 @@
 *.class
+F.txt
 data/Autosave.json
 data/AutosaveBackup.json
 data/EmptyFileSystem.json
