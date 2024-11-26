@@ -4,7 +4,10 @@
         "subfolders": [],
         "subfiles": []
     },
-    "currentFolderPath": "root\\Hobbies",
+    "currentFolderPath": [
+        "root",
+        "Hobbies"
+    ],
     "recentlyOpenedFilePaths": [],
     "recentlyOpenedFolderPaths": [],
     "recentlyOpenedLabels": [],

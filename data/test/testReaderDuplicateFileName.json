@@ -13,11 +13,9 @@
             "labels": []
         }]
     },
-    "currentFolderPath": "root\\",
+    "currentFolderPath": ["root"],
     "recentlyOpenedFilePaths": [],
     "recentlyOpenedFolderPaths": [],
     "recentlyOpenedLabels": [],
-    "labels": [
-        {"name": "School"},
-        {"name": "Personal Project"}]
+    "labels": [{"name": "School"}]
 }

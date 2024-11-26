@@ -4,13 +4,13 @@
         "subfolders": [],
         "subfiles": []
     },
-    "currentFolderPath": "root\\",
+    "currentFolderPath": ["root"],
     "recentlyOpenedFilePaths": [],
     "recentlyOpenedFolderPaths": [],
     "recentlyOpenedLabels": [],
     "labels": [
         {"name": "School"},
-        {"name": "School"},
-        {"name": "Personal Project"}
+        {"name": "Personal Project"},
+        {"name": "School"}
     ]
 }

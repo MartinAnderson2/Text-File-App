@@ -1,16 +1,23 @@
 {
     "rootFolder": {
         "name": "root",
-        "subfolders": [],
         "subfiles": [{
             "filePath": "C:\\",
             "name": "File",
             "labels": []
-        }]
+        }],
+        "subfolders": []
     },
-    "currentFolderPath": "root\\",
+    "currentFolderPath": ["root"],
     "recentlyOpenedFilePaths": [],
-    "recentlyOpenedFolderPaths": ["File"],
+    "recentlyOpenedFolderPaths": [
+        {
+            "folderPath": [
+                "root"
+            ],
+            "folderName": "File"
+        }
+    ],
     "recentlyOpenedLabels": [],
     "labels": []
 }

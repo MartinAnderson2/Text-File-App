@@ -1,6 +1,11 @@
 {
     "rootFolder": {
         "name": "root",
+        "subfiles": [{
+            "filePath": "C:\\",
+            "name": "File",
+            "labels": []
+        }],
         "subfolders": [
             {
                 "name": "Hobbies",
@@ -9,9 +14,13 @@
             },
             {
                 "name": "Education",
+                "subfiles": [{
+                    "filePath": "invalid path",
+                    "name": "test",
+                    "labels": [{"name": "School"}]
+                }],
                 "subfolders": [{
                     "name": "CPSC 210",
-                    "subfolders": [],
                     "subfiles": [
                         {
                             "filePath": "A, eh",
@@ -26,28 +35,28 @@
                                 {"name": "Personal Project"}
                             ]
                         }
-                    ]
-                }],
-                "subfiles": [{
-                    "filePath": "invalid path",
-                    "name": "test",
-                    "labels": [{"name": "School"}]
+                    ],
+                    "subfolders": []
                 }]
             }
-        ],
-        "subfiles": [{
-            "filePath": "C:\\",
-            "name": "File",
-            "labels": []
-        }]
+        ]
     },
+    "currentFolderPath": ["root"],
     "recentlyOpenedFilePaths": [],
     "recentlyOpenedFolderPaths": [
-        "root\\Education\\CPSC 210\\",
-        "root\\Education\\"
+        {
+            "folderPath": [
+                "root",
+                "Education"
+            ],
+            "folderName": "CPSC 210"
+        },
+        {
+            "folderPath": ["root"],
+            "folderName": "Education"
+        }
     ],
     "recentlyOpenedLabels": [],
-    "currentFolderPath": "root\\",
     "labels": [
         {"name": "School"},
         {"name": "Personal Project"}

@@ -41,13 +41,22 @@
             "labels": []
         }]
     },
+    "currentFolderPath": ["School"],
     "recentlyOpenedFilePaths": [],
     "recentlyOpenedFolderPaths": [
-        "root\\Education\\CPSC 210\\",
-        "root\\Education\\"
+        {
+            "folderPath": [
+                "root",
+                "Education"
+            ],
+            "folderName": "CPSC 210"
+        },
+        {
+            "folderPath": ["root"],
+            "folderName": "Education"
+        }
     ],
     "recentlyOpenedLabels": [{"name": "School"}],
-    "currentFolderPath": "School\\",
     "labels": [
         {"name": "School"},
         {"name": "Personal Project"}

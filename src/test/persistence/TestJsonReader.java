@@ -166,7 +166,7 @@ public class TestJsonReader {
         JsonReader jsonReader9 = new JsonReader("data\\test\\testReaderCurrentFolderIsInvalidLabel.json");
         assertThrows(InvalidJsonException.class, () -> jsonReader9.read());
 
-        JsonReader jsonReader10 = new JsonReader("data\\test\\testReaderFilePathNoFolders.json");
+        JsonReader jsonReader10 = new JsonReader("data\\test\\testReaderFilePathFolderDoesNotExist.json");
         assertThrows(InvalidJsonException.class, () -> jsonReader10.read());
     }
 

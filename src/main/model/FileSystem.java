@@ -597,13 +597,18 @@ public class FileSystem implements Writable {
     @Override
     public JSONObject toJson() {
         JSONObject json = new JSONObject();
-        json.put("currentFolderPath", currentFolder.getPathInThisFileSystem());
+        json.put("currentFolderPath", currentFolderPathToJson());
         json.put("labels", labelsToJson());
         json.put("recentlyOpenedFilePaths", recentFilePathsToJson());
         json.put("recentlyOpenedFolderPaths", recentFolderPathsToJson());
         json.put("recentlyOpenedLabels", recentLabelsToJson());
         json.put("rootFolder", rootFolder.toJson());
         return json;
+    }
+
+    // EFFECTS: returns a JSON representation of the path that leads to currentFolder
+    private JSONArray currentFolderPathToJson() {
+        return folderPathToJson(currentFolder, true);
     }
 
     // EFFECTS: returns a JSON representation of all created labels
@@ -617,22 +622,38 @@ public class FileSystem implements Writable {
         return jsonArray;
     }
 
-    // EFFECTS: returns a JSON representation of the paths of the recently-opened files
+    // EFFECTS: returns a JSON representation of the paths that lead to the recently-opened files
     private JSONArray recentFilePathsToJson() {
         JSONArray jsonArray = new JSONArray();
         for (File file : recentlyOpenedFiles) {
-            jsonArray.put(file.getPathInThisFileSystem());
+            jsonArray.put(pathToFileToJson(file));
         }
         return jsonArray;
     }
 
-    // EFFECTS: returns a JSON representation of the paths of the recently-opened folders
+    // EFFECTS: returns a JSON representation of the path that leads to file
+    private JSONObject pathToFileToJson(File file) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("fileName", file.getName());
+        jsonObject.put("folderPath", folderPathToJson(file.getParentFolder(), true));
+        return jsonObject;
+    }
+
+    // EFFECTS: returns a JSON representation of the paths that lead to the recently-opened folders
     private JSONArray recentFolderPathsToJson() {
         JSONArray jsonArray = new JSONArray();
         for (Folder folder : recentlyOpenedFolders) {
-            jsonArray.put(folder.getPathInThisFileSystem());
+            jsonArray.put(pathToFolderToJson(folder));
         }
         return jsonArray;
+    }
+
+    // EFFECTS: returns a JSON representation of the path that leads to folder
+    private JSONObject pathToFolderToJson(Folder folder) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("folderName", folder.getName());
+        jsonObject.put("folderPath", folderPathToJson(folder, false));
+        return jsonObject;
     }
 
     // EFFECTS: returns a JSON representation of the names of the recently-opened labels
@@ -641,6 +662,36 @@ public class FileSystem implements Writable {
         for (Label label : recentlyOpenedLabels) {
             jsonArray.put(label.toJson());
         }
+        return jsonArray;
+    }
+
+    // Shared Helper:
+
+    // EFFECTS: returns a JSON representation of the path that leads to childFolder
+    // if includeChild is true, includes childFolder; if includeChild is false, doesn't include childFolder
+    private JSONArray folderPathToJson(Folder childFolder, boolean includeChild) {
+        JSONArray jsonArray;
+        try {
+            jsonArray = addFolderFolderPathToJson(childFolder.getParentFolder());
+        } catch (NoSuchFolderFoundException e) {
+            jsonArray = new JSONArray();
+        }
+
+        if (includeChild) {
+            jsonArray.put(childFolder.getName());
+        }
+        return jsonArray;
+    }
+
+    // EFFECTS: returns a JSON representation of the path that leads to folder, including folder
+    private JSONArray addFolderFolderPathToJson(Folder folder) {
+        JSONArray jsonArray;
+        try {
+            jsonArray = addFolderFolderPathToJson(folder.getParentFolder());
+        } catch (NoSuchFolderFoundException e) {
+            jsonArray = new JSONArray();
+        }
+        jsonArray.put(folder.getName());
         return jsonArray;
     }
 

@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 // Represents a reader for reading all of the labels, files, and folders of the file system from a file, in JSON format
@@ -200,7 +201,7 @@ public class JsonReader {
     private void openRecentlyOpenedFiles(FileSystem fileSystem, JSONObject jsonObject) throws InvalidJsonException {
         JSONArray jsonArray = jsonObject.getJSONArray("recentlyOpenedFilePaths");
         for (int i = jsonArray.length() - 1; i >= 0; i--) {
-            String nextFilePath = jsonArray.getString(i);
+            JSONObject nextFilePath = jsonArray.getJSONObject(i);
             try {
                 openFile(fileSystem, nextFilePath);
             } catch (NoSuchFolderFoundException | NoSuchFileFoundException e) {
@@ -214,13 +215,13 @@ public class JsonReader {
     // throws NoSuchFolderFoundException if any of the folders in filePath do not exist
     // throws NoSuchFileFoundException if the file in filePath does not exist
     // throws FilePathNoLongerValidException if the file in filePath does not exist
-    private void openFile(FileSystem fileSystem, String filePath) throws NoSuchFolderFoundException,
+    private void openFile(FileSystem fileSystem, JSONObject filePath) throws NoSuchFolderFoundException,
             NoSuchFileFoundException {
         fileSystem.openRootFolder();
-        String folderPath = getFoldersFromFileFilePath(filePath);
-        String filePathWithoutRoot = getFoldersFromFileFilePathMinusFirst(folderPath);
-        openFoldersFromPath(fileSystem, filePathWithoutRoot);
-        openFileAndTrack(fileSystem, getFileNameFromFilePath(filePath));
+        JSONArray folderPath = filePath.getJSONArray("folderPath");
+        openFoldersFromPath(fileSystem, folderPath);
+        openFileAndTrack(fileSystem, filePath.getString("fileName"));
+        fileSystem.openRootFolder();
     }
 
     // MODIFIES: fileSystem
@@ -243,7 +244,7 @@ public class JsonReader {
     private void openRecentlyOpenedFolders(FileSystem fileSystem, JSONObject jsonObject) throws InvalidJsonException {
         JSONArray jsonArray = jsonObject.getJSONArray("recentlyOpenedFolderPaths");
         for (int i = jsonArray.length() - 1; i >= 0; i--) {
-            String nextFolderPath = jsonArray.getString(i);
+            JSONObject nextFolderPath = jsonArray.getJSONObject(i);
             try {
                 openFolder(fileSystem, nextFolderPath);
             } catch (NoSuchFolderFoundException e) {
@@ -255,12 +256,12 @@ public class JsonReader {
     // MODIFIES: fileSystem
     // EFFECTS: opens a folder given its folder path in fileSystem
     // throws NoSuchFolderFoundException if any of the folders in filePath do not exist
-    private void openFolder(FileSystem fileSystem, String folderPath) throws NoSuchFolderFoundException {
-            fileSystem.openRootFolder();
-            String filePathWithoutRoot = getFoldersFromFileFilePathMinusFirst(folderPath);
-            String filePathWithoutRootOrLast = getFoldersFromFileFilePathMinusLast(filePathWithoutRoot);
-            openFoldersFromPath(fileSystem, filePathWithoutRootOrLast);
-            openFolderAndTrack(fileSystem, getNameOfLastFolderFromFolderPath(folderPath));
+    private void openFolder(FileSystem fileSystem, JSONObject folderPathJson) throws NoSuchFolderFoundException {
+        JSONArray folderPath = folderPathJson.getJSONArray("folderPath");
+        fileSystem.openRootFolder();
+        openFoldersFromPath(fileSystem, folderPath);
+        openFolderAndTrack(fileSystem, folderPathJson.getString("folderName"));
+        fileSystem.openRootFolder();
     }
 
     // MODIFIES: fileSystem
@@ -319,106 +320,32 @@ public class JsonReader {
     // EFFECTS: opens the folder that the user had open when they saved the file system
     // throws InvalidJsonException if the folder path saved for currentFolderPath was invalid
     private void openCurrentFolder(FileSystem fileSystem, JSONObject jsonObject) throws InvalidJsonException {
-        String folderPath = jsonObject.getString("currentFolderPath");
-        if (getFirstFolderFromFilePath(folderPath).equals("root")) {
-            fileSystem.openRootFolder();
-            try {
-                openFoldersFromPath(fileSystem, getFoldersFromFileFilePathMinusFirst(folderPath));
-            } catch (NoSuchFolderFoundException e) {
-                throw new InvalidJsonException();
+        JSONArray folderPath = jsonObject.getJSONArray("currentFolderPath");
+        String firstFolderInPathName = folderPath.getString(0);
+
+        try {
+            if (!firstFolderInPathName.equals("root")) {
+                fileSystem.openLabel(firstFolderInPathName);
+            } else {
+                fileSystem.openRootFolder();
             }
-        } else {
-            try {
-                fileSystem.openLabel(getFirstFolderFromFilePath(folderPath));
-            } catch (NoSuchLabelFoundException e) {
-                throw new InvalidJsonException();
-            }
+            openFoldersFromPath(fileSystem, folderPath);
+        } catch (NoSuchLabelFoundException | NoSuchFolderFoundException e) {
+            throw new InvalidJsonException();
         }
     }
 
 
     /* 
-     *  Common Helpers:
+     *  Common Helper:
      */
     // MODIFIES: fileSystem
-    // EFFECTS: opens all of the folders in folderPath
-    // throws NoSuchFolderFoundException if any of the folders in folderPath do not exist
-    private void openFoldersFromPath(FileSystem fileSystem, String folderPath) throws NoSuchFolderFoundException {
-        if (!folderPath.isEmpty()) {
-            fileSystem.openFolder(getFirstFolderFromFilePath(folderPath));
-
-            openFoldersFromPath(fileSystem, getFoldersFromFileFilePathMinusFirst(folderPath));
+    // EFFECTS: opens all of the folders in jsonArray (skipping the first one since this is the root folder)
+    // throws NoSuchFolderFoundException if any of the folders in jsonArray do not exist
+    private void openFoldersFromPath(FileSystem fileSystem, JSONArray jsonArray) throws NoSuchFolderFoundException {
+        for (int i = 1; i < jsonArray.length(); i++) {
+            String folderName = jsonArray.getString(i);
+            fileSystem.openFolder(folderName);
         }
-    }
-
-
-    /* 
-     *  File/Folder path methods:
-     */
-
-    // EFFECTS: returns filePath without the file at the end
-    // returns the empty string if there are no folders
-    private String getFoldersFromFileFilePath(String filePath) {
-        for (int i = filePath.length() - 1; i >= 0; i--) {
-            if (filePath.charAt(i) == Folder.FOLDER_SEPERATOR) {
-                return (filePath.substring(0, i));
-            }
-        }
-        return "";
-    }
-
-    // EFFECTS: returns the name of the file that filePath leads to
-    // returns filePath if filePath already has no folders in it
-    private String getFileNameFromFilePath(String filePath) {
-        for (int i = filePath.length() - 1; i >= 0; i--) {
-            if (filePath.charAt(i) == Folder.FOLDER_SEPERATOR) {
-                return (filePath.substring(i + 1));
-            }
-        }
-        return filePath;
-    }
-
-    // EFFECTS: returns the name of the first folder in folderPath
-    // returns folderPath if there are no folders in folderPath
-    private String getFirstFolderFromFilePath(String folderPath) {
-        for (int i = 0; i < folderPath.length(); i++) {
-            if (folderPath.charAt(i) == Folder.FOLDER_SEPERATOR) {
-                return (folderPath.substring(0, i));
-            }
-        }
-        return folderPath;
-    }
-
-    // EFFECTS: returns the name(s) of the folder(s) after the first one as a path
-    // returns the empty string if there are no folders in folderPath
-    private String getFoldersFromFileFilePathMinusFirst(String folderPath) {
-        for (int i = 0; i < folderPath.length(); i++) {
-            if (folderPath.charAt(i) == Folder.FOLDER_SEPERATOR) {
-                return (folderPath.substring(i + 1));
-            }
-        }
-        return "";
-    }
-
-    // EFFECTS: returns the name(s) of the folder(s) after the first one as a path
-    // returns the empty string if there are no folders in folderPath
-    private String getFoldersFromFileFilePathMinusLast(String folderPath) {
-        for (int i = folderPath.length() - 1 - 1; i >= 0; i--) {
-            if (folderPath.charAt(i) == Folder.FOLDER_SEPERATOR) {
-                return (folderPath.substring(0, i + 1));
-            }
-        }
-        return "";
-    }
-
-    // EFFECTS: returns the name of the last folder in folderPath
-    // returns folderPath if there is only one folder
-    private String getNameOfLastFolderFromFolderPath(String folderPath) {
-        for (int i = folderPath.length() - 1 - 1; i >= 0; i--) {
-            if (folderPath.charAt(i) == Folder.FOLDER_SEPERATOR) {
-                return (folderPath.substring(i + 1, folderPath.length() - 1));
-            }
-        }
-        return folderPath;
     }
 }

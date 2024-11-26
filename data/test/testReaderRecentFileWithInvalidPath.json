@@ -4,9 +4,16 @@
         "subfolders": [],
         "subfiles": []
     },
-    "currentFolderPath": "root\\",
+    "currentFolderPath": ["root"],
     "recentlyOpenedFilePaths": [
-        "root\\Education\\File.txt"],
+        {
+            "folderPath": [
+                "root",
+                "Education"
+            ],
+            "fileName": "File.txt"
+        }
+    ],
     "recentlyOpenedFolderPaths": [],
     "recentlyOpenedLabels": [],
     "labels": []
