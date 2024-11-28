@@ -58,3 +58,6 @@ File named "New file but references same file on disk" created
 Wed Nov 27 22:14:21 PST 2024
 File named "New file but references same file on disk" with path on this computer "data/test/file for testing.txt" opened
 ```
+
+## Phase 4: Task 3
+To improve my design, I might implement the composite pattern. This would involve creating a new class that is a supertype of Folder and File, and then updating Folder to make use of this type. Specifically, instead of storing a list of Folders and a list of Files, I would make it store a list of that supertype. This would make my program easier to understand since it would follow a common design pattern. It would however make some of the implementation a bit harder since the FileSystem needs to be able to differentiate between Folders and Files.
