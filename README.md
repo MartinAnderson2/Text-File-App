@@ -36,3 +36,25 @@ This project is of interest to me since I will personally find it helpful for ke
 - On the left side of the screen, you will find the visual component: an icon of a tree. This is to make the application more interesting and represent it.  
 - In order to save the state of the application, press the "Save" button in the top left. An additional option named "Save File System" will appear. Press it. Assuming there are no issues with administrator privileges, the current file system will be saved to a file at a default location within the project folder.  
 - In order to load a previous state of the application, press the "Load" button in the top left. An additional option named "Load File System" will appear. Press it. Assuming there are no issues with administrator privileges and the save file is correct, the current file system will become the saved one.
+
+## Phase 4: Task 2
+```
+Event Log:
+Wed Nov 27 22:13:10 PST 2024
+New FileSystem created
+
+Wed Nov 27 22:13:32 PST 2024
+File named "Test File" created
+
+Wed Nov 27 22:13:40 PST 2024
+Folder named "Test folder!?!" created
+
+Wed Nov 27 22:13:44 PST 2024
+Folder named "Test folder!?!" opened
+
+Wed Nov 27 22:14:09 PST 2024
+File named "New file but references same file on disk" created
+
+Wed Nov 27 22:14:21 PST 2024
+File named "New file but references same file on disk" with path on this computer "data/test/file for testing.txt" opened
+```

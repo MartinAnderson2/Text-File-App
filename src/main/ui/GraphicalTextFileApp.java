@@ -14,6 +14,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -34,11 +37,7 @@ public class GraphicalTextFileApp extends JFrame {
 
     // EFFECTS: sets up the main panel and the buttons on it and adds the folders and files
     public GraphicalTextFileApp() {
-        try {
-            fileSystem = FileSystem.autoLoad();
-        } catch (IOException | InvalidJsonException e) {
-            fileSystem = new FileSystem();
-        }
+        fileSystem = new FileSystem();
 
         desktop = new JDesktopPane();
 
@@ -46,12 +45,18 @@ public class GraphicalTextFileApp extends JFrame {
         setTitle(ConsoleTextFileApp.appName);
         setSize(WIDTH, HEIGHT);
         setLayout(new BorderLayout());
+        try {
+            BufferedImage icon = ImageIO.read(new java.io.File("data/images/application-icon.png"));
+            setIconImage(new ImageIcon(icon).getImage());
+        } catch (IOException e) {
+            // ignore
+        }
 
         addLogoInBottomRight();
         addMenu();
         addFoldersAndFiles();
 
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setUpWindowClosing();
         setLocationRelativeTo(null);
         setLayout(new GridLayout());
         setVisible(true);
@@ -123,6 +128,23 @@ public class GraphicalTextFileApp extends JFrame {
                     "Add File",
                     JOptionPane.QUESTION_MESSAGE);
             if (filePath == null) {
+                return;
+            }
+
+            createFile(fileName, filePath);
+        }
+
+        // MODIFIES: fileSystem
+        // EFFECTS: checks if filePath is valid. If it is not then tells the user and returns. If it is valid then
+        // attempts to create a file with that name and file path. If successful, updates the UI. If name is already
+        // in use by another file then tells user. If name is invalid because it was blank then tells user
+        private void createFile(String fileName, String filePath) {
+            if (!filePath.endsWith(".txt")) {
+                filePath += ".txt";
+            }
+
+            if (!FileSystem.isFilePathValid(filePath)) {
+                showErrorMessage("File path \"" + filePath + "\" is invalid", "Error Adding");
                 return;
             }
 
@@ -373,6 +395,23 @@ public class GraphicalTextFileApp extends JFrame {
         filePanel.setVisible(true);
 
         return filePanel;
+    }
+
+    // MODIFIES: this
+    // EFFECTS: sets up an event listener to print logged events when the application is closed
+    // Based on https://www.tutorialspoint.com/java-program-to-determine-when-a-frame-or-window-is-closing-in-java
+    private void setUpWindowClosing() {
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        WindowListener listener = new WindowAdapter() {
+            public void windowClosing(WindowEvent evt) {
+                System.out.println();
+                System.out.println("Event Log:");
+                ConsoleEventLogPrinter.printEvents();
+            }
+        };
+
+        addWindowListener(listener);
     }
 
     // MODIFIES: list

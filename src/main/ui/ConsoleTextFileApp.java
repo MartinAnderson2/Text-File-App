@@ -49,6 +49,8 @@ public class ConsoleTextFileApp {
         goodbye();
 
         quit();
+
+        printEventLog();
     }
 
     // EFFECTS: displays the current directory and the main menu options (the first level of menu options that are
@@ -133,6 +135,13 @@ public class ConsoleTextFileApp {
         }
     }
 
+    // EFFECTS: prints all of the events that occured while the program was running
+    private void printEventLog() {
+        System.out.println();
+        System.out.println("Event Log:");
+        ConsoleEventLogPrinter.printEvents();
+    }
+
 
     // Add Menu:
 
@@ -204,7 +213,7 @@ public class ConsoleTextFileApp {
         }
     }
 
-    // REQUIRES: actualFileName.isBlank() is false and fileSystem.fileWithNameAlreadyExists(actualFileName) is false
+    // REQUIRES: actualFileName.isBlank() is false
     // MODIFIES: this
     // EFFECTS: lets the user choose a custom file name or use the file's actual name, creates the file in fileSystem,
     // and enables the user to add labels as desired, if any exist
@@ -215,8 +224,8 @@ public class ConsoleTextFileApp {
         try {
             fileSystem.createFile(fileName, path);
         } catch (NameIsTakenException e) {
-            // Not possible via REQUIRES clause
-            throw new RequiresClauseNotMetRuntimeException();
+            System.out.println(fileName + " is taken");
+            return;
         }
         System.out.println("File with name \"" + fileName + "\" added to current folder ("
                 + fileSystem.getCurrentFolderName() + ")");

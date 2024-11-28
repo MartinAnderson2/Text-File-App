@@ -26,6 +26,7 @@ public class FileSystem implements Writable {
     public static final String AUTOSAVE_FILE_PATH = "data/Autosave.json";
     public static final String EXAMPLE_FILE_PATH = "C:/Users/User/Documents/Note Name.txt";
     public static final String EXAMPLE_SAVE_PATH = "ManualSave.json";
+
     private static final int MAX_NUM_RECENTLY_OPENED_STORED = 10;
 
     private static JsonReader autoLoadJsonReader = new JsonReader(AUTOSAVE_FILE_PATH);
@@ -61,6 +62,8 @@ public class FileSystem implements Writable {
         recentlyOpenedFolders = new LinkedList<Folder>();
         recentlyOpenedLabels = new LinkedList<Label>();
         keepTrackOfRecents = true;
+
+        logEvent("New FileSystem created");
     }
 
     // EFFECTS: returns currentFolder's name
@@ -100,6 +103,7 @@ public class FileSystem implements Writable {
     // throws NameIsBlankException if name.isBlank() is true
     public void createFile(String name, String path) throws NameIsTakenException {
         currentFolder.makeSubfile(name, path);
+        logEvent("File named \"" + name + "\" created");
     }
 
     // MODIFIES: this
@@ -144,6 +148,8 @@ public class FileSystem implements Writable {
                 Desktop.getDesktop().open(new java.io.File(file.getFilePath()));
             }
             addRecentlyOpenedFile(file);
+            logEvent("File named \"" + file.getName() + "\" with path on this computer \""
+                    + file.getFilePath() + "\" opened");
         } catch (IOException e) {
             throw new FilePathNoLongerValidException();
         }
@@ -161,6 +167,7 @@ public class FileSystem implements Writable {
             file.getParentFolder().removeSubfile(fileName);
         }
         currentFolder.removeSubfile(fileName);
+        logEvent("File named \"" + fileName + "\" deleted");
     }
 
     // REQUIRES: newName.isBlank() is false
@@ -173,6 +180,7 @@ public class FileSystem implements Writable {
             throw new NameIsTakenException(getCapitalizationOfFile(newName));
         }
         currentFolder.getSubfile(fileName).setName(newName);
+        logEvent("File named \"" + fileName + "\" renamed to \"" + newName + "\"");
     }
 
     // EFFECTS: returns the file path of File named fileName
@@ -253,6 +261,7 @@ public class FileSystem implements Writable {
     // throws NameIsBlankException if folderName.isBlank() is true
     public void createFolder(String folderName) throws NameIsTakenException {
         currentFolder.makeSubfolder(folderName);
+        logEvent("Folder named \"" + folderName + "\" created");
     }
 
     // MODIFIES: this
@@ -269,6 +278,7 @@ public class FileSystem implements Writable {
     private void openFolder(Folder folderToOpen) {
         currentFolder = folderToOpen;
         addRecentlyOpenedFolder(folderToOpen);
+        logEvent("Folder named \"" + folderToOpen.getName() + "\" opened");
     }
 
     // MODIFIES: this
@@ -276,12 +286,14 @@ public class FileSystem implements Writable {
     // throws NoSuchFolderFoundException if currentFolder does not have a parent
     public void goUpOneDirectoryLevel() throws NoSuchFolderFoundException {
         currentFolder = currentFolder.getParentFolder();
+        logEvent("Folder named \"" + currentFolder.getName() + "\" opened");
     }
 
     // MODIFIES: this
     // EFFECTS: opens the root Folder
     public void openRootFolder() {
         currentFolder = rootFolder;
+        logEvent("Root folder opened");
     }
 
     // MODIFIES: this
@@ -290,6 +302,7 @@ public class FileSystem implements Writable {
     public void deleteFolder(String folderName) throws NoSuchFolderFoundException {
         recentlyOpenedFolders.remove(currentFolder.getSubfolder(folderName));
         currentFolder.removeSubfolder(folderName);
+        logEvent("Folder named \"" + folderName + "\" deleted");
     }
 
     // REQUIRES: newName.isBlank() is false
@@ -303,6 +316,7 @@ public class FileSystem implements Writable {
             throw new NameIsTakenException(getCapitalizationOfFolder(newName));
         }
         currentFolder.getSubfolder(folderName).setName(newName);
+        logEvent("Folder named \"" + folderName + "\" renamed to \"" + newName + "\"");
     }
 
     // EFFECTS: returns true if the currently-opened Folder has a parent and false if it does not
@@ -372,6 +386,7 @@ public class FileSystem implements Writable {
             throw new NameIsTakenException(getCapitalizationOfLabel(labelName));
         }
         labels.add(new Label(labelName));
+        logEvent("Label named \"" + labelName + "\" created");
     }
 
     // MODIFIES: this
@@ -400,6 +415,7 @@ public class FileSystem implements Writable {
         }
         currentFolder = labelFolder;
         addRecentlyOpenedLabel(label);
+        logEvent("Label named \"" + label.getName() + "\" opened");
     }
 
     // MODIFIES: this
@@ -428,6 +444,7 @@ public class FileSystem implements Writable {
         label.unlabelAllFiles();
         recentlyOpenedLabels.remove(label);
         labels.remove(label);
+        logEvent("Label named \"" + labelName + "\" deleted");
     }
 
     // MODIFIES: this
@@ -439,6 +456,7 @@ public class FileSystem implements Writable {
         File file = currentFolder.getSubfile(fileName);
         Label label = getLabel(labelName);
         label.labelFile(file);
+        logEvent("File named \"" + fileName + "\" labelled with label \"" + labelName + "\"");
     }
 
     // MODIFIES: this
@@ -450,6 +468,7 @@ public class FileSystem implements Writable {
         File file = currentFolder.getSubfile(fileName);
         Label label = getLabel(labelName);
         label.unlabelFile(file);
+        logEvent("File named \"" + fileName + "\" had label named \"" + labelName + "\" removed");
     }
 
     // REQUIRES: newName.isBlank() is false
@@ -463,6 +482,7 @@ public class FileSystem implements Writable {
             throw new NameIsTakenException(getCapitalizationOfLabel(newName));
         }
         getLabel(labelName).setName(newName);
+        logEvent("Label named \"" + labelName + "\" renamed to \"" + newName + "\"");
     }
 
     // EFFECTS: returns true if the user has created any Labels and false if no Labels have been made
@@ -500,12 +520,14 @@ public class FileSystem implements Writable {
     // throws NoSuchFileFoundException if there are no Files named fileName
     public void removeAllLabels(String fileName) throws NoSuchFileFoundException {
         File file = currentFolder.getSubfile(fileName);
-        
+
         for (Label label : labels) {
             if (file.isLabelled(label)) {
                 label.unlabelFile(file);
             }
         }
+        
+        logEvent("Removed all labels from file named \"" + fileName + "\"");
     }
 
     // EFFECTS: returns the name of the only Label the user has made. returns null if they haven't made any
@@ -826,5 +848,11 @@ public class FileSystem implements Writable {
             }
         }
         recentlyOpenedLabels.add(0, label);
+    }
+
+    // MODIFIES: EventLog.getInstance()
+    // EFFECTS: adds new event to the event log with passed description
+    private void logEvent(String description) {
+        EventLog.getInstance().logEvent(new Event(description));
     }
 }
