@@ -1,4 +1,4 @@
-# My Personal Project
+# Text File Application
 
 
 ## Purpose
